@@ -1,4 +1,5 @@
 import { Rnd } from "react-rnd";
+import { useState } from "react";
 
 const Widget = ({
   id,
@@ -13,6 +14,8 @@ const Widget = ({
   onSelect,
   isSelected,
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <Rnd
       default={{
@@ -21,7 +24,7 @@ const Widget = ({
         width: width,
         height: height,
       }}
-      position={{ x: x, y: y }}
+      position={{ x: x, y: y }} // Use current position
       size={{ width: width, height: height }}
       style={{
         border: isSelected ? "2px solid blue" : "1px solid black",
@@ -32,19 +35,29 @@ const Widget = ({
       bounds="parent"
       data-id={id}
       onResizeStop={(e, direction, ref, delta, position) => {
-        onResize(id, { width: ref.offsetWidth, height: ref.offsetHeight });
+        // Update BOTH size AND position
+        onResize(id, {
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+          x: position.x, // Use the updated x from onResizeStop
+          y: position.y, // Use the updated y from onResizeStop
+        });
       }}
       onDragStop={(e, d) => {
         onMove(id, { x: d.x, y: d.y });
       }}
-      onClick={() => onSelect(id)}>
+      onClick={() => onSelect(id)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}>
       <div className="relative w-full h-full">
         {children}
-        <button
-          onClick={() => onDelete(id)}
-          className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-full text-xs -mt-2 -mr-2">
-          X
-        </button>
+        {(isHovered || isSelected) && (
+          <button
+            onClick={() => onDelete(id)}
+            className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-full text-xs -mt-2 -mr-2">
+            X
+          </button>
+        )}
       </div>
     </Rnd>
   );

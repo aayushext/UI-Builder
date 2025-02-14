@@ -1,7 +1,7 @@
-import React from "react"; // Import React
+import React from "react";
 import Widget from "./Widget";
-import KivyButton from "./kivy-components/KivyButton";
-import KivyLabel from "./kivy-components/KivyLabel";
+import PySideButton from "@/components/pyside-components/PySideButton";
+import PySideLabel from "@/components/pyside-components/PySideLabel";
 
 const CenterPanel = React.forwardRef(
   (
@@ -19,7 +19,7 @@ const CenterPanel = React.forwardRef(
     return (
       <main
         ref={ref}
-        className="flex-1 p-4 overflow-hidden relative"
+        className="flex-1 p-4 overflow-auto relative"
         style={{ backgroundColor: backgroundColor }}>
         <h1 className="text-2xl font-bold mb-4">Main Content</h1>
         {components.map((component) => (
@@ -35,18 +35,19 @@ const CenterPanel = React.forwardRef(
             onMove={onMoveComponent}
             onSelect={onSelectComponent}
             isSelected={component.id === selectedComponentId}>
-            {component.type === "KivyButton" && (
-              <KivyButton
+            {component.type === "PySideButton" && (
+              <PySideButton
                 text={component.text}
                 fontSize={component.fontSize}
                 textColor={component.textColor}
                 backgroundColor={component.backgroundColor}
                 radius={component.radius}
                 pressedColor={component.pressedColor}
+                hoverColor={component.hoverColor} // Pass hoverColor
               />
             )}
-            {component.type === "KivyLabel" && (
-              <KivyLabel
+            {component.type === "PySideLabel" && (
+              <PySideLabel
                 text={component.text}
                 fontSize={component.fontSize}
                 textColor={component.textColor}

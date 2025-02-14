@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import LeftPanel from "@/components/LeftPanel";
 import CenterPanel from "@/components/CenterPanel";
 import RightPanel from "@/components/RightPanel";
-import { generateKvString } from "@/utils/generateKvString";
+import { generatePySideCode } from "@/utils/generatePySideCode";
 
 export default function Home() {
   const [components, setComponents] = useState([]);
@@ -13,14 +13,15 @@ export default function Home() {
     useState("#ffffff");
   const centerPanelRef = useRef(null);
   const [centerPanelDimensions, setCenterPanelDimensions] = useState({
-    width: 1080,
-    height: 720,
+    width: 1000,
+    height: 1000,
   });
 
-  const addKivyButton = () => {
+  // Function to add a PySideButton
+  const addPySideButton = () => {
     const newComponent = {
       id: nextId,
-      type: "KivyButton",
+      type: "PySideButton",
       x: 50,
       y: 50,
       width: 200,
@@ -29,41 +30,46 @@ export default function Home() {
       fontSize: 16,
       textColor: "#ffffff",
       backgroundColor: "#3b82f6",
-      radius: 0,
+      radius: 4,
       pressedColor: "#1d4ed8",
+      hoverColor: "#60a5fa", // Add hoverColor
     };
     setComponents([...components, newComponent]);
     setNextId(nextId + 1);
   };
 
-  // Function to add a KivyLabel
-  const addKivyLabel = () => {
+  // Function to add a PySideLabel (no changes needed)
+  const addPySideLabel = () => {
     const newComponent = {
       id: nextId,
-      type: "KivyLabel", // Set type to KivyLabel
+      type: "PySideLabel",
       x: 50,
       y: 50,
       width: 150,
       height: 50,
       text: `Label ${nextId}`,
       fontSize: 14,
-      textColor: "#000000", // Black text color
-      backgroundColor: "#f0f0f0", // Light gray background
-      radius: 0, // No radius by default
+      textColor: "#000000",
+      backgroundColor: "#f0f0f0",
+      radius: 0,
     };
     setComponents([...components, newComponent]);
     setNextId(nextId + 1);
   };
+
   const deleteComponent = (id) => {
     setComponents(components.filter((component) => component.id !== id));
     if (selectedComponentId === id) {
       setSelectedComponentId(null);
     }
   };
-  const resizeComponent = (id, newSize) => {
+
+  const resizeComponent = (id, newSizeAndPosition) => {
     setComponents(
       components.map((component) =>
-        component.id === id ? { ...component, ...newSize } : component
+        component.id === id
+          ? { ...component, ...newSizeAndPosition }
+          : component
       )
     );
   };
@@ -106,13 +112,16 @@ export default function Home() {
         }
         target = target.parentNode;
       }
+
       if (!insideRightPanelOrComponent) {
         setSelectedComponentId(null);
       }
     };
+
     if (typeof window !== "undefined") {
       document.addEventListener("click", handleDocumentClick);
     }
+
     return () => {
       if (typeof window !== "undefined") {
         document.removeEventListener("click", handleDocumentClick);
@@ -130,16 +139,16 @@ export default function Home() {
   }, [components, centerPanelBackgroundColor]);
 
   const handleExport = () => {
-    const kvString = generateKvString(
+    const pyCode = generatePySideCode(
       components,
       centerPanelBackgroundColor,
       centerPanelDimensions
     );
-    const blob = new Blob([kvString], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([pyCode], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "ui.kv";
+    link.download = "ui.py";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -149,8 +158,8 @@ export default function Home() {
   return (
     <div className="flex h-screen">
       <LeftPanel
-        onAddKivyButton={addKivyButton}
-        onAddKivyLabel={addKivyLabel}
+        onAddPySideButton={addPySideButton}
+        onAddPySideLabel={addPySideLabel}
         onExport={handleExport}
       />
       <CenterPanel

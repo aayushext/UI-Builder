@@ -16,6 +16,8 @@ const RightPanel = ({
   const [backgroundColor, setBackgroundColor] = useState("");
   const [radius, setRadius] = useState("");
   const [pressedColor, setPressedColor] = useState("");
+  const [hoverColor, setHoverColor] = useState(""); // State for hoverColor
+  const [maxRadius, setMaxRadius] = useState(0);
 
   useEffect(() => {
     if (selectedComponent) {
@@ -29,36 +31,75 @@ const RightPanel = ({
       setBackgroundColor(selectedComponent.backgroundColor || "");
       setRadius(selectedComponent.radius || "");
 
-      // Only for buttons
+      // Only set pressedColor and hoverColor if they exist (i.e., for buttons)
       if (selectedComponent.pressedColor !== undefined) {
         setPressedColor(selectedComponent.pressedColor || "");
       } else {
         setPressedColor("");
       }
+      if (selectedComponent.hoverColor !== undefined) {
+        setHoverColor(selectedComponent.hoverColor || "");
+      } else {
+        setHoverColor("");
+      }
+      setMaxRadius(
+        Math.min(selectedComponent.width, selectedComponent.height) / 2
+      );
+    } else {
+      setText("");
+      setX("");
+      setY("");
+      setWidth("");
+      setHeight("");
+      setFontSize("");
+      setTextColor("");
+      setBackgroundColor("");
+      setRadius("");
+      setPressedColor("");
+      setHoverColor(""); // Reset hoverColor
+      setMaxRadius(0);
     }
   }, [selectedComponent]);
 
   const handleInputChange = (setter, value, isComponentProp = true) => {
-    setter(value);
-
-    if (selectedComponent && isComponentProp) {
-      const updatedProps = {};
-      if (setter === setText) updatedProps.text = value;
-      if (setter === setX) updatedProps.x = parseInt(value, 10);
-      if (setter === setY) updatedProps.y = parseInt(value, 10);
-      if (setter === setWidth) updatedProps.width = parseInt(value, 10);
-      if (setter === setHeight) updatedProps.height = parseInt(value, 10);
-      if (setter === setFontSize) updatedProps.fontSize = parseInt(value, 10);
-      if (setter === setTextColor) updatedProps.textColor = value;
-      if (setter === setBackgroundColor) updatedProps.backgroundColor = value;
-      if (setter === setRadius) updatedProps.radius = parseInt(value, 10);
-      if (setter === setPressedColor) updatedProps.pressedColor = value;
-      onUpdateComponentProps(selectedComponent.id, updatedProps);
+    // Special handling for radius to enforce the limit
+    if (setter === setRadius) {
+      const numValue = parseInt(value, 10);
+      if (!isNaN(numValue)) {
+        const limitedValue = Math.min(Math.max(numValue, 0), maxRadius); // Limit the value
+        setter(limitedValue);
+        if (selectedComponent && isComponentProp) {
+          //updates radius
+          onUpdateComponentProps(selectedComponent.id, {
+            radius: limitedValue,
+          });
+        }
+      } else {
+        setter("");
+      }
+    } else {
+      setter(value);
+      if (selectedComponent && isComponentProp) {
+        const updatedProps = {};
+        if (setter === setText) updatedProps.text = value;
+        if (setter === setX) updatedProps.x = parseInt(value, 10);
+        if (setter === setY) updatedProps.y = parseInt(value, 10);
+        if (setter === setWidth) updatedProps.width = parseInt(value, 10);
+        if (setter === setHeight) updatedProps.height = parseInt(value, 10);
+        if (setter === setFontSize) updatedProps.fontSize = parseInt(value, 10);
+        if (setter === setTextColor) updatedProps.textColor = value;
+        if (setter === setBackgroundColor) updatedProps.backgroundColor = value;
+        if (setter === setPressedColor) updatedProps.pressedColor = value;
+        if (setter === setHoverColor) updatedProps.hoverColor = value; // Update hoverColor
+        onUpdateComponentProps(selectedComponent.id, updatedProps);
+      }
     }
   };
+
   return (
     <aside id="right-panel" className="w-64 bg-gray-200 p-4 overflow-auto">
       <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
+      {/* Center Panel Background Color */}
       <div className="mb-4">
         <label
           htmlFor="centerPanelBackgroundColor"
@@ -78,7 +119,7 @@ const RightPanel = ({
         <>
           <h2 className="text-lg font-bold mb-2 mt-4">Component Properties</h2>
 
-          {/* Text Input */}
+          {/* ... (Other property inputs) ... */}
           <div className="mb-4">
             <label
               htmlFor="text"
@@ -207,40 +248,60 @@ const RightPanel = ({
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
-
           {/* Radius */}
           <div className="mb-4">
             <label
               htmlFor="radius"
               className="block text-sm font-medium text-gray-700">
-              Radius
+              Radius (Max: {maxRadius})
             </label>
             <input
               type="number"
               id="radius"
               value={radius}
               onChange={(e) => handleInputChange(setRadius, e.target.value)}
+              min="0"
+              max={maxRadius}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
-          {/* Conditional Pressed Color (Only for Buttons) */}
-          {selectedComponent && selectedComponent.type === "KivyButton" && (
-            <div className="mb-4">
-              <label
-                htmlFor="pressedColor"
-                className="block text-sm font-medium text-gray-700">
-                Pressed Color
-              </label>
-              <input
-                type="color"
-                id="pressedColor"
-                value={pressedColor}
-                onChange={(e) =>
-                  handleInputChange(setPressedColor, e.target.value)
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
-            </div>
+
+          {/* Conditional Pressed and Hover Colors (Only for Buttons) */}
+          {selectedComponent && selectedComponent.type === "PySideButton" && (
+            <>
+              <div className="mb-4">
+                <label
+                  htmlFor="pressedColor"
+                  className="block text-sm font-medium text-gray-700">
+                  Pressed Color
+                </label>
+                <input
+                  type="color"
+                  id="pressedColor"
+                  value={pressedColor}
+                  onChange={(e) =>
+                    handleInputChange(setPressedColor, e.target.value)
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="hoverColor"
+                  className="block text-sm font-medium text-gray-700">
+                  Hover Color
+                </label>
+                <input
+                  type="color"
+                  id="hoverColor"
+                  value={hoverColor}
+                  onChange={(e) =>
+                    handleInputChange(setHoverColor, e.target.value)
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+            </>
           )}
         </>
       )}
