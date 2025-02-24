@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 const RightPanel = ({
   selectedComponent,
   onUpdateComponentProps,
-  centerPanelBackgroundColor,
-  onUpdateCenterPanelBackgroundColor,
+  currentScreen,
+  onUpdateScreenBackgroundColor,
 }) => {
+  // Local state for component properties
   const [text, setText] = useState("");
   const [x, setX] = useState("");
   const [y, setY] = useState("");
@@ -16,9 +17,15 @@ const RightPanel = ({
   const [backgroundColor, setBackgroundColor] = useState("");
   const [radius, setRadius] = useState("");
   const [pressedColor, setPressedColor] = useState("");
-  const [hoverColor, setHoverColor] = useState(""); // State for hoverColor
+  const [hoverColor, setHoverColor] = useState("");
   const [maxRadius, setMaxRadius] = useState(0);
 
+  // Local state for screen background color
+  const [screenBackgroundColor, setScreenBackgroundColor] = useState(
+    currentScreen?.backgroundColor || "#ffffff"
+  );
+
+  // Update local state when the selected component changes
   useEffect(() => {
     if (selectedComponent) {
       setText(selectedComponent.text || "");
@@ -30,8 +37,6 @@ const RightPanel = ({
       setTextColor(selectedComponent.textColor || "");
       setBackgroundColor(selectedComponent.backgroundColor || "");
       setRadius(selectedComponent.radius || "");
-
-      // Only set pressedColor and hoverColor if they exist (i.e., for buttons)
       if (selectedComponent.pressedColor !== undefined) {
         setPressedColor(selectedComponent.pressedColor || "");
       } else {
@@ -56,10 +61,15 @@ const RightPanel = ({
       setBackgroundColor("");
       setRadius("");
       setPressedColor("");
-      setHoverColor(""); // Reset hoverColor
+      setHoverColor("");
       setMaxRadius(0);
     }
   }, [selectedComponent]);
+
+  // Update screen background color
+  useEffect(() => {
+    setScreenBackgroundColor(currentScreen?.backgroundColor || "#ffffff");
+  }, [currentScreen]);
 
   const handleInputChange = (setter, value, isComponentProp = true) => {
     // Special handling for radius to enforce the limit
@@ -67,15 +77,14 @@ const RightPanel = ({
       const numValue = parseInt(value, 10);
       if (!isNaN(numValue)) {
         const limitedValue = Math.min(Math.max(numValue, 0), maxRadius); // Limit the value
-        setter(limitedValue);
+        setter(limitedValue); // Set the limited value
         if (selectedComponent && isComponentProp) {
-          //updates radius
           onUpdateComponentProps(selectedComponent.id, {
             radius: limitedValue,
           });
         }
       } else {
-        setter("");
+        setter(""); // Allow empty input (interpreted as 0)
       }
     } else {
       setter(value);
@@ -99,18 +108,17 @@ const RightPanel = ({
   return (
     <aside id="right-panel" className="w-64 bg-gray-200 p-4 overflow-auto">
       <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
-      {/* Center Panel Background Color */}
       <div className="mb-4">
         <label
-          htmlFor="centerPanelBackgroundColor"
+          htmlFor="screenBackgroundColor"
           className="block text-sm font-medium text-gray-700">
           Background Color
         </label>
         <input
           type="color"
-          id="centerPanelBackgroundColor"
-          value={centerPanelBackgroundColor}
-          onChange={(e) => onUpdateCenterPanelBackgroundColor(e.target.value)}
+          id="screenBackgroundColor"
+          value={screenBackgroundColor}
+          onChange={(e) => onUpdateScreenBackgroundColor(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         />
       </div>
@@ -118,8 +126,7 @@ const RightPanel = ({
       {selectedComponent && (
         <>
           <h2 className="text-lg font-bold mb-2 mt-4">Component Properties</h2>
-
-          {/* ... (Other property inputs) ... */}
+          {/* Text Input */}
           <div className="mb-4">
             <label
               htmlFor="text"

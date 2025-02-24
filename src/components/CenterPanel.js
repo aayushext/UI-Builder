@@ -43,7 +43,7 @@ const CenterPanel = React.forwardRef(
                 backgroundColor={component.backgroundColor}
                 radius={component.radius}
                 pressedColor={component.pressedColor}
-                hoverColor={component.hoverColor} // Pass hoverColor
+                hoverColor={component.hoverColor}
               />
             )}
             {component.type === "PySideLabel" && (
