@@ -24,10 +24,10 @@ const Widget = ({
         width: width,
         height: height,
       }}
-      position={{ x: x, y: y }} // Use current position
+      position={{ x: x, y: y }}
       size={{ width: width, height: height }}
       style={{
-        border: isSelected ? "2px solid blue" : "1px solid black",
+        border: isSelected ? "2px solid blue" : "0px solid black",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -35,12 +35,11 @@ const Widget = ({
       bounds="parent"
       data-id={id}
       onResizeStop={(e, direction, ref, delta, position) => {
-        // Update BOTH size AND position
         onResize(id, {
           width: ref.offsetWidth,
           height: ref.offsetHeight,
-          x: position.x, // Use the updated x from onResizeStop
-          y: position.y, // Use the updated y from onResizeStop
+          x: position.x,
+          y: position.y,
         });
       }}
       onDragStop={(e, d) => {
@@ -50,14 +49,15 @@ const Widget = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
       <div className="relative w-full h-full">
-        {children}
         {(isHovered || isSelected) && (
           <button
             onClick={() => onDelete(id)}
-            className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-full text-xs -mt-2 -mr-2">
+            className="absolute -top-3 -right-3 bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full text-xs -mt-3 -mr-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
+            style={{ minWidth: "24px", touchAction: "manipulation" }}>
             X
           </button>
         )}
+        {children}
       </div>
     </Rnd>
   );

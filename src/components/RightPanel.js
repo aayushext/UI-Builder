@@ -5,6 +5,7 @@ const RightPanel = ({
   onUpdateComponentProps,
   currentScreen,
   onUpdateScreenBackgroundColor,
+  onDuplicateComponent,
 }) => {
   // Local state for component properties
   const [text, setText] = useState("");
@@ -74,7 +75,7 @@ const RightPanel = ({
   const handleInputChange = (setter, value, isComponentProp = true) => {
     // Special handling for radius to enforce the limit
     if (setter === setRadius) {
-      const numValue = parseInt(value, 10);
+      const numValue = parseFloat(value);
       if (!isNaN(numValue)) {
         const limitedValue = Math.min(Math.max(numValue, 0), maxRadius); // Limit the value
         setter(limitedValue); // Set the limited value
@@ -91,11 +92,12 @@ const RightPanel = ({
       if (selectedComponent && isComponentProp) {
         const updatedProps = {};
         if (setter === setText) updatedProps.text = value;
-        if (setter === setX) updatedProps.x = parseInt(value, 10);
-        if (setter === setY) updatedProps.y = parseInt(value, 10);
-        if (setter === setWidth) updatedProps.width = parseInt(value, 10);
-        if (setter === setHeight) updatedProps.height = parseInt(value, 10);
-        if (setter === setFontSize) updatedProps.fontSize = parseInt(value, 10);
+        if (setter === setX) updatedProps.x = parseFloat(value) || 0;
+        if (setter === setY) updatedProps.y = parseFloat(value) || 0;
+        if (setter === setWidth) updatedProps.width = parseFloat(value) || 0;
+        if (setter === setHeight) updatedProps.height = parseFloat(value) || 0;
+        if (setter === setFontSize)
+          updatedProps.fontSize = parseFloat(value) || 0;
         if (setter === setTextColor) updatedProps.textColor = value;
         if (setter === setBackgroundColor) updatedProps.backgroundColor = value;
         if (setter === setPressedColor) updatedProps.pressedColor = value;
@@ -126,6 +128,14 @@ const RightPanel = ({
       {selectedComponent && (
         <>
           <h2 className="text-lg font-bold mb-2 mt-4">Component Properties</h2>
+
+          {/* Add duplicate button here */}
+          <button
+            onClick={onDuplicateComponent}
+            className="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded mb-4 w-full">
+            Duplicate Widget
+          </button>
+
           {/* Text Input */}
           <div className="mb-4">
             <label
@@ -153,7 +163,9 @@ const RightPanel = ({
               type="number"
               id="x"
               value={x}
+              step="0.1"
               onChange={(e) => handleInputChange(setX, e.target.value)}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent deselection
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
@@ -169,7 +181,9 @@ const RightPanel = ({
               type="number"
               id="y"
               value={y}
+              step="0.1"
               onChange={(e) => handleInputChange(setY, e.target.value)}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent deselection
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
@@ -185,7 +199,9 @@ const RightPanel = ({
               type="number"
               id="width"
               value={width}
+              step="0.1"
               onChange={(e) => handleInputChange(setWidth, e.target.value)}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent deselection
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
@@ -201,7 +217,9 @@ const RightPanel = ({
               type="number"
               id="height"
               value={height}
+              step="0.1"
               onChange={(e) => handleInputChange(setHeight, e.target.value)}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent deselection
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
