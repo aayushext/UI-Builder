@@ -1,0 +1,104 @@
+{
+  "components": [
+    {
+      "type": "PySideButton",
+      "displayName": "Button",
+      "icon": "button-icon",
+      "defaultProps": {
+        "width": 200,
+        "height": 100,
+        "text": "Button",
+        "fontSize": 16,
+        "textColor": "#ffffff",
+        "backgroundColor": "#3b82f6",
+        "radius": 4,
+        "pressedColor": "#1d4ed8",
+        "hoverColor": "#60a5fa"
+      },
+      "properties": [
+        {
+          "name": "text",
+          "type": "text",
+          "label": "Text"
+        },
+        {
+          "name": "fontSize",
+          "type": "number",
+          "label": "Font Size",
+          "step": 1
+        },
+        {
+          "name": "textColor",
+          "type": "color",
+          "label": "Text Color"
+        },
+        {
+          "name": "radius",
+          "type": "number",
+          "label": "Radius",
+          "min": 0,
+          "hasMaxRadius": true
+        },
+        {
+          "name": "backgroundColor",
+          "type": "color",
+          "label": "Background Color"
+        },
+        {
+          "name": "pressedColor",
+          "type": "color",
+          "label": "Pressed Color"
+        },
+        {
+          "name": "hoverColor",
+          "type": "color",
+          "label": "Hover Color"
+        }
+      ]
+    },
+    {
+      "type": "PySideLabel",
+      "displayName": "Label",
+      "icon": "label-icon",
+      "defaultProps": {
+        "width": 150,
+        "height": 50,
+        "text": "Label",
+        "fontSize": 14,
+        "textColor": "#000000",
+        "backgroundColor": "#f0f0f0",
+        "radius": 0
+      },
+      "properties": [
+        {
+          "name": "text",
+          "type": "text",
+          "label": "Text"
+        },
+        {
+          "name": "fontSize",
+          "type": "number",
+          "label": "Font Size",
+          "step": 1
+        },
+        {
+          "name": "textColor",
+          "type": "color",
+          "label": "Text Color"
+        },
+        {
+          "name": "backgroundColor",
+          "type": "color",
+          "label": "Background Color"
+        },
+        {
+          "name": "radius",
+          "type": "number",
+          "label": "Radius",
+          "min": 0,
+          "hasMaxRadius": true
+        }
+      ]
+    }
+  ]
+}

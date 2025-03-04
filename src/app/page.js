@@ -6,6 +6,10 @@ import RightPanel from "../components/RightPanel";
 import ScreenTabs from "../components/ScreenTabs";
 import { generatePySideCode } from "../utils/generatePySideCode";
 import { exportToJson, importFromJson } from "../utils/saveSystem";
+import {
+  createComponent,
+  getComponentDefinitions,
+} from "../utils/componentLoader";
 
 export default function Home() {
   const [screens, setScreens] = useState([
@@ -22,50 +26,19 @@ export default function Home() {
     height: 1000,
   });
 
-  const addPySideButton = () => {
-    const newComponent = {
-      id: nextComponentId,
-      type: "PySideButton",
-      x: 50,
-      y: 50,
-      width: 200,
-      height: 100,
-      text: `Button ${nextComponentId}`,
-      fontSize: 16,
-      textColor: "#ffffff",
-      backgroundColor: "#3b82f6",
-      radius: 4,
-      pressedColor: "#1d4ed8",
-      hoverColor: "#60a5fa",
-    };
-
-    const updatedScreens = [...screens];
-    updatedScreens[currentScreenIndex].components.push(newComponent);
-    setScreens(updatedScreens);
-    setNextComponentId(nextComponentId + 1);
-    setSelectedComponentId(newComponent.id);
+  const addComponent = (type) => {
+    try {
+      const newComponent = createComponent(type, nextComponentId);
+      const updatedScreens = [...screens];
+      updatedScreens[currentScreenIndex].components.push(newComponent);
+      setScreens(updatedScreens);
+      setNextComponentId(nextComponentId + 1);
+      setSelectedComponentId(newComponent.id);
+    } catch (error) {
+      console.error(`Error creating component: ${error.message}`);
+    }
   };
 
-  const addPySideLabel = () => {
-    const newComponent = {
-      id: nextComponentId,
-      type: "PySideLabel",
-      x: 50,
-      y: 50,
-      width: 150,
-      height: 50,
-      text: `Label ${nextComponentId}`,
-      fontSize: 14,
-      textColor: "#000000",
-      backgroundColor: "#f0f0f0",
-      radius: 0,
-    };
-    const updatedScreens = [...screens];
-    updatedScreens[currentScreenIndex].components.push(newComponent);
-    setScreens(updatedScreens);
-    setNextComponentId(nextComponentId + 1);
-    setSelectedComponentId(newComponent.id);
-  };
   const addScreen = () => {
     const newScreen = {
       id: nextScreenId,
@@ -295,8 +268,7 @@ export default function Home() {
     <div className="flex flex-col h-screen">
       <div className="flex flex-1 overflow-hidden">
         <LeftPanel
-          onAddPySideButton={addPySideButton}
-          onAddPySideLabel={addPySideLabel}
+          onAddComponent={addComponent}
           onExport={handleExport}
           onSaveToJson={handleSaveToJson}
           onLoadFromJson={handleLoadFromJson}
