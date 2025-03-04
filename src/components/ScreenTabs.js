@@ -8,14 +8,14 @@ const ScreenTabs = ({
   onDeleteScreen,
 }) => {
   return (
-    <div className="flex items-center border-b border-gray-300 bg-gray-100 px-4 py-2">
+    <div className="flex items-center border-b border-gray-300 bg-gray-100  px-4 py-2">
       {screens.map((screen, index) => (
         <div key={screen.id} className="flex items-center mr-2">
           <button
             onClick={() => onScreenChange(index)}
-            className={`py-1 px-3 rounded-t-md ${
+            className={`py-1 px-3 rounded-md ${
               index === currentScreenIndex
-                ? "bg-white text-blue-600 border border-gray-300 border-b-white"
+                ? "bg-white text-blue-600 border border-gray-300 border-b-gray-400"
                 : "bg-gray-200 hover:bg-gray-300"
             }`}>
             {screen.name}
