@@ -99,6 +99,80 @@
           "hasMaxRadius": true
         }
       ]
+    },
+    {
+      "type": "PySideSlider",
+      "displayName": "Slider",
+      "icon": "slider-icon",
+      "defaultProps": {
+        "width": 200,
+        "height": 30,
+        "minimum": 0,
+        "maximum": 100,
+        "value": 50,
+        "orientation": "horizontal",
+        "tickPosition": "both",
+        "tickInterval": 10,
+        "sliderColor": "#3b82f6",
+        "backgroundColor": "#f0f0f0"
+      },
+      "properties": [
+        {
+          "name": "minimum",
+          "type": "number",
+          "label": "Minimum",
+          "step": 1
+        },
+        {
+          "name": "maximum",
+          "type": "number",
+          "label": "Maximum",
+          "step": 1
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "label": "Value",
+          "step": 1
+        },
+        {
+          "name": "orientation",
+          "type": "select",
+          "label": "Orientation",
+          "options": [
+            { "value": "horizontal", "label": "Horizontal" },
+            { "value": "vertical", "label": "Vertical" }
+          ]
+        },
+        {
+          "name": "tickPosition",
+          "type": "select",
+          "label": "Tick Position",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "both", "label": "Both" },
+            { "value": "above", "label": "Above" },
+            { "value": "below", "label": "Below" }
+          ]
+        },
+        {
+          "name": "tickInterval",
+          "type": "number",
+          "label": "Tick Interval",
+          "step": 1,
+          "min": 0
+        },
+        {
+          "name": "sliderColor",
+          "type": "color",
+          "label": "Slider Color"
+        },
+        {
+          "name": "backgroundColor",
+          "type": "color",
+          "label": "Background Color"
+        }
+      ]
     }
   ]
 }

@@ -11,18 +11,21 @@ export const generatePySideCode = (
     return `${r}, ${g}, ${b}`;
   };
 
-  let pyCode = `
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QStackedWidget
-from PySide6.QtCore import QRect, QPropertyAnimation, QEasingCurve, QPoint
+  let pyCode = `import sys
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, 
+    QPushButton, QLabel, QSlider, QStackedWidget
+)
+from PySide6.QtCore import Qt, QRect, QPoint, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QColor
-
 
 class MyWindow(QMainWindow):
   def __init__(self):
       super().__init__()
-
-      self.setWindowTitle("Generated UI")
-      self.setGeometry(100, 100, ${centerPanelDimensions.width}, ${centerPanelDimensions.height})
+      
+      # Main window setup
+      self.setWindowTitle("My PySide6 App")
+      self.resize(${centerPanelDimensions.width}, ${centerPanelDimensions.height})
 
       self.stacked_widget = QStackedWidget(self)
       self.setCentralWidget(self.stacked_widget)
@@ -82,6 +85,90 @@ class MyWindow(QMainWindow):
           }
       """)
 `;
+      } else if (component.type === "PySideSlider") {
+        const orientation =
+          component.orientation === "vertical"
+            ? "Qt.Orientation.Vertical"
+            : "Qt.Orientation.Horizontal";
+        let tickPosition;
+
+        switch (component.tickPosition) {
+          case "none":
+            tickPosition = "QSlider.TickPosition.NoTicks";
+            break;
+          case "both":
+            tickPosition = "QSlider.TickPosition.TicksBothSides";
+            break;
+          case "above":
+            tickPosition =
+              component.orientation === "vertical"
+                ? "QSlider.TickPosition.TicksLeft"
+                : "QSlider.TickPosition.TicksAbove";
+            break;
+          case "below":
+            tickPosition =
+              component.orientation === "vertical"
+                ? "QSlider.TickPosition.TicksRight"
+                : "QSlider.TickPosition.TicksBelow";
+            break;
+          default:
+            tickPosition = "QSlider.TickPosition.NoTicks";
+        }
+
+        pyCode += `
+            self.${componentName} = QSlider(${orientation}, self.screen_${screenIndex}_widget)
+            self.${componentName}.setGeometry(QRect(${component.x}, ${
+          component.y
+        }, ${component.width}, ${component.height}))
+            self.${componentName}.setMinimum(${component.minimum})
+            self.${componentName}.setMaximum(${component.maximum})
+            self.${componentName}.setValue(${component.value})
+            self.${componentName}.setTickPosition(${tickPosition})
+            self.${componentName}.setTickInterval(${component.tickInterval})
+            self.${componentName}.setStyleSheet("""
+                QSlider {
+                    background-color: rgb(${hexToRgb(
+                      component.backgroundColor
+                    )});
+                }
+                QSlider::groove:horizontal {
+                    height: 8px;
+                    background: #ccc;
+                    margin: 2px 0;
+                }
+                QSlider::groove:vertical {
+                    width: 8px;
+                    background: #ccc;
+                    margin: 0 2px;
+                }
+                QSlider::handle {
+                    background: rgb(${hexToRgb(component.sliderColor)});
+                    border: 1px solid #5c5c5c;
+                    width: ${
+                      component.orientation === "vertical" ? "16" : "12"
+                    }px;
+                    height: ${
+                      component.orientation === "vertical" ? "12" : "16"
+                    }px;
+                    margin: ${
+                      component.orientation === "vertical" ? "-2px 0" : "0 -2px"
+                    };
+                    border-radius: 8px;
+                }
+                QSlider::add-page:horizontal {
+                    background: #ccc;
+                }
+                QSlider::add-page:vertical {
+                    background: rgb(${hexToRgb(component.sliderColor)});
+                }
+                QSlider::sub-page:horizontal {
+                    background: rgb(${hexToRgb(component.sliderColor)});
+                }
+                QSlider::sub-page:vertical {
+                    background: #ccc;
+                }
+            """)
+      `;
       }
     });
 

@@ -45,6 +45,22 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
         />
       );
 
+    case "select":
+      return (
+        <select
+          id={property.name}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          {property.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+
     default:
       return <div>Unknown property type: {property.type}</div>;
   }
