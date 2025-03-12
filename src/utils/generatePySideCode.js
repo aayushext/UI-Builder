@@ -1,17 +1,17 @@
-export const generatePySideCode = (
-  screens,
-  currentScreenIndex,
-  centerPanelDimensions
-) => {
-  const hexToRgb = (hex) => {
+const hexToRgb = (hex) => {
     hex = hex.replace("#", "");
     let r = parseInt(hex.substring(0, 2), 16);
     let g = parseInt(hex.substring(2, 4), 16);
     let b = parseInt(hex.substring(4, 6), 16);
     return `${r}, ${g}, ${b}`;
-  };
+};
 
-  let pyCode = `import sys
+export const generatePySideCode = (
+    screens,
+    currentScreenIndex,
+    centerPanelDimensions
+) => {
+    let pyCode = `import sys
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, 
     QPushButton, QLabel, QSlider, QStackedWidget
@@ -32,26 +32,26 @@ class MyWindow(QMainWindow):
 
 `;
 
-  screens.forEach((screen, screenIndex) => {
-    pyCode += `
+    screens.forEach((screen, screenIndex) => {
+        pyCode += `
       # --- ${screen.name} ---
       self.screen_${screenIndex}_widget = QWidget()
       self.screen_${screenIndex}_widget.setStyleSheet("background-color: rgb(${hexToRgb(
-      screen.backgroundColor
-    )});")
+            screen.backgroundColor
+        )});")
 `;
 
-    screen.components.forEach((component, componentIndex) => {
-      const componentName = `${component.type}${componentIndex}_screen${screenIndex}`;
+        screen.components.forEach((component, componentIndex) => {
+            const componentName = `${component.type}${componentIndex}_screen${screenIndex}`;
 
-      if (component.type === "PySideButton") {
-        pyCode += `
+            if (component.type === "PySideButton") {
+                pyCode += `
       self.${componentName} = QPushButton("${
-          component.text
-        }", self.screen_${screenIndex}_widget)
+                    component.text
+                }", self.screen_${screenIndex}_widget)
       self.${componentName}.setGeometry(QRect(${component.x}, ${component.y}, ${
-          component.width
-        }, ${component.height}))
+                    component.width
+                }, ${component.height}))
       self.${componentName}.setStyleSheet("""
           QPushButton {
               color: rgb(${hexToRgb(component.textColor)});
@@ -67,14 +67,14 @@ class MyWindow(QMainWindow):
           }
       """)
 `;
-      } else if (component.type === "PySideLabel") {
-        pyCode += `
+            } else if (component.type === "PySideLabel") {
+                pyCode += `
       self.${componentName} = QLabel("${
-          component.text
-        }", self.screen_${screenIndex}_widget)
+                    component.text
+                }", self.screen_${screenIndex}_widget)
       self.${componentName}.setGeometry(QRect(${component.x}, ${component.y}, ${
-          component.width
-        }, ${component.height}))
+                    component.width
+                }, ${component.height}))
       self.${componentName}.setStyleSheet("""
           QLabel {
               color: rgb(${hexToRgb(component.textColor)});
@@ -85,41 +85,41 @@ class MyWindow(QMainWindow):
           }
       """)
 `;
-      } else if (component.type === "PySideSlider") {
-        const orientation =
-          component.orientation === "vertical"
-            ? "Qt.Orientation.Vertical"
-            : "Qt.Orientation.Horizontal";
-        let tickPosition;
+            } else if (component.type === "PySideSlider") {
+                const orientation =
+                    component.orientation === "vertical"
+                        ? "Qt.Orientation.Vertical"
+                        : "Qt.Orientation.Horizontal";
+                let tickPosition;
 
-        switch (component.tickPosition) {
-          case "none":
-            tickPosition = "QSlider.TickPosition.NoTicks";
-            break;
-          case "both":
-            tickPosition = "QSlider.TickPosition.TicksBothSides";
-            break;
-          case "above":
-            tickPosition =
-              component.orientation === "vertical"
-                ? "QSlider.TickPosition.TicksLeft"
-                : "QSlider.TickPosition.TicksAbove";
-            break;
-          case "below":
-            tickPosition =
-              component.orientation === "vertical"
-                ? "QSlider.TickPosition.TicksRight"
-                : "QSlider.TickPosition.TicksBelow";
-            break;
-          default:
-            tickPosition = "QSlider.TickPosition.NoTicks";
-        }
+                switch (component.tickPosition) {
+                    case "none":
+                        tickPosition = "QSlider.TickPosition.NoTicks";
+                        break;
+                    case "both":
+                        tickPosition = "QSlider.TickPosition.TicksBothSides";
+                        break;
+                    case "above":
+                        tickPosition =
+                            component.orientation === "vertical"
+                                ? "QSlider.TickPosition.TicksLeft"
+                                : "QSlider.TickPosition.TicksAbove";
+                        break;
+                    case "below":
+                        tickPosition =
+                            component.orientation === "vertical"
+                                ? "QSlider.TickPosition.TicksRight"
+                                : "QSlider.TickPosition.TicksBelow";
+                        break;
+                    default:
+                        tickPosition = "QSlider.TickPosition.NoTicks";
+                }
 
-        pyCode += `
+                pyCode += `
             self.${componentName} = QSlider(${orientation}, self.screen_${screenIndex}_widget)
             self.${componentName}.setGeometry(QRect(${component.x}, ${
-          component.y
-        }, ${component.width}, ${component.height}))
+                    component.y
+                }, ${component.width}, ${component.height}))
             self.${componentName}.setMinimum(${component.minimum})
             self.${componentName}.setMaximum(${component.maximum})
             self.${componentName}.setValue(${component.value})
@@ -128,7 +128,7 @@ class MyWindow(QMainWindow):
             self.${componentName}.setStyleSheet("""
                 QSlider {
                     background-color: rgb(${hexToRgb(
-                      component.backgroundColor
+                        component.backgroundColor
                     )});
                 }
                 QSlider::groove:horizontal {
@@ -145,13 +145,15 @@ class MyWindow(QMainWindow):
                     background: rgb(${hexToRgb(component.sliderColor)});
                     border: 1px solid #5c5c5c;
                     width: ${
-                      component.orientation === "vertical" ? "16" : "12"
+                        component.orientation === "vertical" ? "16" : "12"
                     }px;
                     height: ${
-                      component.orientation === "vertical" ? "12" : "16"
+                        component.orientation === "vertical" ? "12" : "16"
                     }px;
                     margin: ${
-                      component.orientation === "vertical" ? "-2px 0" : "0 -2px"
+                        component.orientation === "vertical"
+                            ? "-2px 0"
+                            : "0 -2px"
                     };
                     border-radius: 8px;
                 }
@@ -169,15 +171,15 @@ class MyWindow(QMainWindow):
                 }
             """)
       `;
-      }
+            }
+        });
+
+        pyCode += `
+      self.stacked_widget.addWidget(self.screen_${screenIndex}_widget)
+`;
     });
 
     pyCode += `
-      self.stacked_widget.addWidget(self.screen_${screenIndex}_widget)
-`;
-  });
-
-  pyCode += `
       self.stacked_widget.setCurrentIndex(${currentScreenIndex})
       self.current_screen_index = ${currentScreenIndex}
 
@@ -214,17 +216,17 @@ class MyWindow(QMainWindow):
       current_widget.setGeometry(0, 0, self.width(), self.height())
 `;
 
-  screens.forEach((screen, index) => {
-    pyCode += `
+    screens.forEach((screen, index) => {
+        pyCode += `
       self.button_screen_${index} = QPushButton("Go to ${screen.name}", self)
       self.button_screen_${index}.setGeometry(QRect(10, ${
-      10 + index * 40
-    }, 150, 30))
+            10 + index * 40
+        }, 150, 30))
       self.button_screen_${index}.clicked.connect(lambda _, i=${index}: self.switch_screen(i))
 `;
-  });
+    });
 
-  pyCode += `
+    pyCode += `
       self.show()
 
 if __name__ == "__main__":
@@ -234,5 +236,193 @@ if __name__ == "__main__":
   app.exec()
 `;
 
-  return pyCode;
+    return pyCode;
+};
+
+export const generateQtUiFile = (
+    screens,
+    currentScreenIndex,
+    centerPanelDimensions
+) => {
+    // Start building the XML for the .ui file
+    let uiCode = `<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>${centerPanelDimensions.width}</width>
+    <height>${centerPanelDimensions.height}</height>
+   </rect>
+  </property>
+  <widget class="QStackedWidget" name="stackedWidget">
+`;
+
+    // Iterate through screens to add each as a page in the stacked widget
+    screens.forEach((screen, screenIndex) => {
+        uiCode += `   <widget class="QWidget" name="screen_${screenIndex}">
+    <property name="styleSheet">
+      <string>background-color: rgb(${hexToRgb(
+          screen.backgroundColor
+      )});</string>
+    </property>
+`;
+        // Iterate through components within a screen
+        screen.components.forEach((component, componentIndex) => {
+            const compName = `${component.type}${componentIndex}_screen${screenIndex}`;
+            if (component.type === "PySideButton") {
+                uiCode += `    <widget class="QPushButton" name="${compName}">
+      <property name="text">
+        <string>${component.text}</string>
+      </property>
+      <property name="geometry">
+        <rect>
+          <x>${component.x}</x>
+          <y>${component.y}</y>
+          <width>${component.width}</width>
+          <height>${component.height}</height>
+        </rect>
+      </property>
+      <property name="styleSheet">
+        <string>
+            QPushButton {
+                color: rgb(${hexToRgb(component.textColor)});
+                background-color: rgb(${hexToRgb(component.backgroundColor)});
+                border-radius: ${component.radius}px;
+                font-size: ${component.fontSize}px;
+            }
+            QPushButton:hover {
+                background-color: rgb(${hexToRgb(component.hoverColor)});
+            }
+            QPushButton:pressed {
+                background-color: rgb(${hexToRgb(component.pressedColor)});
+            }
+        </string>
+      </property>
+    </widget>
+`;
+            } else if (component.type === "PySideLabel") {
+                uiCode += `    <widget class="QLabel" name="${compName}">
+      <property name="text">
+        <string>${component.text}</string>
+      </property>
+      <property name="geometry">
+        <rect>
+          <x>${component.x}</x>
+          <y>${component.y}</y>
+          <width>${component.width}</width>
+          <height>${component.height}</height>
+        </rect>
+      </property>
+      <property name="styleSheet">
+        <string>
+            QLabel {
+                color: rgb(${hexToRgb(component.textColor)});
+                background-color: rgb(${hexToRgb(component.backgroundColor)});
+                border-radius: ${component.radius}px;
+                font-size: ${component.fontSize}px;
+                border: 1px solid #ccc;
+            }
+        </string>
+      </property>
+    </widget>
+`;
+            } else if (component.type === "PySideSlider") {
+                const orientation =
+                    component.orientation === "vertical"
+                        ? "Qt::Orientation::Vertical"
+                        : "Qt::Orientation::Horizontal";
+                let tickPosition;
+                switch (component.tickPosition) {
+                    case "none":
+                        tickPosition = "NoTicks";
+                        break;
+                    case "both":
+                        tickPosition = "TicksBothSides";
+                        break;
+                    case "above":
+                        tickPosition =
+                            component.orientation === "vertical"
+                                ? "TicksLeft"
+                                : "TicksAbove";
+                        break;
+                    case "below":
+                        tickPosition =
+                            component.orientation === "vertical"
+                                ? "TicksRight"
+                                : "TicksBelow";
+                        break;
+                    default:
+                        tickPosition = "NoTicks";
+                }
+                uiCode += `    <widget class="QSlider" name="${compName}">
+      <property name="orientation">
+        <enum>${orientation}</enum>
+      </property>
+      <property name="minimum">
+        <number>${component.minimum}</number>
+      </property>
+      <property name="maximum">
+        <number>${component.maximum}</number>
+      </property>
+      <property name="value">
+        <number>${component.value}</number>
+      </property>
+      <property name="tickPosition">
+        <enum>QSlider::${tickPosition}</enum>
+      </property>
+      <property name="tickInterval">
+        <number>${component.tickInterval}</number>
+      </property>
+      <property name="geometry">
+        <rect>
+          <x>${component.x}</x>
+          <y>${component.y}</y>
+          <width>${component.width}</width>
+          <height>${component.height}</height>
+        </rect>
+      </property>
+      <property name="styleSheet">
+        <string>
+            QSlider {
+                background-color: rgb(${hexToRgb(component.backgroundColor)});
+            }
+            QSlider::groove:${
+                component.orientation === "vertical" ? "vertical" : "horizontal"
+            } {
+                background: rgb(204, 204, 204);
+                ${
+                    component.orientation === "vertical"
+                        ? "width: 8px; margin: 0 2px;"
+                        : "height: 8px; margin: 2px 0;"
+                }
+            }
+            QSlider::handle:${
+                component.orientation === "vertical" ? "vertical" : "horizontal"
+            } {
+                background: rgb(${hexToRgb(component.sliderColor)});
+                border: 1px solid #5c5c5c;
+                width: 16px;
+                height: 16px;
+                margin: -4px 0;
+                border-radius: 8px;
+            }
+        </string>
+      </property>
+    </widget>
+`;
+            }
+        });
+        uiCode += `   </widget>
+`;
+    });
+    uiCode += `  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
+`;
+    return uiCode;
 };
