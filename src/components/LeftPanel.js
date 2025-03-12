@@ -29,7 +29,7 @@ const LeftPanel = ({
                     <button
                         key={component.type}
                         onClick={() => onAddComponent(component.type)}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 w-full">
+                        className="bg-blue-500 hover:bg-blue-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded mt-4 w-full">
                         Add {component.displayName}
                     </button>
                 ))}
@@ -38,19 +38,19 @@ const LeftPanel = ({
             <div className="mt-auto pt-4 space-y-2">
                 <button
                     onClick={onSaveToJson}
-                    className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full">
+                    className="bg-purple-500 hover:bg-purple-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
                     Save Design
                 </button>
 
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded w-full">
+                    className="bg-indigo-500 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
                     Load Design
                 </button>
 
                 <button
                     onClick={onExport}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
+                    className="bg-green-600 hover:bg-green-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
                     Export to .py
                 </button>
 
