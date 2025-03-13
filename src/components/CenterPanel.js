@@ -63,8 +63,6 @@ const CenterPanel = React.forwardRef(
                                 maximum={component.maximum}
                                 value={component.value}
                                 orientation={component.orientation}
-                                tickPosition={component.tickPosition}
-                                tickInterval={component.tickInterval}
                                 sliderColor={component.sliderColor}
                                 backgroundColor={component.backgroundColor}
                             />

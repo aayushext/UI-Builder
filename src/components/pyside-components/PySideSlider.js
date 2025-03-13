@@ -7,8 +7,6 @@ const PySideSlider = ({
     maximum = 100,
     value = 50,
     orientation = "horizontal",
-    tickPosition = "both",
-    tickInterval = 10,
     sliderColor = "#3b82f6",
     backgroundColor = "#000000ff",
 }) => {
@@ -33,48 +31,10 @@ const PySideSlider = ({
         ? percentage * (width - 20 - thumbSize) + 10
         : (1 - percentage) * (height - 20 - thumbSize) + 10;
 
-    const showTicks = tickPosition !== "none" && tickInterval > 0;
-
-    // Generate tick marks if needed
-    const renderTicks = () => {
-        if (!showTicks || tickInterval <= 0 || range <= 0) return null;
-
-        const ticks = [];
-        const tickCount = Math.floor(range / tickInterval) + 1;
-
-        for (let i = 0; i < tickCount; i++) {
-            const tickPercentage = i / (tickCount - 1);
-            const tickPosX = isHorizontal
-                ? tickPercentage * (width - 20) + 10
-                : width / 2;
-            const tickPosY = isHorizontal
-                ? height / 2
-                : (1 - tickPercentage) * (height - 20) + 10;
-
-            ticks.push(
-                <div
-                    key={i}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-0 bg-gray-500"
-                    style={{
-                        width: isHorizontal ? "1px" : "6px",
-                        height: isHorizontal ? "6px" : "1px",
-                        left: tickPosX,
-                        top: tickPosY,
-                    }}
-                />
-            );
-        }
-
-        return ticks;
-    };
-
     return (
         <div
             className="relative flex items-center justify-center overflow-visible rounded w-full h-full"
             style={{ backgroundColor }}>
-            {/* Show ticks */}
-            {renderTicks()}
-
             {/* Slider track */}
             <div
                 className="absolute bg-gray-300 border border-gray-400 rounded z-10"

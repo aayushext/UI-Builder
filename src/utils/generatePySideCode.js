@@ -90,31 +90,6 @@ class MyWindow(QMainWindow):
                     component.orientation === "vertical"
                         ? "Qt.Orientation.Vertical"
                         : "Qt.Orientation.Horizontal";
-                let tickPosition;
-
-                switch (component.tickPosition) {
-                    case "none":
-                        tickPosition = "QSlider.TickPosition.NoTicks";
-                        break;
-                    case "both":
-                        tickPosition = "QSlider.TickPosition.TicksBothSides";
-                        break;
-                    case "above":
-                        tickPosition =
-                            component.orientation === "vertical"
-                                ? "QSlider.TickPosition.TicksLeft"
-                                : "QSlider.TickPosition.TicksAbove";
-                        break;
-                    case "below":
-                        tickPosition =
-                            component.orientation === "vertical"
-                                ? "QSlider.TickPosition.TicksRight"
-                                : "QSlider.TickPosition.TicksBelow";
-                        break;
-                    default:
-                        tickPosition = "QSlider.TickPosition.NoTicks";
-                }
-
                 pyCode += `
             self.${componentName} = QSlider(${orientation}, self.screen_${screenIndex}_widget)
             self.${componentName}.setGeometry(QRect(${component.x}, ${
@@ -123,8 +98,6 @@ class MyWindow(QMainWindow):
             self.${componentName}.setMinimum(${component.minimum})
             self.${componentName}.setMaximum(${component.maximum})
             self.${componentName}.setValue(${component.value})
-            self.${componentName}.setTickPosition(${tickPosition})
-            self.${componentName}.setTickInterval(${component.tickInterval})
             self.${componentName}.setStyleSheet("""
                 QSlider {
                     background-color: rgb(${hexToRgb(
@@ -334,29 +307,6 @@ export const generateQtUiFile = (
                     component.orientation === "vertical"
                         ? "Qt::Orientation::Vertical"
                         : "Qt::Orientation::Horizontal";
-                let tickPosition;
-                switch (component.tickPosition) {
-                    case "none":
-                        tickPosition = "NoTicks";
-                        break;
-                    case "both":
-                        tickPosition = "TicksBothSides";
-                        break;
-                    case "above":
-                        tickPosition =
-                            component.orientation === "vertical"
-                                ? "TicksLeft"
-                                : "TicksAbove";
-                        break;
-                    case "below":
-                        tickPosition =
-                            component.orientation === "vertical"
-                                ? "TicksRight"
-                                : "TicksBelow";
-                        break;
-                    default:
-                        tickPosition = "NoTicks";
-                }
                 uiCode += `    <widget class="QSlider" name="${compName}">
       <property name="orientation">
         <enum>${orientation}</enum>
@@ -369,12 +319,6 @@ export const generateQtUiFile = (
       </property>
       <property name="value">
         <number>${component.value}</number>
-      </property>
-      <property name="tickPosition">
-        <enum>QSlider::${tickPosition}</enum>
-      </property>
-      <property name="tickInterval">
-        <number>${component.tickInterval}</number>
       </property>
       <property name="geometry">
         <rect>

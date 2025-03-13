@@ -79,7 +79,8 @@ export default function Home() {
         }
     };
 
-    const resizeComponent = (id, newSizeAndPosition) => {
+    const resizeComponent = (id, newSizeAndPosition, isTemporary = false) => {
+        // This creates a new array of screens with the updated component
         const updatedScreens = screens.map((screen) => ({
             ...screen,
             components: screen.components.map((component) =>
@@ -88,6 +89,8 @@ export default function Home() {
                     : component
             ),
         }));
+        
+        // Update state with the new dimensions
         setScreens(updatedScreens);
     };
 
