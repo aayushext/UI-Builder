@@ -1,9 +1,35 @@
-const hexToRgb = (hex) => {
+const hexToRgba = (hex) => {
+    // Add null check to prevent errors with undefined colors
+    if (!hex) return "0, 0, 0, 1"; // Default to opaque black if color is undefined
+
     hex = hex.replace("#", "");
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
+    let r,
+        g,
+        b,
+        a = 1;
+
+    if (hex.length === 3) {
+        // Handle shorthand hex format (#RGB)
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+    } else if (hex.length === 6) {
+        // Handle standard hex format (#RRGGBB)
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+    } else if (hex.length === 8) {
+        // Handle hex format with alpha (#RRGGBBAA)
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+        a = parseInt(hex.substring(6, 8), 16) / 255;
+    } else {
+        // Default to black if invalid format
+        return "0, 0, 0, 1";
+    }
+
+    return `${r}, ${g}, ${b}, ${a}`;
 };
 
 export const generatePySideCode = (
@@ -36,7 +62,7 @@ class MyWindow(QMainWindow):
         pyCode += `
       # --- ${screen.name} ---
       self.screen_${screenIndex}_widget = QWidget()
-      self.screen_${screenIndex}_widget.setStyleSheet("background-color: rgb(${hexToRgb(
+      self.screen_${screenIndex}_widget.setStyleSheet("background-color: rgba(${hexToRgba(
             screen.backgroundColor
         )});")
 `;
@@ -54,16 +80,16 @@ class MyWindow(QMainWindow):
                 }, ${component.height}))
       self.${componentName}.setStyleSheet("""
           QPushButton {
-              color: rgb(${hexToRgb(component.textColor)});
-              background-color: rgb(${hexToRgb(component.backgroundColor)});
+              color: rgba(${hexToRgba(component.textColor)});
+              background-color: rgba(${hexToRgba(component.backgroundColor)});
               border-radius: ${component.radius}px;
               font-size: ${component.fontSize}px;
           }
           QPushButton:hover {
-              background-color: rgb(${hexToRgb(component.hoverColor)});
+              background-color: rgba(${hexToRgba(component.hoverColor)});
           }
           QPushButton:pressed {
-              background-color: rgb(${hexToRgb(component.pressedColor)});
+              background-color: rgba(${hexToRgba(component.pressedColor)});
           }
       """)
 `;
@@ -77,8 +103,8 @@ class MyWindow(QMainWindow):
                 }, ${component.height}))
       self.${componentName}.setStyleSheet("""
           QLabel {
-              color: rgb(${hexToRgb(component.textColor)});
-              background-color: rgb(${hexToRgb(component.backgroundColor)});
+              color: rgba(${hexToRgba(component.textColor)});
+              background-color: rgba(${hexToRgba(component.backgroundColor)});
               border-radius: ${component.radius}px;
               font-size: ${component.fontSize}px;
               border: 1px solid #ccc;
@@ -100,23 +126,23 @@ class MyWindow(QMainWindow):
             self.${componentName}.setValue(${component.value})
             self.${componentName}.setStyleSheet("""
                 QSlider {
-                    background-color: rgb(${hexToRgb(
+                    background-color: rgba(${hexToRgba(
                         component.backgroundColor
                     )});
                 }
                 QSlider::groove:horizontal {
                     height: 8px;
-                    background: #ccc;
+                    background: rgba(204, 204, 204, 1);
                     margin: 2px 0;
                 }
                 QSlider::groove:vertical {
                     width: 8px;
-                    background: #ccc;
+                    background: rgba(204, 204, 204, 1);
                     margin: 0 2px;
                 }
                 QSlider::handle {
-                    background: rgb(${hexToRgb(component.sliderColor)});
-                    border: 1px solid #5c5c5c;
+                    background: rgba(${hexToRgba(component.sliderColor)});
+                    border: 1px solid rgba(92, 92, 92, 1);
                     width: ${
                         component.orientation === "vertical" ? "16" : "12"
                     }px;
@@ -131,16 +157,16 @@ class MyWindow(QMainWindow):
                     border-radius: 8px;
                 }
                 QSlider::add-page:horizontal {
-                    background: #ccc;
+                    background: rgba(204, 204, 204, 1);
                 }
                 QSlider::add-page:vertical {
-                    background: rgb(${hexToRgb(component.sliderColor)});
+                    background: rgba(${hexToRgba(component.sliderColor)});
                 }
                 QSlider::sub-page:horizontal {
-                    background: rgb(${hexToRgb(component.sliderColor)});
+                    background: rgba(${hexToRgba(component.sliderColor)});
                 }
                 QSlider::sub-page:vertical {
-                    background: #ccc;
+                    background: rgba(204, 204, 204, 1);
                 }
             """)
       `;
@@ -225,7 +251,7 @@ export const generateQtUiFile = (
   <property name="geometry">
    <rect>
     <x>0</x>
-    <y>0</y>
+    <y>0</x>
     <width>${centerPanelDimensions.width}</width>
     <height>${centerPanelDimensions.height}</height>
    </rect>
@@ -237,7 +263,7 @@ export const generateQtUiFile = (
     screens.forEach((screen, screenIndex) => {
         uiCode += `   <widget class="QWidget" name="screen_${screenIndex}">
     <property name="styleSheet">
-      <string>background-color: rgb(${hexToRgb(
+      <string>background-color: rgba(${hexToRgba(
           screen.backgroundColor
       )});</string>
     </property>
@@ -261,16 +287,16 @@ export const generateQtUiFile = (
       <property name="styleSheet">
         <string>
             QPushButton {
-                color: rgb(${hexToRgb(component.textColor)});
-                background-color: rgb(${hexToRgb(component.backgroundColor)});
+                color: rgba(${hexToRgba(component.textColor)});
+                background-color: rgba(${hexToRgba(component.backgroundColor)});
                 border-radius: ${component.radius}px;
                 font-size: ${component.fontSize}px;
             }
             QPushButton:hover {
-                background-color: rgb(${hexToRgb(component.hoverColor)});
+                background-color: rgba(${hexToRgba(component.hoverColor)});
             }
             QPushButton:pressed {
-                background-color: rgb(${hexToRgb(component.pressedColor)});
+                background-color: rgba(${hexToRgba(component.pressedColor)});
             }
         </string>
       </property>
@@ -292,11 +318,11 @@ export const generateQtUiFile = (
       <property name="styleSheet">
         <string>
             QLabel {
-                color: rgb(${hexToRgb(component.textColor)});
-                background-color: rgb(${hexToRgb(component.backgroundColor)});
+                color: rgba(${hexToRgba(component.textColor)});
+                background-color: rgba(${hexToRgba(component.backgroundColor)});
                 border-radius: ${component.radius}px;
                 font-size: ${component.fontSize}px;
-                border: 1px solid #ccc;
+                border: 1px solid rgba(204, 204, 204, 1);
             }
         </string>
       </property>
@@ -331,12 +357,12 @@ export const generateQtUiFile = (
       <property name="styleSheet">
         <string>
             QSlider {
-                background-color: rgb(${hexToRgb(component.backgroundColor)});
+                background-color: rgba(${hexToRgba(component.backgroundColor)});
             }
             QSlider::groove:${
                 component.orientation === "vertical" ? "vertical" : "horizontal"
             } {
-                background: rgb(204, 204, 204);
+                background: rgba(204, 204, 204, 1);
                 ${
                     component.orientation === "vertical"
                         ? "width: 8px; margin: 0 2px;"
@@ -346,8 +372,8 @@ export const generateQtUiFile = (
             QSlider::handle:${
                 component.orientation === "vertical" ? "vertical" : "horizontal"
             } {
-                background: rgb(${hexToRgb(component.sliderColor)});
-                border: 1px solid #5c5c5c;
+                background: rgba(${hexToRgba(component.sliderColor)});
+                border: 1px solid rgba(92, 92, 92, 1);
                 width: 16px;
                 height: 16px;
                 margin: -4px 0;
