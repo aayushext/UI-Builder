@@ -89,7 +89,7 @@ export default function Home() {
                     : component
             ),
         }));
-        
+
         // Update state with the new dimensions
         setScreens(updatedScreens);
     };
@@ -320,6 +320,7 @@ export default function Home() {
                         ref={centerPanelRef}
                         components={currentScreenComponents}
                         onDeleteComponent={deleteComponent}
+                        onDuplicateComponent={duplicateComponent} // Add this line
                         onResizeComponent={resizeComponent}
                         onMoveComponent={moveComponent}
                         onSelectComponent={selectComponent}

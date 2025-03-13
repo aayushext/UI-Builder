@@ -9,6 +9,7 @@ const CenterPanel = React.forwardRef(
         {
             components,
             onDeleteComponent,
+            onDuplicateComponent, // Add this prop
             onResizeComponent,
             onMoveComponent,
             onSelectComponent,
@@ -31,6 +32,7 @@ const CenterPanel = React.forwardRef(
                         width={component.width}
                         height={component.height}
                         onDelete={onDeleteComponent}
+                        onDuplicate={onDuplicateComponent} // Pass duplicate function
                         onResize={onResizeComponent}
                         onMove={onMoveComponent}
                         onSelect={onSelectComponent}

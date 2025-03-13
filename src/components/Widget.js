@@ -1,9 +1,13 @@
 import { Rnd } from "react-rnd";
 import { useState } from "react";
+import { IconContext } from "react-icons";
+import { FaCopy } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
 
 const Widget = ({
     id,
     onDelete,
+    onDuplicate, // Add this prop
     x,
     y,
     width,
@@ -71,17 +75,39 @@ const Widget = ({
             onClick={() => onSelect(id)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full ">
                 {(isHovered || isSelected) && (
-                    <button
-                        onClick={() => onDelete(id)}
-                        className="absolute -top-3 -right-3 bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full text-xs -mt-3 -mr-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
-                        style={{
-                            minWidth: "24px",
-                            touchAction: "manipulation",
-                        }}>
-                        X
-                    </button>
+                    <>
+                        {/* Duplicate button */}
+                        <button
+                            onClick={() => onDuplicate()}
+                            className="absolute -top-4 right-1 bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded-full text-xs -mt-3 -ml-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
+                            style={{
+                                minWidth: "24px",
+                                touchAction: "manipulation",
+                            }}>
+                            <IconContext.Provider value={{ size: "1em" }}>
+                                <div>
+                                    <FaCopy />
+                                </div>
+                            </IconContext.Provider>
+                        </button>
+
+                        {/* Delete button */}
+                        <button
+                            onClick={() => onDelete(id)}
+                            className="absolute -top-4 -right-3 bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full -mt-3 -mr-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
+                            style={{
+                                minWidth: "24px",
+                                touchAction: "manipulation",
+                            }}>
+                            <IconContext.Provider value={{ size: "1em" }}>
+                                <div>
+                                    <IoMdClose />
+                                </div>
+                            </IconContext.Provider>
+                        </button>
+                    </>
                 )}
                 {children}
             </div>
