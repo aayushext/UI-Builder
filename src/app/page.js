@@ -131,10 +131,17 @@ export default function Home() {
     };
     const updateScreenDimensions = (screenIndex, dimensions) => {
         const updatedScreens = [...screens];
-        if (dimensions.width)
-            updatedScreens[screenIndex].width = dimensions.width;
-        if (dimensions.height)
-            updatedScreens[screenIndex].height = dimensions.height;
+
+        // Apply dimensions to all screens to keep them consistent
+        updatedScreens.forEach((screen) => {
+            if (dimensions.width) {
+                screen.width = dimensions.width;
+            }
+            if (dimensions.height) {
+                screen.height = dimensions.height;
+            }
+        });
+
         setScreens(updatedScreens);
     };
     const selectComponent = (id) => {

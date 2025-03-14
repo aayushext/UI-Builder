@@ -17,6 +17,11 @@
             },
             "properties": [
                 {
+                    "name": "componentId",
+                    "type": "text",
+                    "label": "Component ID"
+                },
+                {
                     "name": "text",
                     "type": "text",
                     "label": "Text"
@@ -71,6 +76,11 @@
             },
             "properties": [
                 {
+                    "name": "componentId",
+                    "type": "text",
+                    "label": "Component ID"
+                },
+                {
                     "name": "text",
                     "type": "text",
                     "label": "Text"
@@ -113,6 +123,11 @@
                 "backgroundColor": "#f0f0f0"
             },
             "properties": [
+                {
+                    "name": "componentId",
+                    "type": "text",
+                    "label": "Component ID"
+                },
                 {
                     "name": "minimum",
                     "type": "number",

@@ -95,7 +95,10 @@ class MyWindow(QMainWindow):
 `;
 
         screen.components.forEach((component, componentIndex) => {
-            const componentName = `${component.type}${componentIndex}_screen${screenIndex}`;
+            // Use componentId if available, otherwise fallback to the generated name
+            const componentName =
+                component.componentId ||
+                `${component.type}${componentIndex}_screen${screenIndex}`;
 
             // Scale component based on screen dimensions
             const scaled = scaleComponentForScreen(
@@ -310,7 +313,10 @@ export const generateQtUiFile = (
 `;
         // Iterate through components within a screen
         screen.components.forEach((component, componentIndex) => {
-            const compName = `${component.type}${componentIndex}_screen${screenIndex}`;
+            // Use componentId if available, otherwise fallback to the generated name
+            const compName =
+                component.componentId ||
+                `${component.type}${componentIndex}_screen${screenIndex}`;
 
             // Scale component based on screen dimensions
             const scaled = scaleComponentForScreen(
