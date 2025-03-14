@@ -16,7 +16,14 @@ import {
 
 export default function Home() {
     const [screens, setScreens] = useState([
-        { id: 0, name: "Screen 1", components: [], backgroundColor: "#ffffff" },
+        {
+            id: 0,
+            name: "Screen 1",
+            components: [],
+            backgroundColor: "#ffffff",
+            width: 1280,
+            height: 800,
+        },
     ]); // Array of screens
     const [nextScreenId, setNextScreenId] = useState(1);
     const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
@@ -48,6 +55,8 @@ export default function Home() {
             name: `Screen ${nextScreenId + 1}`,
             components: [],
             backgroundColor: "#ffffff",
+            width: 1280, // Default width
+            height: 800, // Default height
         };
         setScreens([...screens, newScreen]);
         setNextScreenId(nextScreenId + 1);
@@ -118,6 +127,14 @@ export default function Home() {
     const updateScreenBackgroundColor = (screenIndex, newColor) => {
         const updatedScreens = [...screens];
         updatedScreens[screenIndex].backgroundColor = newColor;
+        setScreens(updatedScreens);
+    };
+    const updateScreenDimensions = (screenIndex, dimensions) => {
+        const updatedScreens = [...screens];
+        if (dimensions.width)
+            updatedScreens[screenIndex].width = dimensions.width;
+        if (dimensions.height)
+            updatedScreens[screenIndex].height = dimensions.height;
         setScreens(updatedScreens);
     };
     const selectComponent = (id) => {
@@ -329,6 +346,10 @@ export default function Home() {
                             screens[currentScreenIndex]?.backgroundColor ||
                             "#ffffff"
                         }
+                        screenWidth={screens[currentScreenIndex]?.width || 1280}
+                        screenHeight={
+                            screens[currentScreenIndex]?.height || 800
+                        }
                     />
                 </div>
                 <RightPanel
@@ -337,6 +358,9 @@ export default function Home() {
                     currentScreen={screens[currentScreenIndex]}
                     onUpdateScreenBackgroundColor={(color) =>
                         updateScreenBackgroundColor(currentScreenIndex, color)
+                    }
+                    onUpdateScreenDimensions={(dimensions) =>
+                        updateScreenDimensions(currentScreenIndex, dimensions)
                     }
                     onDuplicateComponent={duplicateComponent}
                 />

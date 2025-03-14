@@ -73,17 +73,39 @@ const RightPanel = ({
     onUpdateComponentProps,
     currentScreen,
     onUpdateScreenBackgroundColor,
+    onUpdateScreenDimensions,
     onDuplicateComponent,
 }) => {
-    // State for screen background color
+    // Screen properties state
     const [screenBackgroundColor, setScreenBackgroundColor] = useState(
         currentScreen?.backgroundColor || "#ffffff"
     );
+    const [screenWidth, setScreenWidth] = useState(
+        currentScreen?.width || 1280
+    );
+    const [screenHeight, setScreenHeight] = useState(
+        currentScreen?.height || 800
+    );
 
-    // Update screen background color when current screen changes
+    // Update screen properties when current screen changes
     useEffect(() => {
         setScreenBackgroundColor(currentScreen?.backgroundColor || "#ffffff");
+        setScreenWidth(currentScreen?.width || 1280);
+        setScreenHeight(currentScreen?.height || 800);
     }, [currentScreen]);
+
+    // Handle screen dimension changes
+    const handleScreenWidthChange = (value) => {
+        const width = parseInt(value) || 1280;
+        setScreenWidth(width);
+        onUpdateScreenDimensions({ width });
+    };
+
+    const handleScreenHeightChange = (value) => {
+        const height = parseInt(value) || 800;
+        setScreenHeight(height);
+        onUpdateScreenDimensions({ height });
+    };
 
     // Get the definition for the selected component
     const componentDefinition = selectedComponent
@@ -102,21 +124,50 @@ const RightPanel = ({
             id="right-panel"
             className="w-64 bg-gray-200 dark:bg-gray-800 p-4 overflow-auto">
             <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
+
+            {/* Screen Width */}
+            <div className="mb-4">
+                <label
+                    htmlFor="screenWidth"
+                    className="block text-sm font-medium">
+                    Width (px)
+                </label>
+                <input
+                    type="number"
+                    id="screenWidth"
+                    value={screenWidth}
+                    min="320"
+                    step="10"
+                    onChange={(e) => handleScreenWidthChange(e.target.value)}
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+            </div>
+
+            {/* Screen Height */}
+            <div className="mb-4">
+                <label
+                    htmlFor="screenHeight"
+                    className="block text-sm font-medium">
+                    Height (px)
+                </label>
+                <input
+                    type="number"
+                    id="screenHeight"
+                    value={screenHeight}
+                    min="240"
+                    step="10"
+                    onChange={(e) => handleScreenHeightChange(e.target.value)}
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+            </div>
+
+            {/* Background Color */}
             <div className="mb-4">
                 <label
                     htmlFor="screenBackgroundColor"
                     className="block text-sm font-medium">
                     Background Color
                 </label>
-                {/* <input
-                    type="color"
-                    id="screenBackgroundColor"
-                    value={screenBackgroundColor}
-                    onChange={(e) =>
-                        onUpdateScreenBackgroundColor(e.target.value)
-                    }
-                    className="mt-1 block w-full rounded-sm bg-gray-200 dark:bg-gray-800 border-gray-200 dark:border-gray-800 shadow-sm sm:text-sm"
-                /> */}
                 <CustomColorPicker
                     value={screenBackgroundColor}
                     onChange={(color) => onUpdateScreenBackgroundColor(color)}
