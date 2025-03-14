@@ -251,7 +251,7 @@ export const generateQtUiFile = (
   <property name="geometry">
    <rect>
     <x>0</x>
-    <y>0</x>
+    <y>0</y>
     <width>${centerPanelDimensions.width}</width>
     <height>${centerPanelDimensions.height}</height>
    </rect>
