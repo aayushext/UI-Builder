@@ -152,7 +152,6 @@ export default function Home() {
         if (!selectedComponentId) return;
 
         let componentToDuplicate = null;
-        let screenIndex = currentScreenIndex;
 
         for (const screen of screens) {
             const found = screen.components.find(
