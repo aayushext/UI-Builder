@@ -330,8 +330,11 @@ export default function Home() {
                     onExport={handleExport}
                     onSaveToJson={handleSaveToJson}
                     onLoadFromJson={handleLoadFromJson}
+                    className="flex-shrink-0" // Add this to prevent shrinking
                 />
-                <div className="flex flex-col flex-1">
+                <div className="flex flex-col flex-1 min-w-0">
+                    {" "}
+                    {/* Add min-w-0 to allow shrinking below content size */}
                     <ScreenTabs
                         screens={screens}
                         currentScreenIndex={currentScreenIndex}
@@ -369,6 +372,7 @@ export default function Home() {
                         updateScreenDimensions(currentScreenIndex, dimensions)
                     }
                     onDuplicateComponent={duplicateComponent}
+                    className="flex-shrink-0" // Add this to prevent shrinking
                 />
             </div>
         </div>

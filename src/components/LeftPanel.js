@@ -20,7 +20,7 @@ const LeftPanel = ({
     };
 
     return (
-        <aside className="w-64 bg-gray-200 dark:bg-gray-800 p-4 flex flex-col h-full">
+        <aside className="w-64 bg-gray-200 dark:bg-gray-800 p-4 flex flex-col h-full flex-shrink-0">
             <div className="flex-1">
                 <h2 className="text-lg font-bold mb-2">Components</h2>
 

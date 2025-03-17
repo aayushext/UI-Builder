@@ -15,7 +15,7 @@ const CenterPanel = React.forwardRef(
             onSelectComponent,
             selectedComponentId,
             backgroundColor,
-            screenWidth = 1280, // Add default dimensions here
+            screenWidth = 1280,
             screenHeight = 800,
         },
         ref
@@ -24,7 +24,10 @@ const CenterPanel = React.forwardRef(
             <main
                 ref={ref}
                 className="flex-1 p-4 overflow-auto relative"
-                style={{ backgroundColor: backgroundColor }}>
+                style={{
+                    backgroundColor: backgroundColor,
+                    minWidth: 0,
+                }}>
                 <div
                     className="relative mx-auto"
                     style={{
@@ -33,6 +36,7 @@ const CenterPanel = React.forwardRef(
                         backgroundColor: backgroundColor,
                         boxShadow: "0 0 10px rgba(0,0,0,0.2)",
                         overflow: "hidden",
+                        // Remove maxWidth: "100%" to allow horizontal scrolling
                     }}>
                     {components.map((component) => (
                         <Widget
@@ -48,6 +52,7 @@ const CenterPanel = React.forwardRef(
                             onMove={onMoveComponent}
                             onSelect={onSelectComponent}
                             isSelected={component.id === selectedComponentId}>
+                            {/* Component rendering content remains unchanged */}
                             {component.type === "PySideButton" && (
                                 <PySideButton
                                     text={component.text}
