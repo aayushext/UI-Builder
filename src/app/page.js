@@ -24,7 +24,7 @@ export default function Home() {
             width: 1280,
             height: 800,
         },
-    ]); // Array of screens
+    ]);
     const [nextScreenId, setNextScreenId] = useState(1);
     const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
     const [nextComponentId, setNextComponentId] = useState(0);
@@ -55,8 +55,8 @@ export default function Home() {
             name: `Screen ${nextScreenId + 1}`,
             components: [],
             backgroundColor: "#ffffff",
-            width: 1280, // Default width
-            height: 800, // Default height
+            width: 1280,
+            height: 800,
         };
         setScreens([...screens, newScreen]);
         setNextScreenId(nextScreenId + 1);
@@ -89,7 +89,6 @@ export default function Home() {
     };
 
     const resizeComponent = (id, newSizeAndPosition, isTemporary = false) => {
-        // This creates a new array of screens with the updated component
         const updatedScreens = screens.map((screen) => ({
             ...screen,
             components: screen.components.map((component) =>
@@ -99,7 +98,6 @@ export default function Home() {
             ),
         }));
 
-        // Update state with the new dimensions
         setScreens(updatedScreens);
     };
 
@@ -132,7 +130,6 @@ export default function Home() {
     const updateScreenDimensions = (screenIndex, dimensions) => {
         const updatedScreens = [...screens];
 
-        // Apply dimensions to all screens to keep them consistent
         updatedScreens.forEach((screen) => {
             if (dimensions.width) {
                 screen.width = dimensions.width;
@@ -330,11 +327,10 @@ export default function Home() {
                     onExport={handleExport}
                     onSaveToJson={handleSaveToJson}
                     onLoadFromJson={handleLoadFromJson}
-                    className="flex-shrink-0" // Add this to prevent shrinking
+                    className="flex-shrink-0"
                 />
                 <div className="flex flex-col flex-1 min-w-0">
                     {" "}
-                    {/* Add min-w-0 to allow shrinking below content size */}
                     <ScreenTabs
                         screens={screens}
                         currentScreenIndex={currentScreenIndex}
@@ -346,7 +342,7 @@ export default function Home() {
                         ref={centerPanelRef}
                         components={currentScreenComponents}
                         onDeleteComponent={deleteComponent}
-                        onDuplicateComponent={duplicateComponent} // Add this line
+                        onDuplicateComponent={duplicateComponent}
                         onResizeComponent={resizeComponent}
                         onMoveComponent={moveComponent}
                         onSelectComponent={selectComponent}
@@ -372,7 +368,7 @@ export default function Home() {
                         updateScreenDimensions(currentScreenIndex, dimensions)
                     }
                     onDuplicateComponent={duplicateComponent}
-                    className="flex-shrink-0" // Add this to prevent shrinking
+                    className="flex-shrink-0"
                 />
             </div>
         </div>

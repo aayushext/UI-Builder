@@ -15,7 +15,6 @@ const LeftPanel = ({
         if (file) {
             onLoadFromJson(file);
         }
-        // Reset the input so the same file can be selected again
         event.target.value = "";
     };
 
