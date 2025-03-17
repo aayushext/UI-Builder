@@ -378,7 +378,7 @@ export const generateQtUiFile = (
                 background-color: rgba(${hexToRgba(component.backgroundColor)});
                 border-radius: ${component.radius}px;
                 font-size: ${component.fontSize}px;
-                border: 1px solid rgba(204, 204, 204, 1);
+                border: 1px solid rgba(${hexToRgba(component.borderColor)});
             }
         </string>
       </property>

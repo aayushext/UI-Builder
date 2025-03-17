@@ -67,6 +67,7 @@ const CenterPanel = React.forwardRef(
                                     fontSize={component.fontSize}
                                     textColor={component.textColor}
                                     backgroundColor={component.backgroundColor}
+                                    borderColor={component.borderColor}
                                     radius={component.radius}
                                 />
                             )}

@@ -102,6 +102,11 @@
                     "label": "Background Color"
                 },
                 {
+                    "name": "borderColor",
+                    "type": "color",
+                    "label": "Border Color"
+                },
+                {
                     "name": "radius",
                     "type": "number",
                     "label": "Radius",
