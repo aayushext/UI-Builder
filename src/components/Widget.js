@@ -4,10 +4,11 @@ import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 
+// Add zoomLevel to the component props
 const Widget = ({
     id,
     onDelete,
-    onDuplicate, // Add this prop
+    onDuplicate,
     x,
     y,
     width,
@@ -17,6 +18,7 @@ const Widget = ({
     onMove,
     onSelect,
     isSelected,
+    zoomLevel = 1, // Default to 1 if not provided
 }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [tempDimensions, setTempDimensions] = useState({
@@ -26,6 +28,10 @@ const Widget = ({
         y,
     });
 
+    // Calculate actual position based on zoom level
+    const actualPosition = { x: x, y: y };
+    const actualSize = { width: width, height: height };
+
     return (
         <Rnd
             default={{
@@ -34,8 +40,9 @@ const Widget = ({
                 width: width,
                 height: height,
             }}
-            position={{ x: x, y: y }}
-            size={{ width: width, height: height }}
+            position={actualPosition}
+            size={actualSize}
+            scale={zoomLevel} // Add scale for correct drag handling
             style={{
                 border: isSelected ? "2px solid blue" : "0px solid black",
                 display: "flex",

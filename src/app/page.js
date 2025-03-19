@@ -36,6 +36,10 @@ export default function Home() {
         height: 1000,
     });
 
+    const [zoomLevel, setZoomLevel] = useState(1); // 1 = 100%
+    const [minZoom] = useState(0.1); // 10%
+    const [maxZoom] = useState(3); // 300%
+
     const addComponent = (type) => {
         try {
             const newComponent = createComponent(type, nextComponentId);
@@ -174,6 +178,28 @@ export default function Home() {
         setScreens(updatedScreens);
         setNextComponentId(nextComponentId + 1);
         setSelectedComponentId(newComponent.id);
+    };
+
+    const handleZoomIn = () => {
+        setZoomLevel((prev) => Math.min(maxZoom, prev + 0.1));
+    };
+
+    const handleZoomOut = () => {
+        setZoomLevel((prev) => Math.max(minZoom, prev - 0.1));
+    };
+
+    const handleZoomReset = () => {
+        setZoomLevel(1);
+    };
+
+    const handleWheel = (e) => {
+        if (e.ctrlKey) {
+            e.preventDefault();
+            const zoomFactor = e.deltaY > 0 ? -0.05 : 0.05;
+            setZoomLevel((prev) =>
+                Math.max(minZoom, Math.min(maxZoom, prev + zoomFactor))
+            );
+        }
     };
 
     useEffect(() => {
@@ -355,6 +381,11 @@ export default function Home() {
                         screenHeight={
                             screens[currentScreenIndex]?.height || 800
                         }
+                        zoomLevel={zoomLevel}
+                        onZoomIn={handleZoomIn}
+                        onZoomOut={handleZoomOut}
+                        onZoomReset={handleZoomReset}
+                        onWheel={handleWheel}
                     />
                 </div>
                 <RightPanel
