@@ -1,8 +1,11 @@
 import React, { useEffect } from "react";
+import { IconContext } from "react-icons";
+
 import Widget from "./Widget";
 import PySideButton from "@/components/pyside-components/PySideButton";
 import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
+import { FaPlus, FaMinus } from "react-icons/fa6";
 
 const CenterPanel = React.forwardRef(
     (
@@ -118,7 +121,11 @@ const CenterPanel = React.forwardRef(
                         onClick={onZoomOut}
                         className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
                         title="Zoom out">
-                        <span className="text-lg font-bold">-</span>
+                        <IconContext.Provider value={{ size: "1em" }}>
+                            <div>
+                                <FaMinus />
+                            </div>
+                        </IconContext.Provider>
                     </button>
                     <button
                         onClick={onZoomReset}
@@ -130,7 +137,11 @@ const CenterPanel = React.forwardRef(
                         onClick={onZoomIn}
                         className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
                         title="Zoom in">
-                        <span className="text-lg font-bold">+</span>
+                        <IconContext.Provider value={{ size: "1em" }}>
+                            <div>
+                                <FaPlus />
+                            </div>
+                        </IconContext.Provider>
                     </button>
                 </div>
             </main>

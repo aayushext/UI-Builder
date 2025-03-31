@@ -54,10 +54,10 @@ const Widget = ({
             onResize={(e, direction, ref, delta, position) => {
                 // Update dimensions during resize
                 const newDimensions = {
-                    width: ref.offsetWidth,
-                    height: ref.offsetHeight,
-                    x: position.x,
-                    y: position.y,
+                    width: Math.round(ref.offsetWidth * 100) / 100,
+                    height: Math.round(ref.offsetHeight * 100) / 100,
+                    x: Math.round(position.x * 100) / 100,
+                    y: Math.round(position.y * 100) / 100,
                 };
                 setTempDimensions(newDimensions);
                 // Pass temporary dimensions to parent for live updates
@@ -65,18 +65,18 @@ const Widget = ({
             }}
             onResizeStop={(e, direction, ref, delta, position) => {
                 const finalDimensions = {
-                    width: ref.offsetWidth,
-                    height: ref.offsetHeight,
-                    x: position.x,
-                    y: position.y,
+                    width: Math.round(ref.offsetWidth * 100) / 100,
+                    height: Math.round(ref.offsetHeight * 100) / 100,
+                    x: Math.round(position.x * 100) / 100,
+                    y: Math.round(position.y * 100) / 100,
                 };
                 // Final update when resize stops
                 onResize(id, finalDimensions);
             }}
             onDragStop={(e, d) => {
                 onMove(id, {
-                    x: d.x,
-                    y: d.y,
+                    x: Math.round(d.x * 100) / 100,
+                    y: Math.round(d.y * 100) / 100,
                 });
             }}
             onClick={() => onSelect(id)}
