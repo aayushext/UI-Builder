@@ -32,27 +32,6 @@ const hexToRgba = (hex) => {
     return `${r}, ${g}, ${b}, ${a}`;
 };
 
-// Add this function after the hexToRgba function
-const scaleComponentForScreen = (
-    component,
-    originalWidth,
-    originalHeight,
-    targetWidth,
-    targetHeight
-) => {
-    // Calculate scaling factors
-    const xScale = targetWidth / originalWidth;
-    const yScale = targetHeight / originalHeight;
-
-    // Return scaled coordinates and dimensions
-    return {
-        x: Math.round(component.x * xScale),
-        y: Math.round(component.y * yScale),
-        width: Math.round(component.width * xScale),
-        height: Math.round(component.height * yScale),
-    };
-};
-
 export const generatePySideCode = (
     screens,
     currentScreenIndex,
@@ -82,10 +61,6 @@ class MyWindow(QMainWindow):
 `;
 
     screens.forEach((screen, screenIndex) => {
-        // Get screen dimensions with defaults
-        const screenWidth = screen.width || 1280;
-        const screenHeight = screen.height || 800;
-
         pyCode += `
       # --- ${screen.name} ---
       self.screen_${screenIndex}_widget = QWidget()
@@ -100,23 +75,14 @@ class MyWindow(QMainWindow):
                 component.componentId ||
                 `${component.type}${componentIndex}_screen${screenIndex}`;
 
-            // Scale component based on screen dimensions
-            const scaled = scaleComponentForScreen(
-                component,
-                1280,
-                800, // Original/default design dimensions
-                screenWidth,
-                screenHeight // Target screen dimensions
-            );
-
             if (component.type === "PySideButton") {
                 pyCode += `
       self.${componentName} = QPushButton("${
                     component.text
                 }", self.screen_${screenIndex}_widget)
-      self.${componentName}.setGeometry(QRect(${scaled.x}, ${scaled.y}, ${
-                    scaled.width
-                }, ${scaled.height}))
+      self.${componentName}.setGeometry(QRect(${component.x}, ${component.y}, ${
+                    component.width
+                }, ${component.height}))
       self.${componentName}.setStyleSheet("""
           QPushButton {
               color: rgba(${hexToRgba(component.textColor)});
@@ -137,9 +103,9 @@ class MyWindow(QMainWindow):
       self.${componentName} = QLabel("${
                     component.text
                 }", self.screen_${screenIndex}_widget)
-      self.${componentName}.setGeometry(QRect(${scaled.x}, ${scaled.y}, ${
-                    scaled.width
-                }, ${scaled.height}))
+      self.${componentName}.setGeometry(QRect(${component.x}, ${component.y}, ${
+                    component.width
+                }, ${component.height}))
       self.${componentName}.setStyleSheet("""
           QLabel {
               color: rgba(${hexToRgba(component.textColor)});
@@ -157,9 +123,9 @@ class MyWindow(QMainWindow):
                         : "Qt.Orientation.Horizontal";
                 pyCode += `
             self.${componentName} = QSlider(${orientation}, self.screen_${screenIndex}_widget)
-            self.${componentName}.setGeometry(QRect(${scaled.x}, ${scaled.y}, ${
-                    scaled.width
-                }, ${scaled.height}))
+            self.${componentName}.setGeometry(QRect(${component.x}, ${
+                    component.y
+                }, ${component.width}, ${component.height}))
             self.${componentName}.setMinimum(${component.minimum})
             self.${componentName}.setMaximum(${component.maximum})
             self.${componentName}.setValue(${component.value})
@@ -300,10 +266,6 @@ export const generateQtUiFile = (
 
     // Iterate through screens to add each as a page in the stacked widget
     screens.forEach((screen, screenIndex) => {
-        // Get screen dimensions with defaults
-        const screenWidth = screen.width || 1280;
-        const screenHeight = screen.height || 800;
-
         uiCode += `   <widget class="QWidget" name="screen_${screenIndex}">
     <property name="styleSheet">
       <string>background-color: rgba(${hexToRgba(
@@ -318,15 +280,6 @@ export const generateQtUiFile = (
                 component.componentId ||
                 `${component.type}${componentIndex}_screen${screenIndex}`;
 
-            // Scale component based on screen dimensions
-            const scaled = scaleComponentForScreen(
-                component,
-                1280,
-                800, // Original/default design dimensions
-                screenWidth,
-                screenHeight // Target screen dimensions
-            );
-
             if (component.type === "PySideButton") {
                 uiCode += `    <widget class="QPushButton" name="${compName}">
       <property name="text">
@@ -334,10 +287,10 @@ export const generateQtUiFile = (
       </property>
       <property name="geometry">
         <rect>
-          <x>${scaled.x}</x>
-          <y>${scaled.y}</y>
-          <width>${scaled.width}</width>
-          <height>${scaled.height}</height>
+          <x>${component.x}</x>
+          <y>${component.y}</y>
+          <width>${component.width}</width>
+          <height>${component.height}</height>
         </rect>
       </property>
       <property name="styleSheet">
@@ -365,10 +318,10 @@ export const generateQtUiFile = (
       </property>
       <property name="geometry">
         <rect>
-          <x>${scaled.x}</x>
-          <y>${scaled.y}</y>
-          <width>${scaled.width}</width>
-          <height>${scaled.height}</height>
+          <x>${component.x}</x>
+          <y>${component.y}</y>
+          <width>${component.width}</width>
+          <height>${component.height}</height>
         </rect>
       </property>
       <property name="styleSheet">
@@ -404,10 +357,10 @@ export const generateQtUiFile = (
       </property>
       <property name="geometry">
         <rect>
-          <x>${scaled.x}</x>
-          <y>${scaled.y}</y>
-          <width>${scaled.width}</width>
-          <height>${scaled.height}</height>
+          <x>${component.x}</x>
+          <y>${component.y}</y>
+          <width>${component.width}</width>
+          <height>${component.height}</height>
         </rect>
       </property>
       <property name="styleSheet">
