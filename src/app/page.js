@@ -40,6 +40,10 @@ export default function Home() {
     const [minZoom] = useState(0.1); // 10%
     const [maxZoom] = useState(3); // 300%
 
+    const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+    const [isPanning, setIsPanning] = useState(false);
+    const [lastMousePosition, setLastMousePosition] = useState({ x: 0, y: 0 });
+
     const addComponent = (type) => {
         try {
             const newComponent = createComponent(type, nextComponentId);
@@ -188,10 +192,6 @@ export default function Home() {
         setZoomLevel((prev) => Math.max(minZoom, prev - 0.1));
     };
 
-    const handleZoomReset = () => {
-        setZoomLevel(1);
-    };
-
     const handleWheel = (e) => {
         if (e.ctrlKey) {
             e.preventDefault();
@@ -200,6 +200,39 @@ export default function Home() {
                 Math.max(minZoom, Math.min(maxZoom, prev + zoomFactor))
             );
         }
+    };
+
+    const handlePanStart = (e) => {
+        // Only start panning with middle mouse button (button 1) or if space is held down
+        if (e.button === 1 || e.altKey) {
+            setIsPanning(true);
+            setLastMousePosition({ x: e.clientX, y: e.clientY });
+            e.preventDefault();
+        }
+    };
+
+    const handlePanMove = (e) => {
+        if (isPanning) {
+            const deltaX = e.clientX - lastMousePosition.x;
+            const deltaY = e.clientY - lastMousePosition.y;
+
+            setPanPosition({
+                x: panPosition.x + deltaX,
+                y: panPosition.y + deltaY,
+            });
+
+            setLastMousePosition({ x: e.clientX, y: e.clientY });
+            e.preventDefault();
+        }
+    };
+
+    const handlePanEnd = () => {
+        setIsPanning(false);
+    };
+
+    const handleResetView = () => {
+        setPanPosition({ x: 0, y: 0 });
+        setZoomLevel(1);
     };
 
     useEffect(() => {
@@ -384,8 +417,12 @@ export default function Home() {
                         zoomLevel={zoomLevel}
                         onZoomIn={handleZoomIn}
                         onZoomOut={handleZoomOut}
-                        onZoomReset={handleZoomReset}
                         onWheel={handleWheel}
+                        panPosition={panPosition}
+                        onPanStart={handlePanStart}
+                        onPanMove={handlePanMove}
+                        onPanEnd={handlePanEnd}
+                        onResetView={handleResetView}
                     />
                 </div>
                 <RightPanel

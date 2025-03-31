@@ -23,8 +23,12 @@ const CenterPanel = React.forwardRef(
             zoomLevel,
             onZoomIn,
             onZoomOut,
-            onZoomReset,
             onWheel,
+            panPosition,
+            onPanStart,
+            onPanMove,
+            onPanEnd,
+            onResetView,
         },
         ref
     ) => {
@@ -49,7 +53,11 @@ const CenterPanel = React.forwardRef(
                 style={{
                     minWidth: 0,
                 }}
-                onWheel={onWheel}>
+                onWheel={onWheel}
+                onMouseDown={onPanStart}
+                onMouseMove={onPanMove}
+                onMouseUp={onPanEnd}
+                onMouseLeave={onPanEnd}>
                 <div
                     className="relative mx-auto"
                     style={{
@@ -58,7 +66,7 @@ const CenterPanel = React.forwardRef(
                         backgroundColor: backgroundColor,
                         boxShadow: "0 0 10px rgba(0,0,0,0.2)",
                         overflow: "hidden",
-                        transform: `scale(${zoomLevel})`,
+                        transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
                         transformOrigin: "center center",
                         transition: "transform 0.1s ease-out",
                     }}>
@@ -114,7 +122,6 @@ const CenterPanel = React.forwardRef(
                         </Widget>
                     ))}
                 </div>
-
                 {/* Zoom controls */}
                 <div className="absolute bottom-4 right-6 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg">
                     <button
@@ -128,9 +135,9 @@ const CenterPanel = React.forwardRef(
                         </IconContext.Provider>
                     </button>
                     <button
-                        onClick={onZoomReset}
+                        onClick={onResetView}
                         className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md px-2 flex items-center justify-center"
-                        title="Reset zoom">
+                        title="Reset view">
                         {Math.round(zoomLevel * 100)}%
                     </button>
                     <button
