@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getComponentDefinitionByType } from "../utils/componentLoader";
 import CustomColorPicker from "./CustomColorPicker";
+import { useUIStore } from "../store/StateStore";
 
 const PropertyEditor = ({ property, value, onChange, component }) => {
     // Calculate max radius if needed
@@ -59,15 +60,23 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
     }
 };
 
-const RightPanel = ({
-    selectedComponent,
-    onUpdateComponentProps,
-    currentScreen,
-    onUpdateScreenBackgroundColor,
-    onUpdateScreenDimensions,
-    onDuplicateComponent,
-    onUpdateScreenCustomId,
-}) => {
+const RightPanel = () => {
+    // Get state and actions directly from the store
+    const {
+        getCurrentScreen,
+        getSelectedComponent,
+        currentScreenIndex,
+        updateComponentProps,
+        updateScreenBackgroundColor,
+        updateScreenDimensions,
+        updateScreenCustomId,
+        duplicateComponent,
+    } = useUIStore();
+
+    // Get current screen and selected component using the store's selectors
+    const currentScreen = getCurrentScreen();
+    const selectedComponent = getSelectedComponent();
+
     const [screenBackgroundColor, setScreenBackgroundColor] = useState(
         currentScreen?.backgroundColor || "#ffffff"
     );
@@ -92,18 +101,18 @@ const RightPanel = ({
     const handleScreenWidthChange = (value) => {
         const width = parseInt(value) || 1280;
         setScreenWidth(width);
-        onUpdateScreenDimensions({ width });
+        updateScreenDimensions(currentScreenIndex, { width });
     };
 
     const handleScreenHeightChange = (value) => {
         const height = parseInt(value) || 800;
         setScreenHeight(height);
-        onUpdateScreenDimensions({ height });
+        updateScreenDimensions(currentScreenIndex, { height });
     };
 
     const handleScreenCustomIdChange = (value) => {
         setScreenCustomId(value);
-        onUpdateScreenCustomId(value);
+        updateScreenCustomId(currentScreenIndex, value);
     };
 
     const componentDefinition = selectedComponent
@@ -112,7 +121,7 @@ const RightPanel = ({
 
     const handlePropertyChange = (name, value) => {
         if (selectedComponent) {
-            onUpdateComponentProps(selectedComponent.id, { [name]: value });
+            updateComponentProps(selectedComponent.id, { [name]: value });
         }
     };
 
@@ -186,7 +195,9 @@ const RightPanel = ({
                 </label>
                 <CustomColorPicker
                     value={screenBackgroundColor}
-                    onChange={(color) => onUpdateScreenBackgroundColor(color)}
+                    onChange={(color) =>
+                        updateScreenBackgroundColor(currentScreenIndex, color)
+                    }
                 />
             </div>
 
@@ -197,7 +208,7 @@ const RightPanel = ({
                     </h2>
 
                     <button
-                        onClick={onDuplicateComponent}
+                        onClick={duplicateComponent}
                         className="bg-teal-500 dark:bg-teal-600 dark:hover:bg-teal-800 hover:bg-teal-700 font-bold py-2 px-4 rounded-sm mb-4 w-full">
                         Duplicate Widget
                     </button>
