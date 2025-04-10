@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IconContext } from "react-icons";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
-import { useUIStore } from "../store/StateStore";
+import { useScreenStore } from "@/store/ScreenStore";
 
 const ScreenTabs = () => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -14,7 +14,7 @@ const ScreenTabs = () => {
         setCurrentScreenIndex,
         addScreen,
         deleteScreen,
-    } = useUIStore();
+    } = useScreenStore();
 
     return (
         <div className="flex items-center border-b border-gray-300 dark:border-gray-900 bg-gray-100 dark:bg-gray-600 px-4 py-2">

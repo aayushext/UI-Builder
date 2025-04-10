@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { getComponentDefinitions } from "../utils/componentLoader";
-import { useUIStore } from "../store/StateStore";
+import { useAppStore } from "../store/StateStore";
 import { exportToUiFile, importFromUiFile } from "../utils/saveSystem";
 import {
     generatePythonLoaderCode,
@@ -15,7 +15,7 @@ const LeftPanel = () => {
 
     // Get actions directly from store
     const { addComponent, screens, currentScreenIndex, setAppState } =
-        useUIStore();
+        useAppStore();
 
     const handleExport = async () => {
         const uiFile = generateQtUiFile(screens, currentScreenIndex);

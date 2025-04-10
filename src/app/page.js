@@ -9,12 +9,12 @@ import {
     generateQtUiFile,
 } from "../utils/generatePySideCode";
 import { exportToUiFile, importFromUiFile } from "../utils/saveSystem";
-import { useUIStore } from "../store/StateStore";
+import { useAppStore } from "../store/StateStore";
 
 import JSZip from "jszip";
 
 export default function Home() {
-    const { selectComponent } = useUIStore();
+    const { selectComponent } = useAppStore();
 
     useEffect(() => {
         const inputElements = ["INPUT", "SELECT", "TEXTAREA"];

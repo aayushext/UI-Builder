@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { getComponentDefinitionByType } from "../utils/componentLoader";
 import CustomColorPicker from "./CustomColorPicker";
-import { useUIStore } from "../store/StateStore";
+import { useScreenStore } from "@/store/ScreenStore";
+import { useComponentStore } from "@/store/ComponentStore";
 
 const PropertyEditor = ({ property, value, onChange, component }) => {
     // Calculate max radius if needed
@@ -61,19 +62,17 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
 };
 
 const RightPanel = () => {
-    // Get state and actions directly from the store
     const {
         getCurrentScreen,
-        getSelectedComponent,
         currentScreenIndex,
-        updateComponentProps,
         updateScreenBackgroundColor,
         updateScreenDimensions,
         updateScreenCustomId,
-        duplicateComponent,
-    } = useUIStore();
+    } = useScreenStore();
 
-    // Get current screen and selected component using the store's selectors
+    const { getSelectedComponent, duplicateComponent, updateComponentProps } =
+        useComponentStore();
+
     const currentScreen = getCurrentScreen();
     const selectedComponent = getSelectedComponent();
 

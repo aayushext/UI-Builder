@@ -6,7 +6,9 @@ import PySideButton from "@/components/pyside-components/PySideButton";
 import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
 import { FaPlus, FaMinus } from "react-icons/fa6";
-import { useUIStore } from "../store/StateStore";
+import { useAppStore } from "../store/StateStore";
+import { useScreenStore } from "@/store/ScreenStore";
+import { useComponentStore } from "@/store/ComponentStore";
 
 const CenterPanel = () => {
     const ref = useRef(null);
@@ -14,17 +16,10 @@ const CenterPanel = () => {
     // Get state and actions directly from the store
     const {
         getCurrentScreen,
-        getCurrentScreenComponents,
-        selectedComponentId,
         zoomLevel,
         panPosition,
         isPanning,
         lastMousePosition,
-        deleteComponent,
-        duplicateComponent,
-        resizeComponent,
-        moveComponent,
-        selectComponent,
         handleZoomIn,
         handleZoomOut,
         handleWheelZoom,
@@ -32,7 +27,17 @@ const CenterPanel = () => {
         setIsPanning,
         setLastMousePosition,
         resetView,
-    } = useUIStore();
+    } = useScreenStore();
+
+    const {
+        getCurrentScreenComponents,
+        selectedComponentId,
+        deleteComponent,
+        duplicateComponent,
+        resizeComponent,
+        moveComponent,
+        selectComponent,
+    } = useComponentStore();
 
     // Get current screen and its components using the store's selectors
     const currentScreen = getCurrentScreen();
