@@ -121,21 +121,7 @@ const CenterPanel = () => {
                     transition: "transform 0.1s ease-out",
                 }}>
                 {currentScreenComponents.map((component) => (
-                    <Widget
-                        key={component.id}
-                        id={component.id}
-                        x={component.x}
-                        y={component.y}
-                        width={component.width}
-                        height={component.height}
-                        onDelete={deleteComponent}
-                        onDuplicate={duplicateComponent}
-                        onResize={resizeComponent}
-                        onMove={moveComponent}
-                        onSelect={selectComponent}
-                        isSelected={component.id === selectedComponentId}
-                        zoomLevel={zoomLevel} // Pass zoomLevel here
-                    >
+                    <Widget key={component.id} id={component.id}>
                         {component.type === "PySideButton" && (
                             <PySideButton
                                 text={component.text}

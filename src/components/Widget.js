@@ -3,30 +3,41 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { useScreenStore } from "@/store/ScreenStore";
+import { useComponentStore } from "@/store/ComponentStore";
 
-// Add zoomLevel to the component props
-const Widget = ({
-    id,
-    onDelete,
-    onDuplicate,
-    x,
-    y,
-    width,
-    height,
-    children,
-    onResize,
-    onMove,
-    onSelect,
-    isSelected,
-    zoomLevel = 1, // Default to 1 if not provided
-}) => {
+// Widget now only needs id as a prop
+const Widget = ({ id, children }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [tempDimensions, setTempDimensions] = useState({
-        width,
-        height,
-        x,
-        y,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
     });
+
+    // Get component-specific data and actions from stores
+    const {
+        deleteComponent,
+        duplicateComponent,
+        resizeComponent,
+        moveComponent,
+        selectComponent,
+        selectedComponentId,
+    } = useComponentStore();
+
+    const { zoomLevel } = useScreenStore();
+
+    // Get the component data from the current screen
+    const currentComponent = useComponentStore()
+        .getCurrentScreenComponents()
+        .find((component) => component.id === id);
+
+    // If component not found, return null
+    if (!currentComponent) return null;
+
+    const { x, y, width, height } = currentComponent;
+    const isSelected = id === selectedComponentId;
 
     // Calculate actual position based on zoom level
     const actualPosition = { x: x, y: y };
@@ -42,7 +53,7 @@ const Widget = ({
             }}
             position={actualPosition}
             size={actualSize}
-            scale={zoomLevel} // Add scale for correct drag handling
+            scale={zoomLevel}
             style={{
                 border: isSelected ? "2px solid blue" : "0px solid black",
                 display: "flex",
@@ -61,7 +72,7 @@ const Widget = ({
                 };
                 setTempDimensions(newDimensions);
                 // Pass temporary dimensions to parent for live updates
-                onResize(id, newDimensions, true); // true indicates it's a temporary update
+                resizeComponent(id, newDimensions, true); // true indicates it's a temporary update
             }}
             onResizeStop={(e, direction, ref, delta, position) => {
                 const finalDimensions = {
@@ -71,15 +82,15 @@ const Widget = ({
                     y: Math.round(position.y * 100) / 100,
                 };
                 // Final update when resize stops
-                onResize(id, finalDimensions);
+                resizeComponent(id, finalDimensions);
             }}
             onDragStop={(e, d) => {
-                onMove(id, {
+                moveComponent(id, {
                     x: Math.round(d.x * 100) / 100,
                     y: Math.round(d.y * 100) / 100,
                 });
             }}
-            onClick={() => onSelect(id)}
+            onClick={() => selectComponent(id)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
             <div className="relative w-full h-full ">
@@ -87,7 +98,7 @@ const Widget = ({
                     <>
                         {/* Duplicate button */}
                         <button
-                            onClick={() => onDuplicate()}
+                            onClick={() => duplicateComponent()}
                             className="absolute -top-4 right-1 bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded-full text-xs -mt-3 -ml-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
                             style={{
                                 minWidth: "24px",
@@ -102,7 +113,7 @@ const Widget = ({
 
                         {/* Delete button */}
                         <button
-                            onClick={() => onDelete(id)}
+                            onClick={() => deleteComponent(id)}
                             className="absolute -top-4 -right-3 bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full -mt-3 -mr-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
                             style={{
                                 minWidth: "24px",
