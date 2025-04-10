@@ -49,6 +49,11 @@ export const useScreenStore = create(
             }),
 
         updateScreenCustomId: (screenIndex, newCustomId) => {
+            if (newCustomId.trim() === "") {
+                alert("Screen ID cannot be empty");
+                return false;
+            }
+
             if (!/^[a-zA-Z0-9_]+$/.test(newCustomId)) {
                 alert(
                     "Screen ID can only contain letters, numbers, and underscores"
