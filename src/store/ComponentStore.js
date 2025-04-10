@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { useScreenStore } from "./ScreenStore";
+
+import { useScreenStore } from "@/store/ScreenStore";
 
 const initialComponentState = {
     nextComponentId: 0,
@@ -11,7 +12,6 @@ export const useComponentStore = create(
     immer((set, get) => ({
         ...initialComponentState,
 
-        // Selectors
         getCurrentScreenComponents: () => {
             const { getCurrentScreen } = useScreenStore.getState();
             const currentScreen = getCurrentScreen();
@@ -23,13 +23,12 @@ export const useComponentStore = create(
             return components.find((c) => c.id === get().selectedComponentId);
         },
 
-        // Component actions
         addComponent: (type) =>
             set((state) => {
                 try {
                     const {
                         createComponent,
-                    } = require("../utils/componentLoader");
+                    } = require("@/utils/componentLoader");
                     const { screens, currentScreenIndex } =
                         useScreenStore.getState();
 
@@ -38,7 +37,6 @@ export const useComponentStore = create(
                         state.nextComponentId
                     );
 
-                    // Update the screen in the ScreenStore
                     useScreenStore.setState((screenState) => {
                         screenState.screens[currentScreenIndex].components.push(
                             newComponent

@@ -1,12 +1,12 @@
-import { Rnd } from "react-rnd";
 import { useState } from "react";
+import { Rnd } from "react-rnd";
 import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+
 import { useScreenStore } from "@/store/ScreenStore";
 import { useComponentStore } from "@/store/ComponentStore";
 
-// Widget now only needs id as a prop
 const Widget = ({ id, children }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [tempDimensions, setTempDimensions] = useState({
@@ -16,7 +16,6 @@ const Widget = ({ id, children }) => {
         y: 0,
     });
 
-    // Get component-specific data and actions from stores
     const {
         deleteComponent,
         duplicateComponent,
@@ -28,18 +27,15 @@ const Widget = ({ id, children }) => {
 
     const { zoomLevel } = useScreenStore();
 
-    // Get the component data from the current screen
     const currentComponent = useComponentStore()
         .getCurrentScreenComponents()
         .find((component) => component.id === id);
 
-    // If component not found, return null
     if (!currentComponent) return null;
 
     const { x, y, width, height } = currentComponent;
     const isSelected = id === selectedComponentId;
 
-    // Calculate actual position based on zoom level
     const actualPosition = { x: x, y: y };
     const actualSize = { width: width, height: height };
 
@@ -63,7 +59,6 @@ const Widget = ({ id, children }) => {
             bounds="parent"
             data-id={id}
             onResize={(e, direction, ref, delta, position) => {
-                // Update dimensions during resize
                 const newDimensions = {
                     width: Math.round(ref.offsetWidth * 100) / 100,
                     height: Math.round(ref.offsetHeight * 100) / 100,
@@ -71,8 +66,8 @@ const Widget = ({ id, children }) => {
                     y: Math.round(position.y * 100) / 100,
                 };
                 setTempDimensions(newDimensions);
-                // Pass temporary dimensions to parent for live updates
-                resizeComponent(id, newDimensions, true); // true indicates it's a temporary update
+
+                resizeComponent(id, newDimensions, true);
             }}
             onResizeStop={(e, direction, ref, delta, position) => {
                 const finalDimensions = {
@@ -81,7 +76,7 @@ const Widget = ({ id, children }) => {
                     x: Math.round(position.x * 100) / 100,
                     y: Math.round(position.y * 100) / 100,
                 };
-                // Final update when resize stops
+
                 resizeComponent(id, finalDimensions);
             }}
             onDragStop={(e, d) => {

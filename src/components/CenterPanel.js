@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { IconContext } from "react-icons";
+import { FaPlus, FaMinus } from "react-icons/fa6";
+import { useScreenStore } from "@/store/ScreenStore";
+import { useComponentStore } from "@/store/ComponentStore";
 
-import Widget from "./Widget";
+import Widget from "@/components/Widget";
 import PySideButton from "@/components/pyside-components/PySideButton";
 import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
-import { FaPlus, FaMinus } from "react-icons/fa6";
-import { useAppStore } from "../store/StateStore";
-import { useScreenStore } from "@/store/ScreenStore";
-import { useComponentStore } from "@/store/ComponentStore";
 
 const CenterPanel = () => {
     const ref = useRef(null);

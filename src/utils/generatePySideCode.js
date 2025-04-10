@@ -1,6 +1,5 @@
 const hexToRgba = (hex) => {
-    // Add null check to prevent errors with undefined colors
-    if (!hex) return "0, 0, 0, 1"; // Default to opaque black if color is undefined
+    if (!hex) return "0, 0, 0, 1";
 
     hex = hex.replace("#", "");
     let r,
@@ -79,7 +78,6 @@ export const generateQtUiFile = (
     currentScreenIndex,
     centerPanelDimensions
 ) => {
-    // Start building the XML for the .ui file
     let uiCode = `<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
@@ -106,7 +104,6 @@ export const generateQtUiFile = (
     </property>
 `;
         screen.components.forEach((component, componentIndex) => {
-            // Use componentId if available, otherwise fallback to the generated name
             const compName =
                 component.componentId ||
                 `${component.type}${componentIndex}_screen${screenIndex}`;

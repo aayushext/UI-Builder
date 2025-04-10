@@ -11,27 +11,23 @@ const CustomColorPicker = ({ value, onChange }) => {
     const pickerRef = useRef(null);
     const swatchRef = useRef(null);
 
-    // Update local state when prop value changes
     useEffect(() => {
         if (value && value !== color) {
             setColor(value);
         }
     }, [value]);
 
-    // Calculate best position when opening the picker
     useEffect(() => {
         if (isPickerOpen && swatchRef.current) {
             const rect = swatchRef.current.getBoundingClientRect();
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
 
-            // Calculate available space in each direction
             const spaceRight = viewportWidth - rect.right;
             const spaceLeft = rect.left;
             const spaceBottom = viewportHeight - rect.bottom;
             const spaceTop = rect.top;
 
-            // Determine best position
             setPickerPosition({
                 top: spaceBottom > spaceTop,
                 left: spaceRight > spaceLeft,
@@ -59,7 +55,6 @@ const CustomColorPicker = ({ value, onChange }) => {
         };
     }, [isPickerOpen]);
 
-    // Handle internal color changes
     const handleColorChange = (newColor) => {
         setColor(newColor);
         onChange(newColor);

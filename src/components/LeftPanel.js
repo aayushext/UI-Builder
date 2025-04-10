@@ -1,19 +1,19 @@
 import { useRef, useState } from "react";
-import { getComponentDefinitions } from "../utils/componentLoader";
-import { useAppStore } from "../store/StateStore";
-import { exportToUiFile, importFromUiFile } from "../utils/saveSystem";
+import JSZip from "jszip";
+
+import { getComponentDefinitions } from "@/utils/componentLoader";
+import { useAppStore } from "@/store/StateStore";
+import { exportToUiFile, importFromUiFile } from "@/utils/saveSystem";
 import {
     generatePythonLoaderCode,
     generateQtUiFile,
-} from "../utils/generatePySideCode";
-import JSZip from "jszip";
+} from "@/utils/generatePySideCode";
 
 const LeftPanel = () => {
     const fileInputRef = useRef(null);
     const [isUiFileLoaded, setIsUiFileLoaded] = useState(false);
     const componentDefinitions = getComponentDefinitions();
 
-    // Get actions directly from store
     const { addComponent, screens, currentScreenIndex, setAppState } =
         useAppStore();
 

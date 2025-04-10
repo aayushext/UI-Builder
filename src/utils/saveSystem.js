@@ -1,4 +1,4 @@
-import { generateQtUiFile } from "./generatePySideCode";
+import { generateQtUiFile } from "@/utils/generatePySideCode";
 
 // Function to parse a hex color from rgba format (returns #RRGGBB or #RRGGBBAA)
 const parseRgba = (rgbaStr) => {
@@ -13,7 +13,6 @@ const parseRgba = (rgbaStr) => {
     const b = parseInt(match[3]);
     const a = match[4] ? parseFloat(match[4]) : 1;
 
-    // Convert to hex
     const rHex = r.toString(16).padStart(2, "0");
     const gHex = g.toString(16).padStart(2, "0");
     const bHex = b.toString(16).padStart(2, "0");
@@ -52,7 +51,6 @@ export const importFromUiFile = (file) => {
                     "text/xml"
                 );
 
-                // Extract screens and components
                 const appState = parseUiFile(xmlDoc);
                 resolve(appState);
             } catch (error) {
@@ -69,7 +67,6 @@ const parseUiFile = (xmlDoc) => {
     const screens = [];
     let nextComponentId = 0;
 
-    // Get the main window dimensions
     const mainWindow = xmlDoc.querySelector("widget[class='QMainWindow']");
     const mainGeometry = mainWindow.querySelector(
         "property[name='geometry'] rect"
@@ -82,7 +79,6 @@ const parseUiFile = (xmlDoc) => {
         mainGeometry.querySelector("height").textContent
     );
 
-    // Find the stacked widget that contains screens
     const stackedWidget = mainWindow.querySelector(
         "widget[class='QStackedWidget']"
     );
@@ -90,15 +86,12 @@ const parseUiFile = (xmlDoc) => {
         "widget[class='QWidget']"
     );
 
-    // Process each screen
     screenWidgets.forEach((screenWidget, screenIndex) => {
-        // Extract screen name (e.g., "screen_0" -> "Screen 1")
         const screenName = screenWidget
             .getAttribute("name")
             .replace("screen_", "");
         const screenNum = parseInt(screenName) + 1;
 
-        // Get screen background color
         const styleSheet = screenWidget.querySelector(
             "property[name='styleSheet'] string"
         );
@@ -112,7 +105,6 @@ const parseUiFile = (xmlDoc) => {
             }
         }
 
-        // Create screen object
         const screen = {
             id: screenIndex,
             name: `Screen ${screenNum}`,
@@ -124,25 +116,21 @@ const parseUiFile = (xmlDoc) => {
             height: defaultHeight,
         };
 
-        // Process components in this screen
         const componentWidgets = screenWidget.querySelectorAll("widget");
         componentWidgets.forEach((componentWidget) => {
             const componentType = componentWidget.getAttribute("class");
             const componentId = componentWidget.getAttribute("name");
 
-            // Skip if not a supported component
             if (!["QPushButton", "QLabel", "QSlider"].includes(componentType)) {
                 return;
             }
 
-            // Map component class to our component type
             const typeMap = {
                 QPushButton: "PySideButton",
                 QLabel: "PySideLabel",
                 QSlider: "PySideSlider",
             };
 
-            // Extract geometry
             const geometry = componentWidget.querySelector(
                 "property[name='geometry'] rect"
             );
@@ -153,7 +141,6 @@ const parseUiFile = (xmlDoc) => {
                 geometry.querySelector("height").textContent
             );
 
-            // Extract text for buttons and labels
             let text = "";
             const textProp = componentWidget.querySelector(
                 "property[name='text'] string"
@@ -162,7 +149,6 @@ const parseUiFile = (xmlDoc) => {
                 text = textProp.textContent;
             }
 
-            // Parse style properties
             const componentStyle = componentWidget.querySelector(
                 "property[name='styleSheet'] string"
             );
@@ -176,23 +162,19 @@ const parseUiFile = (xmlDoc) => {
                 height,
             };
 
-            // Add component-specific properties
             if (
                 component.type === "PySideButton" ||
                 component.type === "PySideLabel"
             ) {
                 component.text = text;
 
-                // Extract other style properties
                 if (componentStyle) {
                     const content = componentStyle.textContent;
 
-                    // Font size
                     const fontSizeMatch = content.match(/font-size:\s*(\d+)px/);
                     if (fontSizeMatch)
                         component.fontSize = parseInt(fontSizeMatch[1]);
 
-                    // Text color
                     const textColorMatch = content.match(
                         /color:\s*rgba\(([^)]+)\)/
                     );
@@ -201,7 +183,6 @@ const parseUiFile = (xmlDoc) => {
                             `rgba(${textColorMatch[1]})`
                         );
 
-                    // Background color
                     const bgColorMatch = content.match(
                         /background-color:\s*rgba\(([^)]+)\)/
                     );
@@ -210,14 +191,12 @@ const parseUiFile = (xmlDoc) => {
                             `rgba(${bgColorMatch[1]})`
                         );
 
-                    // Border radius
                     const radiusMatch = content.match(
                         /border-radius:\s*(\d+)px/
                     );
                     if (radiusMatch)
                         component.radius = parseInt(radiusMatch[1]);
 
-                    // Additional properties for buttons
                     if (component.type === "PySideButton") {
                         const hoverColorMatch = content.match(
                             /QPushButton:hover\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
@@ -236,7 +215,6 @@ const parseUiFile = (xmlDoc) => {
                             );
                     }
 
-                    // Border color for labels
                     if (component.type === "PySideLabel") {
                         const borderColorMatch = content.match(
                             /border:\s*1px solid rgba\(([^)]+)\)/
@@ -248,7 +226,6 @@ const parseUiFile = (xmlDoc) => {
                     }
                 }
             } else if (component.type === "PySideSlider") {
-                // Extract slider properties
                 const minProp = componentWidget.querySelector(
                     "property[name='minimum'] number"
                 );
@@ -276,7 +253,6 @@ const parseUiFile = (xmlDoc) => {
                 }
 
                 if (componentStyle) {
-                    // Extract slider color
                     const handleColorMatch = componentStyle.textContent.match(
                         /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/
                     );
@@ -285,7 +261,6 @@ const parseUiFile = (xmlDoc) => {
                             `rgba(${handleColorMatch[1]})`
                         );
 
-                    // Background color
                     const bgColorMatch = componentStyle.textContent.match(
                         /QSlider\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
                     );
@@ -296,10 +271,7 @@ const parseUiFile = (xmlDoc) => {
                 }
             }
 
-            // Apply defaults for missing properties
             setDefaultProperties(component);
-
-            // Add to screen components
             screen.components.push(component);
         });
 
@@ -314,7 +286,6 @@ const parseUiFile = (xmlDoc) => {
     };
 };
 
-// Set default properties for components based on their type
 const setDefaultProperties = (component) => {
     if (component.type === "PySideButton") {
         component.fontSize = component.fontSize || 16;

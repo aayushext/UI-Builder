@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { IconContext } from "react-icons";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
+
 import { useScreenStore } from "@/store/ScreenStore";
 
 const ScreenTabs = () => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
-    // Get state and actions directly from store
     const {
         screens,
         currentScreenIndex,

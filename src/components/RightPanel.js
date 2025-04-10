@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { getComponentDefinitionByType } from "../utils/componentLoader";
-import CustomColorPicker from "./CustomColorPicker";
+
+import CustomColorPicker from "@/components/CustomColorPicker";
+import { getComponentDefinitionByType } from "@/utils/componentLoader";
 import { useScreenStore } from "@/store/ScreenStore";
 import { useComponentStore } from "@/store/ComponentStore";
 
 const PropertyEditor = ({ property, value, onChange, component }) => {
-    // Calculate max radius if needed
     const maxRadius = property.hasMaxRadius
         ? Math.min(component.width, component.height) / 2
         : null;
@@ -96,7 +96,6 @@ const RightPanel = () => {
         setScreenCustomId(currentScreen?.customId || "screen_0");
     }, [currentScreen]);
 
-    // Handle screen dimension changes
     const handleScreenWidthChange = (value) => {
         const width = parseInt(value) || 1280;
         setScreenWidth(width);
