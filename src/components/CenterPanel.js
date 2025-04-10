@@ -13,7 +13,6 @@ import { useComponentStore } from "@/store/ComponentStore";
 const CenterPanel = () => {
     const ref = useRef(null);
 
-    // Get state and actions directly from the store
     const {
         getCurrentScreen,
         zoomLevel,
@@ -29,17 +28,8 @@ const CenterPanel = () => {
         resetView,
     } = useScreenStore();
 
-    const {
-        getCurrentScreenComponents,
-        selectedComponentId,
-        deleteComponent,
-        duplicateComponent,
-        resizeComponent,
-        moveComponent,
-        selectComponent,
-    } = useComponentStore();
+    const { getCurrentScreenComponents } = useComponentStore();
 
-    // Get current screen and its components using the store's selectors
     const currentScreen = getCurrentScreen();
     const currentScreenComponents = getCurrentScreenComponents();
 
@@ -69,7 +59,6 @@ const CenterPanel = () => {
     };
 
     const handlePanStart = (e) => {
-        // Only start panning with middle mouse button (button 1) or if space is held down
         if (e.button === 1 || e.altKey) {
             setIsPanning(true);
             setLastMousePosition({ x: e.clientX, y: e.clientY });
@@ -158,6 +147,7 @@ const CenterPanel = () => {
                     </Widget>
                 ))}
             </div>
+
             {/* Zoom controls */}
             <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg">
                 <button
