@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "jszip": "^3.10.1",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-color-palette": "^7.3.0",

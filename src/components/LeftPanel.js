@@ -1,19 +1,21 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { getComponentDefinitions } from "../utils/componentLoader";
 
 const LeftPanel = ({
     onAddComponent,
+    onSaveToUiFile,
+    onLoadFromUiFile,
     onExport,
-    onSaveToJson,
-    onLoadFromJson,
 }) => {
     const fileInputRef = useRef(null);
+    const [isUiFileLoaded, setIsUiFileLoaded] = useState(false);
     const componentDefinitions = getComponentDefinitions();
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            onLoadFromJson(file);
+            onLoadFromUiFile(file);
+            setIsUiFileLoaded(true);
         }
         event.target.value = "";
     };
@@ -36,9 +38,9 @@ const LeftPanel = ({
 
             <div className="mt-auto pt-4 space-y-2">
                 <button
-                    onClick={onSaveToJson}
+                    onClick={onSaveToUiFile}
                     className="bg-purple-500 hover:bg-purple-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
-                    Save Design
+                    Export Design
                 </button>
 
                 <button
@@ -49,14 +51,17 @@ const LeftPanel = ({
 
                 <button
                     onClick={onExport}
-                    className="bg-green-600 hover:bg-green-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
-                    Export to .py
+                    disabled={isUiFileLoaded}
+                    className={`bg-green-600 hover:bg-green-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full ${
+                        isUiFileLoaded ? "opacity-50 cursor-not-allowed" : ""
+                    }`}>
+                    Export Project
                 </button>
 
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".json"
+                    accept=".ui"
                     onChange={handleFileChange}
                     className="hidden"
                 />

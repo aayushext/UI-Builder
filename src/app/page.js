@@ -5,20 +5,23 @@ import CenterPanel from "../components/CenterPanel";
 import RightPanel from "../components/RightPanel";
 import ScreenTabs from "../components/ScreenTabs";
 import {
-    generatePySideCode,
+    generatePythonLoaderCode,
     generateQtUiFile,
 } from "../utils/generatePySideCode";
-import { exportToJson, importFromJson } from "../utils/saveSystem";
+import { exportToUiFile, importFromUiFile } from "../utils/saveSystem";
 import {
     createComponent,
     getComponentDefinitions,
 } from "../utils/componentLoader";
+
+import JSZip from "jszip";
 
 export default function Home() {
     const [screens, setScreens] = useState([
         {
             id: 0,
             name: "Screen 1",
+            customId: "screen_0",
             components: [],
             backgroundColor: "#ffffff",
             width: 1280,
@@ -61,6 +64,7 @@ export default function Home() {
         const newScreen = {
             id: nextScreenId,
             name: `Screen ${nextScreenId + 1}`,
+            customId: `screen_${nextScreenId}`,
             components: [],
             backgroundColor: "#ffffff",
             width: 1280,
@@ -69,6 +73,35 @@ export default function Home() {
         setScreens([...screens, newScreen]);
         setNextScreenId(nextScreenId + 1);
         setCurrentScreenIndex(screens.length);
+    };
+
+    const updateScreenCustomId = (screenIndex, newCustomId) => {
+        if (!/^[a-zA-Z0-9_]+$/.test(newCustomId)) {
+            alert(
+                "Screen ID can only contain letters, numbers, and underscores"
+            );
+            return false;
+        }
+
+        if (newCustomId.length > 20) {
+            alert("Screen ID cannot exceed 20 characters");
+            return false;
+        }
+
+        const isDuplicate = screens.some(
+            (screen, idx) =>
+                idx !== screenIndex && screen.customId === newCustomId
+        );
+
+        if (isDuplicate) {
+            alert("Screen ID must be unique");
+            return false;
+        }
+
+        const updatedScreens = [...screens];
+        updatedScreens[screenIndex].customId = newCustomId;
+        setScreens(updatedScreens);
+        return true;
     };
 
     const deleteScreen = (screenId) => {
@@ -291,55 +324,43 @@ export default function Home() {
         }
     }, [screens, currentScreenIndex]);
 
-    // const handleExport = () => {
-    //   const pyCode = generatePySideCode(
-    //     screens,
-    //     currentScreenIndex,
-    //     centerPanelDimensions
-    //   );
-    //   const blob = new Blob([pyCode], { type: "text/plain;charset=utf-8" });
-    //   const url = URL.createObjectURL(blob);
-    //   const link = document.createElement("a");
-    //   link.href = url;
-    //   link.download = "ui.py";
-    //   document.body.appendChild(link);
-    //   link.click();
-    //   document.body.removeChild(link);
-    //   URL.revokeObjectURL(url);
-    // };
-
-    const handleExport = () => {
+    const handleExport = async () => {
+        // Generate UI file content
         const uiFile = generateQtUiFile(
             screens,
             currentScreenIndex,
             centerPanelDimensions
         );
-        const blob = new Blob([uiFile], {
-            type: "application/xml;charset=utf-8",
-        });
-        const url = URL.createObjectURL(blob);
+
+        // Generate Python loader code
+        const pythonFile = generatePythonLoaderCode();
+
+        // Create zip file
+        const zip = new JSZip();
+        zip.file("ui-designer.ui", uiFile);
+        zip.file("main.py", pythonFile);
+
+        // Generate the zip file
+        const zipContent = await zip.generateAsync({ type: "blob" });
+
+        // Create download link
+        const url = URL.createObjectURL(zipContent);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "ui-designer.ui";
+        link.download = "ui-project.zip";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     };
 
-    const handleSaveToJson = () => {
-        const appState = {
-            screens,
-            nextScreenId,
-            currentScreenIndex,
-            nextComponentId,
-        };
-        exportToJson(appState);
+    const handleSaveToUiFile = () => {
+        exportToUiFile(screens, currentScreenIndex);
     };
 
-    const handleLoadFromJson = async (file) => {
+    const handleLoadFromUiFile = async (file) => {
         try {
-            const appState = await importFromJson(file);
+            const appState = await importFromUiFile(file);
 
             if (!appState.screens || !Array.isArray(appState.screens)) {
                 throw new Error("Invalid file format: missing screens array");
@@ -353,16 +374,7 @@ export default function Home() {
                     appState.screens.length - 1
                 )
             );
-
-            const highestId = Math.max(
-                0,
-                ...appState.screens
-                    .flatMap((screen) =>
-                        screen.components.map((comp) => comp.id)
-                    )
-                    .filter((id) => !isNaN(id))
-            );
-            setNextComponentId(appState.nextComponentId || highestId + 1);
+            setNextComponentId(appState.nextComponentId);
 
             // Clear selection
             setSelectedComponentId(null);
@@ -383,9 +395,9 @@ export default function Home() {
             <div className="flex flex-1 overflow-hidden">
                 <LeftPanel
                     onAddComponent={addComponent}
+                    onSaveToUiFile={handleSaveToUiFile}
+                    onLoadFromUiFile={handleLoadFromUiFile}
                     onExport={handleExport}
-                    onSaveToJson={handleSaveToJson}
-                    onLoadFromJson={handleLoadFromJson}
                     className="flex-shrink-0"
                 />
                 <div className="flex flex-col flex-1 min-w-0">
@@ -434,6 +446,9 @@ export default function Home() {
                     }
                     onUpdateScreenDimensions={(dimensions) =>
                         updateScreenDimensions(currentScreenIndex, dimensions)
+                    }
+                    onUpdateScreenCustomId={(customId) =>
+                        updateScreenCustomId(currentScreenIndex, customId)
                     }
                     onDuplicateComponent={duplicateComponent}
                     className="flex-shrink-0"

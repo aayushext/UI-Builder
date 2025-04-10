@@ -32,215 +32,46 @@ const hexToRgba = (hex) => {
     return `${r}, ${g}, ${b}, ${a}`;
 };
 
-export const generatePySideCode = (
-    screens,
-    currentScreenIndex,
-    centerPanelDimensions
-) => {
-    let pyCode = `import sys
-from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, 
-    QPushButton, QLabel, QSlider, QStackedWidget
-)
-from PySide6.QtCore import Qt, QRect, QPoint, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QColor
+export const generatePythonLoaderCode = () => {
+    return `
+import sys
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCore import QFile, QIODevice
+from PySide6.QtUiTools import QUiLoader
 
-class MyWindow(QMainWindow):
-  def __init__(self):
-      super().__init__()
-      
-      # Main window setup
-      self.setWindowTitle("My PySide6 App")
-      self.resize(${screens[currentScreenIndex].width || 1280}, ${
-        screens[currentScreenIndex].height || 800
-    })
-
-      self.stacked_widget = QStackedWidget(self)
-      self.setCentralWidget(self.stacked_widget)
-
-`;
-
-    screens.forEach((screen, screenIndex) => {
-        pyCode += `
-      # --- ${screen.name} ---
-      self.screen_${screenIndex}_widget = QWidget()
-      self.screen_${screenIndex}_widget.setStyleSheet("background-color: rgba(${hexToRgba(
-            screen.backgroundColor
-        )});")
-`;
-
-        screen.components.forEach((component, componentIndex) => {
-            // Use componentId if available, otherwise fallback to the generated name
-            const componentName =
-                component.componentId ||
-                `${component.type}${componentIndex}_screen${screenIndex}`;
-
-            if (component.type === "PySideButton") {
-                pyCode += `
-      self.${componentName} = QPushButton("${
-                    component.text
-                }", self.screen_${screenIndex}_widget)
-      self.${componentName}.setGeometry(QRect(${component.x}, ${component.y}, ${
-                    component.width
-                }, ${component.height}))
-      self.${componentName}.setStyleSheet("""
-          QPushButton {
-              color: rgba(${hexToRgba(component.textColor)});
-              background-color: rgba(${hexToRgba(component.backgroundColor)});
-              border-radius: ${component.radius}px;
-              font-size: ${component.fontSize}px;
-          }
-          QPushButton:hover {
-              background-color: rgba(${hexToRgba(component.hoverColor)});
-          }
-          QPushButton:pressed {
-              background-color: rgba(${hexToRgba(component.pressedColor)});
-          }
-      """)
-`;
-            } else if (component.type === "PySideLabel") {
-                pyCode += `
-      self.${componentName} = QLabel("${
-                    component.text
-                }", self.screen_${screenIndex}_widget)
-      self.${componentName}.setGeometry(QRect(${component.x}, ${component.y}, ${
-                    component.width
-                }, ${component.height}))
-      self.${componentName}.setStyleSheet("""
-          QLabel {
-              color: rgba(${hexToRgba(component.textColor)});
-              background-color: rgba(${hexToRgba(component.backgroundColor)});
-              border-radius: ${component.radius}px;
-              font-size: ${component.fontSize}px;
-              border: 1px solid #ccc;
-          }
-      """)
-`;
-            } else if (component.type === "PySideSlider") {
-                const orientation =
-                    component.orientation === "vertical"
-                        ? "Qt.Orientation.Vertical"
-                        : "Qt.Orientation.Horizontal";
-                pyCode += `
-            self.${componentName} = QSlider(${orientation}, self.screen_${screenIndex}_widget)
-            self.${componentName}.setGeometry(QRect(${component.x}, ${
-                    component.y
-                }, ${component.width}, ${component.height}))
-            self.${componentName}.setMinimum(${component.minimum})
-            self.${componentName}.setMaximum(${component.maximum})
-            self.${componentName}.setValue(${component.value})
-            self.${componentName}.setStyleSheet("""
-                QSlider {
-                    background-color: rgba(${hexToRgba(
-                        component.backgroundColor
-                    )});
-                }
-                QSlider::groove:horizontal {
-                    height: 8px;
-                    background: rgba(204, 204, 204, 1);
-                    margin: 2px 0;
-                }
-                QSlider::groove:vertical {
-                    width: 8px;
-                    background: rgba(204, 204, 204, 1);
-                    margin: 0 2px;
-                }
-                QSlider::handle {
-                    background: rgba(${hexToRgba(component.sliderColor)});
-                    border: 1px solid rgba(92, 92, 92, 1);
-                    width: ${
-                        component.orientation === "vertical" ? "16" : "12"
-                    }px;
-                    height: ${
-                        component.orientation === "vertical" ? "12" : "16"
-                    }px;
-                    margin: ${
-                        component.orientation === "vertical"
-                            ? "-2px 0"
-                            : "0 -2px"
-                    };
-                    border-radius: 8px;
-                }
-                QSlider::add-page:horizontal {
-                    background: rgba(204, 204, 204, 1);
-                }
-                QSlider::add-page:vertical {
-                    background: rgba(${hexToRgba(component.sliderColor)});
-                }
-                QSlider::sub-page:horizontal {
-                    background: rgba(${hexToRgba(component.sliderColor)});
-                }
-                QSlider::sub-page:vertical {
-                    background: rgba(204, 204, 204, 1);
-                }
-            """)
-      `;
-            }
-        });
-
-        pyCode += `
-      self.stacked_widget.addWidget(self.screen_${screenIndex}_widget)
-`;
-    });
-
-    pyCode += `
-      self.stacked_widget.setCurrentIndex(${currentScreenIndex})
-      self.current_screen_index = ${currentScreenIndex}
-
-      # Animation setup
-      self.animation = QPropertyAnimation(self.stacked_widget, b"pos")
-      self.animation.setDuration(500)
-      self.animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
-
-
-  def switch_screen(self, index):
-      if index == self.current_screen_index:
-          return
-
-      direction = 1 if index > self.current_screen_index else -1
-      current_widget = self.stacked_widget.currentWidget()
-      next_widget = self.stacked_widget.widget(index)
-
-      next_widget.setGeometry(self.width() * direction, 0, self.width(), self.height())
-
-      self.animation.setStartValue(QPoint(0, 0))
-      self.animation.setEndValue(QPoint(-self.width() * direction, 0))
-
-      self.animation.finished.connect(lambda: self.post_switch_screen(index))
-
-      self.stacked_widget.setCurrentIndex(index)
-      self.current_screen_index = index
-      current_widget.stackUnder(next_widget)
-      self.animation.start()
-
-
-  def post_switch_screen(self, index):
-      self.stacked_widget.setCurrentIndex(index)  # Ensure correct index
-      current_widget = self.stacked_widget.widget(index)
-      current_widget.setGeometry(0, 0, self.width(), self.height())
-`;
-
-    screens.forEach((screen, index) => {
-        pyCode += `
-      self.button_screen_${index} = QPushButton("Go to ${screen.name}", self)
-      self.button_screen_${index}.setGeometry(QRect(10, ${
-            10 + index * 40
-        }, 150, 30))
-      self.button_screen_${index}.clicked.connect(lambda _, i=${index}: self.switch_screen(i))
-`;
-    });
-
-    pyCode += `
-      self.show()
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.load_ui()
+        
+    def load_ui(self):
+        ui_file = QFile("ui-designer.ui")
+        if not ui_file.open(QIODevice.ReadOnly):
+            print(f"Cannot open UI file: {ui_file.errorString()}")
+            return
+            
+        loader = QUiLoader()
+        self.ui = loader.load(ui_file)
+        ui_file.close()
+        
+        if not self.ui:
+            print(loader.errorString())
+            return
+            
+        self.ui.show()
+        
+        # Connect any signals/slots here
+        # Example: self.ui.myButton.clicked.connect(self.button_clicked)
+    
+    # Define your slot functions here
+    # def button_clicked(self):
+    #     print("Button clicked!")
 
 if __name__ == "__main__":
-  app = QApplication([])
-  window = MyWindow()
-  window.show()
-  app.exec()
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec())
 `;
-
-    return pyCode;
 };
 
 export const generateQtUiFile = (
@@ -264,16 +95,16 @@ export const generateQtUiFile = (
   <widget class="QStackedWidget" name="stackedWidget">
 `;
 
-    // Iterate through screens to add each as a page in the stacked widget
     screens.forEach((screen, screenIndex) => {
-        uiCode += `   <widget class="QWidget" name="screen_${screenIndex}">
+        const screenId = screen.customId || `screen_${screenIndex}`;
+
+        uiCode += `   <widget class="QWidget" name="${screenId}">
     <property name="styleSheet">
       <string>background-color: rgba(${hexToRgba(
           screen.backgroundColor
       )});</string>
     </property>
 `;
-        // Iterate through components within a screen
         screen.components.forEach((component, componentIndex) => {
             // Use componentId if available, otherwise fallback to the generated name
             const compName =

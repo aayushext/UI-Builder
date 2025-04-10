@@ -36,16 +36,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
             );
 
         case "color":
-            return (
-                // <input
-                //   type="color"
-                //   id={property.name}
-                //   value={value}
-                //   onChange={(e) => onChange(e.target.value)}
-                //   className="mt-1 block w-full rounded-sm border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                // />
-                <CustomColorPicker value={value} onChange={onChange} />
-            );
+            return <CustomColorPicker value={value} onChange={onChange} />;
 
         case "select":
             return (
@@ -75,8 +66,8 @@ const RightPanel = ({
     onUpdateScreenBackgroundColor,
     onUpdateScreenDimensions,
     onDuplicateComponent,
+    onUpdateScreenCustomId,
 }) => {
-    // Screen properties state
     const [screenBackgroundColor, setScreenBackgroundColor] = useState(
         currentScreen?.backgroundColor || "#ffffff"
     );
@@ -86,12 +77,15 @@ const RightPanel = ({
     const [screenHeight, setScreenHeight] = useState(
         currentScreen?.height || 800
     );
+    const [screenCustomId, setScreenCustomId] = useState(
+        currentScreen?.customId || "screen_0"
+    );
 
-    // Update screen properties when current screen changes
     useEffect(() => {
         setScreenBackgroundColor(currentScreen?.backgroundColor || "#ffffff");
         setScreenWidth(currentScreen?.width || 1280);
         setScreenHeight(currentScreen?.height || 800);
+        setScreenCustomId(currentScreen?.customId || "screen_0");
     }, [currentScreen]);
 
     // Handle screen dimension changes
@@ -107,12 +101,15 @@ const RightPanel = ({
         onUpdateScreenDimensions({ height });
     };
 
-    // Get the definition for the selected component
+    const handleScreenCustomIdChange = (value) => {
+        setScreenCustomId(value);
+        onUpdateScreenCustomId(value);
+    };
+
     const componentDefinition = selectedComponent
         ? getComponentDefinitionByType(selectedComponent.type)
         : null;
 
-    // Handle property change
     const handlePropertyChange = (name, value) => {
         if (selectedComponent) {
             onUpdateComponentProps(selectedComponent.id, { [name]: value });
@@ -159,6 +156,25 @@ const RightPanel = ({
                     onChange={(e) => handleScreenHeightChange(e.target.value)}
                     className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
+            </div>
+
+            {/* Screen ID */}
+            <div className="mb-4">
+                <label
+                    htmlFor="screenCustomId"
+                    className="block text-sm font-medium">
+                    Screen ID
+                </label>
+                <input
+                    type="text"
+                    id="screenCustomId"
+                    value={screenCustomId}
+                    onChange={(e) => handleScreenCustomIdChange(e.target.value)}
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                    Used as the widget name in the UI file
+                </p>
             </div>
 
             {/* Background Color */}

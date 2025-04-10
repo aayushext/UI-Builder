@@ -123,7 +123,7 @@ const CenterPanel = React.forwardRef(
                     ))}
                 </div>
                 {/* Zoom controls */}
-                <div className="absolute bottom-4 right-6 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg">
+                <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg">
                     <button
                         onClick={onZoomOut}
                         className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
