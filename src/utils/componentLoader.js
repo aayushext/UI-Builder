@@ -1,4 +1,4 @@
-import componentDefinitions from "./componentDefinitions.json";
+import componentDefinitions from "@/utils/componentDefinitions.json";
 
 export const getComponentDefinitions = () => {
     return componentDefinitions.components;
@@ -17,7 +17,6 @@ export const createComponent = (type, id, position = { x: 50, y: 50 }) => {
         throw new Error(`Component type "${type}" not found in definitions`);
     }
 
-    // Create default component ID based on type and numeric ID
     const componentId = `${type.toLowerCase()}${id}`;
 
     return {
@@ -25,7 +24,7 @@ export const createComponent = (type, id, position = { x: 50, y: 50 }) => {
         type,
         x: position.x,
         y: position.y,
-        componentId: componentId, // Add default component ID
+        componentId: componentId,
         ...definition.defaultProps,
     };
 };

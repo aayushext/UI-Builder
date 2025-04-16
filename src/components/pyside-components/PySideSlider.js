@@ -10,7 +10,6 @@ const PySideSlider = ({
     sliderColor = "#3b82f6",
     backgroundColor = "#000000ff",
 }) => {
-    // Calculate track dimensions and position
     const isHorizontal = orientation === "horizontal";
     const trackHeight = isHorizontal
         ? Math.max(Math.min(height / 3, 12), 8)
@@ -19,7 +18,6 @@ const PySideSlider = ({
         ? Math.max(width - 20, 8)
         : Math.min(width / 3, 8);
 
-    // Calculate the thumb position
     const range = maximum - minimum;
     const percentage = range > 0 ? (value - minimum) / range : 0;
     const thumbSize = Math.min(

@@ -4,7 +4,6 @@ import CustomColorPicker from "./CustomColorPicker";
 import { useAppStore } from "../store/useAppStore";
 
 const PropertyEditor = ({ property, value, onChange, component }) => {
-    // Calculate max radius if needed
     const maxRadius = property.hasMaxRadius
         ? Math.min(component.width, component.height) / 2
         : null;
@@ -97,7 +96,6 @@ const RightPanel = () => {
         setScreenCustomId(currentScreen?.customId || "screen_0");
     }, [currentScreen]);
 
-    // Handle screen dimension changes
     const handleScreenWidthChange = (value) => {
         const width = parseInt(value) || 1280;
         setScreenWidth(width);
