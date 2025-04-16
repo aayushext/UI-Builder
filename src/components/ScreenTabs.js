@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import { IconContext } from "react-icons";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
+import { useAppStore } from "../store/useAppStore";
 
-const ScreenTabs = ({
-    screens,
-    currentScreenIndex,
-    onScreenChange,
-    onAddScreen,
-    onDeleteScreen,
-}) => {
+const ScreenTabs = () => {
+    const screens = useAppStore((s) => s.screens);
+    const currentScreenIndex = useAppStore((s) => s.currentScreenIndex);
+    const setCurrentScreenIndex = useAppStore((s) => s.setCurrentScreenIndex);
+    const addScreen = useAppStore((s) => s.addScreen);
+    const deleteScreen = useAppStore((s) => s.deleteScreen);
+
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     return (
@@ -17,7 +18,7 @@ const ScreenTabs = ({
             {screens.map((screen, index) => (
                 <div key={screen.id} className="flex items-center mr-2">
                     <button
-                        onClick={() => onScreenChange(index)}
+                        onClick={() => setCurrentScreenIndex(index)}
                         onMouseEnter={() => setHoveredIndex(index)}
                         onMouseLeave={() => setHoveredIndex(null)}
                         className={`flex items-center py-1 px-3 rounded-md ${
@@ -38,7 +39,7 @@ const ScreenTabs = ({
                                 <div
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onDeleteScreen(screen.id);
+                                        deleteScreen(screen.id);
                                     }}
                                     className="flex hover:bg-red-500 dark:hover:bg-red-700 cursor-pointer text-xs font-bold rounded-full h-5 w-5 items-center justify-center">
                                     <IconContext.Provider
@@ -54,7 +55,7 @@ const ScreenTabs = ({
                 </div>
             ))}
             <button
-                onClick={onAddScreen}
+                onClick={addScreen}
                 className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-900 py-2 px-2 rounded-md ml-2">
                 <IconContext.Provider value={{ size: "1em" }}>
                     <div>
