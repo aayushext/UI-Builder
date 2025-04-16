@@ -1,40 +1,31 @@
-import { useState } from "react";
 import { Rnd } from "react-rnd";
+import { useState } from "react";
 import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 
-import { useScreenStore } from "@/store/ScreenStore";
-import { useComponentStore } from "@/store/ComponentStore";
-
-const Widget = ({ id, children }) => {
+const Widget = ({
+    id,
+    onDelete,
+    onDuplicate,
+    x,
+    y,
+    width,
+    height,
+    children,
+    onResize,
+    onMove,
+    onSelect,
+    isSelected,
+    zoomLevel = 1,
+}) => {
     const [isHovered, setIsHovered] = useState(false);
     const [tempDimensions, setTempDimensions] = useState({
-        width: 0,
-        height: 0,
-        x: 0,
-        y: 0,
+        width,
+        height,
+        x,
+        y,
     });
-
-    const {
-        deleteComponent,
-        duplicateComponent,
-        resizeComponent,
-        moveComponent,
-        selectComponent,
-        selectedComponentId,
-    } = useComponentStore();
-
-    const { zoomLevel } = useScreenStore();
-
-    const currentComponent = useComponentStore()
-        .getCurrentScreenComponents()
-        .find((component) => component.id === id);
-
-    if (!currentComponent) return null;
-
-    const { x, y, width, height } = currentComponent;
-    const isSelected = id === selectedComponentId;
 
     const actualPosition = { x: x, y: y };
     const actualSize = { width: width, height: height };
@@ -66,8 +57,7 @@ const Widget = ({ id, children }) => {
                     y: Math.round(position.y * 100) / 100,
                 };
                 setTempDimensions(newDimensions);
-
-                resizeComponent(id, newDimensions, true);
+                onResize(id, newDimensions, true);
             }}
             onResizeStop={(e, direction, ref, delta, position) => {
                 const finalDimensions = {
@@ -76,16 +66,15 @@ const Widget = ({ id, children }) => {
                     x: Math.round(position.x * 100) / 100,
                     y: Math.round(position.y * 100) / 100,
                 };
-
-                resizeComponent(id, finalDimensions);
+                onResize(id, finalDimensions);
             }}
             onDragStop={(e, d) => {
-                moveComponent(id, {
+                onMove(id, {
                     x: Math.round(d.x * 100) / 100,
                     y: Math.round(d.y * 100) / 100,
                 });
             }}
-            onClick={() => selectComponent(id)}
+            onClick={() => onSelect(id)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
             <div className="relative w-full h-full ">
@@ -93,7 +82,7 @@ const Widget = ({ id, children }) => {
                     <>
                         {/* Duplicate button */}
                         <button
-                            onClick={() => duplicateComponent()}
+                            onClick={() => onDuplicate()}
                             className="absolute -top-4 right-1 bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded-full text-xs -mt-3 -ml-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
                             style={{
                                 minWidth: "24px",
@@ -108,7 +97,7 @@ const Widget = ({ id, children }) => {
 
                         {/* Delete button */}
                         <button
-                            onClick={() => deleteComponent(id)}
+                            onClick={() => onDelete(id)}
                             className="absolute -top-4 -right-3 bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full -mt-3 -mr-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
                             style={{
                                 minWidth: "24px",
