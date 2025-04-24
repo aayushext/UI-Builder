@@ -24,6 +24,7 @@ export const createComponent = (type, id, position = { x: 50, y: 50 }) => {
         type,
         x: position.x,
         y: position.y,
+        parentId: null,
         componentId: componentId,
         ...definition.defaultProps,
     };

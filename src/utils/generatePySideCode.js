@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         self.ui.show()
         
         # Connect any signals/slots here
-        # Example: self.ui.myButton.clicked.connect(self.button_clicked)
+        # Example: self.ui.findChild(QPushButton, "myButton").clicked.connect(self.button_clicked)
     
     # Define your slot functions here
     # def button_clicked(self):
@@ -73,11 +73,183 @@ if __name__ == "__main__":
 `;
 };
 
-export const generateQtUiFile = (
-    screens,
-    currentScreenIndex,
-    centerPanelDimensions
-) => {
+const generateComponentXml = (component, allComponents, indentLevel) => {
+    const indent = " ".repeat(indentLevel * 2);
+    let xml = "";
+    const compName =
+        component.componentId ||
+        `${component.type}${component.id}_screen${component.parentId ?? "root"}`; // Use ID for uniqueness
+
+    // Log component being processed
+    console.log(
+        `${indent}Processing Component: ID=${component.id}, Type=${component.type}, ParentID=${component.parentId}, Name=${compName}`
+    );
+
+    const commonGeometry = `${indent}  <property name="geometry">
+${indent}   <rect>
+${indent}    <x>${component.x}</x>
+${indent}    <y>${component.y}</y>
+${indent}    <width>${component.width}</width>
+${indent}    <height>${component.height}</height>
+${indent}   </rect>
+${indent}  </property>\n`;
+
+    if (component.type === "PySideButton") {
+        xml += `${indent}<widget class="QPushButton" name="${compName}">\n`;
+        xml += `${indent}  <property name="text">
+${indent}    <string>${component.text}</string>
+${indent}  </property>\n`;
+        xml += commonGeometry;
+        xml += `${indent}  <property name="styleSheet">
+${indent}    <string>
+${indent}        QPushButton {
+${indent}            color: rgba(${hexToRgba(component.textColor)});
+${indent}            background-color: rgba(${hexToRgba(
+            component.backgroundColor
+        )});
+${indent}            border-radius: ${component.radius}px;
+${indent}            font-size: ${component.fontSize}px;
+${indent}        }
+${indent}        QPushButton:hover {
+${indent}            background-color: rgba(${hexToRgba(component.hoverColor)});
+${indent}        }
+${indent}        QPushButton:pressed {
+${indent}            background-color: rgba(${hexToRgba(
+            component.pressedColor
+        )});
+${indent}        }
+${indent}    </string>
+${indent}  </property>\n`;
+        // Buttons typically don't have children in Qt Designer structure
+        xml += `${indent}</widget>\n`;
+    } else if (component.type === "PySideLabel") {
+        xml += `${indent}<widget class="QLabel" name="${compName}">\n`;
+        xml += `${indent}  <property name="text">
+${indent}    <string>${component.text}</string>
+${indent}  </property>\n`;
+        xml += commonGeometry;
+        xml += `${indent}  <property name="styleSheet">
+${indent}    <string>
+${indent}        QLabel {
+${indent}            color: rgba(${hexToRgba(component.textColor)});
+${indent}            background-color: rgba(${hexToRgba(
+            component.backgroundColor
+        )});
+${indent}            border-radius: ${component.radius}px;
+${indent}            font-size: ${component.fontSize}px;
+${indent}            border: 1px solid rgba(${hexToRgba(
+            component.borderColor
+        )});
+${indent}        }
+${indent}    </string>
+${indent}  </property>\n`;
+        xml += `${indent}</widget>\n`;
+    } else if (component.type === "PySideSlider") {
+        const orientation =
+            component.orientation === "vertical"
+                ? "Qt::Orientation::Vertical"
+                : "Qt::Orientation::Horizontal";
+        xml += `${indent}<widget class="QSlider" name="${compName}">\n`;
+        xml += `${indent}  <property name="orientation">
+${indent}    <enum>${orientation}</enum>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="minimum">
+${indent}    <number>${component.minimum}</number>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="maximum">
+${indent}    <number>${component.maximum}</number>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="value">
+${indent}    <number>${component.value}</number>
+${indent}  </property>\n`;
+        xml += commonGeometry;
+        xml += `${indent}  <property name="styleSheet">
+${indent}    <string>
+${indent}        QSlider {
+${indent}            background-color: rgba(${hexToRgba(
+            component.backgroundColor
+        )});
+${indent}        }
+${indent}        QSlider::groove:${
+            component.orientation === "vertical" ? "vertical" : "horizontal"
+        } {
+${indent}            background: rgba(204, 204, 204, 1);
+${indent}            ${
+            component.orientation === "vertical"
+                ? "width: 8px; margin: 0 2px;"
+                : "height: 8px; margin: 2px 0;"
+        }
+${indent}        }
+${indent}        QSlider::handle:${
+            component.orientation === "vertical" ? "vertical" : "horizontal"
+        } {
+${indent}            background: rgba(${hexToRgba(component.sliderColor)});
+${indent}            border: 1px solid rgba(92, 92, 92, 1);
+${indent}            width: 16px;
+${indent}            height: 16px;
+${indent}            margin: -4px 0;
+${indent}            border-radius: 8px;
+${indent}        }
+${indent}    </string>
+${indent}  </property>\n`;
+        xml += `${indent}</widget>\n`;
+    } else if (component.type === "PySideFrame") {
+        xml += `${indent}<widget class="QFrame" name="${compName}">\n`;
+        xml += commonGeometry;
+        xml += `${indent}  <property name="styleSheet">
+${indent}      <string>background-color: rgba(${hexToRgba(
+            component.backgroundColor
+        )});</string>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="frameShape">
+${indent}      <enum>QFrame::${component.frameShape}</enum>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="frameShadow">
+${indent}      <enum>QFrame::${component.frameShadow}</enum>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="lineWidth">
+${indent}      <number>${component.lineWidth}</number>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="midLineWidth">
+${indent}      <number>${component.midLineWidth}</number>
+${indent}  </property>\n`;
+
+        // Find and log children
+        const children = allComponents.filter(
+            (comp) => comp.parentId === component.id
+        );
+        console.log(
+            `${indent}  Frame ${compName} (ID: ${component.id}) - Found ${
+                children.length
+            } children: [${children
+                .map((c) => `ID=${c.id}, Type=${c.type}`)
+                .join(", ")}]`
+        );
+
+        // Recursively generate children's XML
+        let childrenXml = "";
+        children.forEach((child) => {
+            childrenXml += generateComponentXml(
+                child,
+                allComponents,
+                indentLevel + 1
+            );
+        });
+
+        // Append children XML *before* the closing tag
+        if (childrenXml) {
+            xml += childrenXml;
+        }
+
+        // Add the closing tag for the frame
+        xml += `${indent}</widget>\n`;
+    }
+
+    return xml;
+};
+
+export const generateQtUiFile = (screens, currentScreenIndex) => {
+    console.log("--- Starting UI File Generation ---");
     let uiCode = `<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
@@ -95,135 +267,30 @@ export const generateQtUiFile = (
 
     screens.forEach((screen, screenIndex) => {
         const screenId = screen.customId || `screen_${screenIndex}`;
+        const allComponents = screen.components;
+        const topLevelComponents = allComponents.filter(
+            (comp) => comp.parentId === null
+        );
+
+        console.log(
+            `Screen ${screenIndex} (${screenId}): Processing ${allComponents.length} total components.`
+        );
+        // Optional: Log all components for the screen if needed for deep debugging
+        // console.log(JSON.stringify(allComponents, null, 2));
 
         uiCode += `   <widget class="QWidget" name="${screenId}">
     <property name="styleSheet">
       <string>background-color: rgba(${hexToRgba(
           screen.backgroundColor
       )});</string>
-    </property>
-`;
-        screen.components.forEach((component, componentIndex) => {
-            const compName =
-                component.componentId ||
-                `${component.type}${componentIndex}_screen${screenIndex}`;
+    </property>\n`; // Added newline for clarity
 
-            if (component.type === "PySideButton") {
-                uiCode += `    <widget class="QPushButton" name="${compName}">
-      <property name="text">
-        <string>${component.text}</string>
-      </property>
-      <property name="geometry">
-        <rect>
-          <x>${component.x}</x>
-          <y>${component.y}</y>
-          <width>${component.width}</width>
-          <height>${component.height}</height>
-        </rect>
-      </property>
-      <property name="styleSheet">
-        <string>
-            QPushButton {
-                color: rgba(${hexToRgba(component.textColor)});
-                background-color: rgba(${hexToRgba(component.backgroundColor)});
-                border-radius: ${component.radius}px;
-                font-size: ${component.fontSize}px;
-            }
-            QPushButton:hover {
-                background-color: rgba(${hexToRgba(component.hoverColor)});
-            }
-            QPushButton:pressed {
-                background-color: rgba(${hexToRgba(component.pressedColor)});
-            }
-        </string>
-      </property>
-    </widget>
-`;
-            } else if (component.type === "PySideLabel") {
-                uiCode += `    <widget class="QLabel" name="${compName}">
-      <property name="text">
-        <string>${component.text}</string>
-      </property>
-      <property name="geometry">
-        <rect>
-          <x>${component.x}</x>
-          <y>${component.y}</y>
-          <width>${component.width}</width>
-          <height>${component.height}</height>
-        </rect>
-      </property>
-      <property name="styleSheet">
-        <string>
-            QLabel {
-                color: rgba(${hexToRgba(component.textColor)});
-                background-color: rgba(${hexToRgba(component.backgroundColor)});
-                border-radius: ${component.radius}px;
-                font-size: ${component.fontSize}px;
-                border: 1px solid rgba(${hexToRgba(component.borderColor)});
-            }
-        </string>
-      </property>
-    </widget>
-`;
-            } else if (component.type === "PySideSlider") {
-                const orientation =
-                    component.orientation === "vertical"
-                        ? "Qt::Orientation::Vertical"
-                        : "Qt::Orientation::Horizontal";
-                uiCode += `    <widget class="QSlider" name="${compName}">
-      <property name="orientation">
-        <enum>${orientation}</enum>
-      </property>
-      <property name="minimum">
-        <number>${component.minimum}</number>
-      </property>
-      <property name="maximum">
-        <number>${component.maximum}</number>
-      </property>
-      <property name="value">
-        <number>${component.value}</number>
-      </property>
-      <property name="geometry">
-        <rect>
-          <x>${component.x}</x>
-          <y>${component.y}</y>
-          <width>${component.width}</width>
-          <height>${component.height}</height>
-        </rect>
-      </property>
-      <property name="styleSheet">
-        <string>
-            QSlider {
-                background-color: rgba(${hexToRgba(component.backgroundColor)});
-            }
-            QSlider::groove:${
-                component.orientation === "vertical" ? "vertical" : "horizontal"
-            } {
-                background: rgba(204, 204, 204, 1);
-                ${
-                    component.orientation === "vertical"
-                        ? "width: 8px; margin: 0 2px;"
-                        : "height: 8px; margin: 2px 0;"
-                }
-            }
-            QSlider::handle:${
-                component.orientation === "vertical" ? "vertical" : "horizontal"
-            } {
-                background: rgba(${hexToRgba(component.sliderColor)});
-                border: 1px solid rgba(92, 92, 92, 1);
-                width: 16px;
-                height: 16px;
-                margin: -4px 0;
-                border-radius: 8px;
-            }
-        </string>
-      </property>
-    </widget>
-`;
-            }
+        // Generate XML for top-level components and their children recursively
+        topLevelComponents.forEach((component) => {
+            uiCode += generateComponentXml(component, allComponents, 2); // Start indent level at 2
         });
-        uiCode += `   </widget>
-`;
+
+        uiCode += `   </widget>\n`; // Added newline
     });
     uiCode += `  </widget>
  </widget>
@@ -231,5 +298,6 @@ export const generateQtUiFile = (
  <connections/>
 </ui>
 `;
+    console.log("--- Finished UI File Generation ---");
     return uiCode;
 };

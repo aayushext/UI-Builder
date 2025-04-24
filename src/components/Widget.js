@@ -20,98 +20,108 @@ const Widget = ({
     zoomLevel = 1,
 }) => {
     const [isHovered, setIsHovered] = useState(false);
-    const [tempDimensions, setTempDimensions] = useState({
-        width,
-        height,
-        x,
-        y,
-    });
 
     const actualPosition = { x: x, y: y };
     const actualSize = { width: width, height: height };
 
     return (
         <Rnd
-            default={{
-                x: x,
-                y: y,
-                width: width,
-                height: height,
-            }}
             position={actualPosition}
             size={actualSize}
             scale={zoomLevel}
             style={{
-                border: isSelected ? "2px solid blue" : "0px solid black",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                border: isSelected
+                    ? `2px solid blue`
+                    : isHovered
+                      ? `1px dashed gray`
+                      : "none",
+                position: "absolute",
+                boxSizing: "border-box",
             }}
             bounds="parent"
             data-id={id}
-            onResize={(e, direction, ref, delta, position) => {
-                const newDimensions = {
-                    width: Math.round(ref.offsetWidth * 100) / 100,
-                    height: Math.round(ref.offsetHeight * 100) / 100,
-                    x: Math.round(position.x * 100) / 100,
-                    y: Math.round(position.y * 100) / 100,
-                };
-                setTempDimensions(newDimensions);
-                onResize(id, newDimensions, true);
+            enableResizing={{
+                top: true,
+                right: true,
+                bottom: true,
+                left: true,
+                topRight: true,
+                bottomRight: true,
+                bottomLeft: true,
+                topLeft: true,
+            }}
+            onDragStart={(e) => {
+                e.stopPropagation(); // Prevent drag start from bubbling to parent
             }}
             onResizeStop={(e, direction, ref, delta, position) => {
+                e.stopPropagation(); // Prevent event bubbling
                 const finalDimensions = {
-                    width: Math.round(ref.offsetWidth * 100) / 100,
-                    height: Math.round(ref.offsetHeight * 100) / 100,
-                    x: Math.round(position.x * 100) / 100,
-                    y: Math.round(position.y * 100) / 100,
+                    width: Math.round(ref.offsetWidth / zoomLevel),
+                    height: Math.round(ref.offsetHeight / zoomLevel),
+                    x: Math.round(position.x),
+                    y: Math.round(position.y),
                 };
                 onResize(id, finalDimensions);
             }}
             onDragStop={(e, d) => {
+                e.stopPropagation(); // Prevent event bubbling
                 onMove(id, {
-                    x: Math.round(d.x * 100) / 100,
-                    y: Math.round(d.y * 100) / 100,
+                    x: Math.round(d.x),
+                    y: Math.round(d.y),
                 });
             }}
-            onClick={() => onSelect(id)}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(id);
+            }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
-            <div className="relative w-full h-full ">
+            <div
+                className="relative w-full h-full"
+                style={{ pointerEvents: "none" }}>
+                <div
+                    className="absolute inset-0"
+                    style={{ pointerEvents: "auto" }}>
+                    {children}
+                </div>
+
                 {(isHovered || isSelected) && (
-                    <>
-                        {/* Duplicate button */}
+                    <div
+                        className="absolute -top-3 -right-3 flex gap-1"
+                        style={{ pointerEvents: "auto", zIndex: 10 }}>
                         <button
-                            onClick={() => onDuplicate()}
-                            className="absolute -top-4 right-1 bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded-full text-xs -mt-3 -ml-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDuplicate();
+                            }}
+                            className="bg-blue-500 hover:bg-blue-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
                             style={{
-                                minWidth: "24px",
+                                minWidth: "20px",
                                 touchAction: "manipulation",
-                            }}>
-                            <IconContext.Provider value={{ size: "1em" }}>
-                                <div>
-                                    <FaCopy />
-                                </div>
+                            }}
+                            title="Duplicate">
+                            <IconContext.Provider value={{ size: "0.7em" }}>
+                                <FaCopy />
                             </IconContext.Provider>
                         </button>
 
-                        {/* Delete button */}
                         <button
-                            onClick={() => onDelete(id)}
-                            className="absolute -top-4 -right-3 bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-full -mt-3 -mr-3 w-6 h-6 flex items-center justify-center shadow-sm transition"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(id);
+                            }}
+                            className="bg-red-500 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
                             style={{
-                                minWidth: "24px",
+                                minWidth: "20px",
                                 touchAction: "manipulation",
-                            }}>
-                            <IconContext.Provider value={{ size: "1em" }}>
-                                <div>
-                                    <IoMdClose />
-                                </div>
+                            }}
+                            title="Delete">
+                            <IconContext.Provider value={{ size: "0.8em" }}>
+                                <IoMdClose />
                             </IconContext.Provider>
                         </button>
-                    </>
+                    </div>
                 )}
-                {children}
             </div>
         </Rnd>
     );

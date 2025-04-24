@@ -4,8 +4,109 @@ import Widget from "./Widget";
 import PySideButton from "@/components/pyside-components/PySideButton";
 import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
+import PySideFrame from "@/components/pyside-components/PySideFrame"; // Import Frame
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useAppStore } from "../store/useAppStore";
+
+// Helper function to render components recursively
+const renderComponent = (
+    component,
+    allComponents,
+    selectedComponentId,
+    handlers,
+    zoomLevel
+    // Removed parentAbsolutePos - position is now always relative to the DOM parent
+) => {
+    const {
+        onDeleteComponent,
+        onDuplicateComponent,
+        onResizeComponent,
+        onMoveComponent,
+        onSelectComponent,
+    } = handlers;
+
+    // Find children ONLY if the current component is a Frame
+    let renderedChildren = null;
+    if (component.type === "PySideFrame") {
+        renderedChildren = allComponents
+            .filter((comp) => comp.parentId === component.id)
+            .map((childComp) =>
+                renderComponent(
+                    // Recursive call for children
+                    childComp,
+                    allComponents,
+                    selectedComponentId,
+                    handlers,
+                    zoomLevel
+                )
+            );
+    }
+
+    return (
+        <Widget
+            key={component.id}
+            id={component.id}
+            // Pass the component's stored X and Y (relative to parent)
+            x={component.x}
+            y={component.y}
+            width={component.width}
+            height={component.height}
+            onDelete={onDeleteComponent}
+            onDuplicate={onDuplicateComponent}
+            onResize={onResizeComponent} // onResize needs adjustment in store if x/y changes
+            onMove={onMoveComponent} // onMove needs adjustment in store
+            onSelect={onSelectComponent}
+            isSelected={component.id === selectedComponentId}
+            zoomLevel={zoomLevel}>
+            {/* Render the specific PySide component */}
+            {/* Pass rendered children down to the Widget, which will pass it to PySideFrame */}
+            {component.type === "PySideButton" && (
+                <PySideButton
+                    text={component.text}
+                    fontSize={component.fontSize}
+                    textColor={component.textColor}
+                    backgroundColor={component.backgroundColor}
+                    radius={component.radius}
+                    pressedColor={component.pressedColor}
+                    hoverColor={component.hoverColor}
+                />
+            )}
+            {component.type === "PySideLabel" && (
+                <PySideLabel
+                    text={component.text}
+                    fontSize={component.fontSize}
+                    textColor={component.textColor}
+                    backgroundColor={component.backgroundColor}
+                    borderColor={component.borderColor}
+                    radius={component.radius}
+                />
+            )}
+            {component.type === "PySideSlider" && (
+                <PySideSlider
+                    width={component.width}
+                    height={component.height}
+                    minimum={component.minimum}
+                    maximum={component.maximum}
+                    value={component.value}
+                    orientation={component.orientation}
+                    sliderColor={component.sliderColor}
+                    backgroundColor={component.backgroundColor}
+                />
+            )}
+            {component.type === "PySideFrame" && (
+                <PySideFrame
+                    backgroundColor={component.backgroundColor}
+                    frameShape={component.frameShape}
+                    frameShadow={component.frameShadow}
+                    lineWidth={component.lineWidth}
+                    midLineWidth={component.midLineWidth}>
+                    {/* PySideFrame now renders the child Widgets passed down */}
+                    {renderedChildren}
+                </PySideFrame>
+            )}
+        </Widget>
+    );
+};
 
 const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
     const screens = useAppStore((s) => s.screens);
@@ -29,17 +130,31 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
     const onResetView = useAppStore((s) => s.handleResetView);
 
     const screen = screens[currentScreenIndex] || {};
-    const components = screen.components || [];
+    const allComponents = screen.components || [];
     const backgroundColor = screen.backgroundColor || "#ffffff";
     const screenWidth = screen.width || 1280;
     const screenHeight = screen.height || 800;
 
+    // Filter top-level components (those without a parent)
+    const topLevelComponents = allComponents.filter(
+        (comp) => comp.parentId === null
+    );
+
+    const handlers = {
+        onDeleteComponent,
+        onDuplicateComponent,
+        onResizeComponent,
+        onMoveComponent,
+        onSelectComponent,
+    };
+
     return (
         <main
             ref={ref}
-            className="flex-1 p-4 overflow-auto relative"
+            className="flex-1 p-4 overflow-hidden relative bg-gray-400 dark:bg-gray-900" // Changed overflow to hidden
             style={{
                 minWidth: 0,
+                cursor: useAppStore.getState().isPanning ? "grabbing" : "grab",
             }}
             onWheel={onWheel}
             onMouseDown={onPanStart}
@@ -47,70 +162,33 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
             onMouseUp={onPanEnd}
             onMouseLeave={onPanEnd}>
             <div
-                className="relative mx-auto"
+                className="relative mx-auto origin-top-left"
                 style={{
                     width: `${screenWidth}px`,
                     height: `${screenHeight}px`,
                     backgroundColor: backgroundColor,
                     boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-                    overflow: "hidden",
-                    transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
-                    transformOrigin: "center center",
-                    transition: "transform 0.1s ease-out",
+                    overflow: "hidden", // Keep overflow hidden for the main screen area
+                    transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
+                    transition: useAppStore.getState().isPanning
+                        ? "none"
+                        : "transform 0.1s ease-out",
+                    willChange: "transform",
+                    // This div establishes the absolute positioning context for top-level Widgets
                 }}>
-                {components.map((component) => (
-                    <Widget
-                        key={component.id}
-                        id={component.id}
-                        x={component.x}
-                        y={component.y}
-                        width={component.width}
-                        height={component.height}
-                        onDelete={onDeleteComponent}
-                        onDuplicate={onDuplicateComponent}
-                        onResize={onResizeComponent}
-                        onMove={onMoveComponent}
-                        onSelect={onSelectComponent}
-                        isSelected={component.id === selectedComponentId}
-                        zoomLevel={zoomLevel}>
-                        {component.type === "PySideButton" && (
-                            <PySideButton
-                                text={component.text}
-                                fontSize={component.fontSize}
-                                textColor={component.textColor}
-                                backgroundColor={component.backgroundColor}
-                                radius={component.radius}
-                                pressedColor={component.pressedColor}
-                                hoverColor={component.hoverColor}
-                            />
-                        )}
-                        {component.type === "PySideLabel" && (
-                            <PySideLabel
-                                text={component.text}
-                                fontSize={component.fontSize}
-                                textColor={component.textColor}
-                                backgroundColor={component.backgroundColor}
-                                borderColor={component.borderColor}
-                                radius={component.radius}
-                            />
-                        )}
-                        {component.type === "PySideSlider" && (
-                            <PySideSlider
-                                width={component.width}
-                                height={component.height}
-                                minimum={component.minimum}
-                                maximum={component.maximum}
-                                value={component.value}
-                                orientation={component.orientation}
-                                sliderColor={component.sliderColor}
-                                backgroundColor={component.backgroundColor}
-                            />
-                        )}
-                    </Widget>
-                ))}
+                {/* Render only top-level components; children are rendered recursively inside their parent's Widget */}
+                {topLevelComponents.map((component) =>
+                    renderComponent(
+                        component,
+                        allComponents,
+                        selectedComponentId,
+                        handlers,
+                        zoomLevel
+                    )
+                )}
             </div>
             {/* Zoom controls */}
-            <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg">
+            <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg z-50">
                 <button
                     onClick={onZoomOut}
                     className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"

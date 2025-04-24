@@ -171,6 +171,70 @@
                     "label": "Background Color"
                 }
             ]
+        },
+        {
+            "type": "PySideFrame",
+            "displayName": "Frame",
+            "icon": "frame-icon",
+            "defaultProps": {
+                "width": 300,
+                "height": 200,
+                "backgroundColor": "#e0e0e0",
+                "frameShape": "StyledPanel",
+                "frameShadow": "Sunken",
+                "lineWidth": 1,
+                "midLineWidth": 0
+            },
+            "properties": [
+                {
+                    "name": "componentId",
+                    "type": "text",
+                    "label": "Component ID"
+                },
+                {
+                    "name": "backgroundColor",
+                    "type": "color",
+                    "label": "Background Color"
+                },
+                {
+                    "name": "frameShape",
+                    "type": "select",
+                    "label": "Frame Shape",
+                    "options": [
+                        { "value": "NoFrame", "label": "No Frame" },
+                        { "value": "Box", "label": "Box" },
+                        { "value": "Panel", "label": "Panel" },
+                        { "value": "StyledPanel", "label": "Styled Panel" },
+                        { "value": "HLine", "label": "Horizontal Line" },
+                        { "value": "VLine", "label": "Vertical Line" },
+                        { "value": "WinPanel", "label": "Win Panel" }
+                    ]
+                },
+                {
+                    "name": "frameShadow",
+                    "type": "select",
+                    "label": "Frame Shadow",
+                    "options": [
+                        { "value": "Plain", "label": "Plain" },
+                        { "value": "Raised", "label": "Raised" },
+                        { "value": "Sunken", "label": "Sunken" }
+                    ]
+                },
+                {
+                    "name": "lineWidth",
+                    "type": "number",
+                    "label": "Line Width",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "name": "midLineWidth",
+                    "type": "number",
+                    "label": "Mid-Line Width",
+                    "min": 0,
+                    "step": 1
+                }
+            ]
         }
     ]
 }
