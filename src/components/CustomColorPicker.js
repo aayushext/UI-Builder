@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import { HexAlphaColorPicker } from "react-colorful";
 
 const CustomColorPicker = ({ value, onChange }) => {
@@ -35,7 +36,6 @@ const CustomColorPicker = ({ value, onChange }) => {
         }
     }, [isPickerOpen]);
 
-    // Handle clicks outside the picker to close it
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -94,11 +94,17 @@ const CustomColorPicker = ({ value, onChange }) => {
                         className="mt-2 py-1 px-2 block w-full rounded-md bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         value={color}
                         onChange={(e) => handleColorChange(e.target.value)}
+                        onMouseDown={(e) => e.stopPropagation()}
                     />
                 </div>
             )}
         </div>
     );
+};
+
+CustomColorPicker.propTypes = {
+    value: PropTypes.string,
+    onChange: PropTypes.func.isRequired,
 };
 
 export default CustomColorPicker;

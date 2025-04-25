@@ -13,47 +13,10 @@ export default function Home() {
         height: 1000,
     });
 
-    // Zustand store selectors
-    const {
-        screens,
-        nextScreenId,
-        currentScreenIndex,
-        nextComponentId,
-        selectedComponentId,
-        zoomLevel,
-        minZoom,
-        maxZoom,
-        panPosition,
-        isPanning,
-        lastMousePosition,
-        addComponent,
-        addScreen,
-        updateScreenCustomId,
-        deleteScreen,
-        deleteComponent,
-        resizeComponent,
-        moveComponent,
-        updateComponentProps,
-        updateScreenBackgroundColor,
-        updateScreenDimensions,
-        selectComponent,
-        duplicateComponent,
-        setCurrentScreenIndex,
-        setZoomLevel,
-        setPanPosition,
-        setIsPanning,
-        setLastMousePosition,
-        handleZoomIn,
-        handleZoomOut,
-        handleWheel,
-        handlePanStart,
-        handlePanMove,
-        handlePanEnd,
-        handleResetView,
-        handleExport,
-        handleSaveToUiFile,
-        handleLoadFromUiFile,
-    } = useAppStore();
+    const screens = useAppStore((s) => s.screens);
+    const currentScreenIndex = useAppStore((s) => s.currentScreenIndex);
+    const selectedComponentId = useAppStore((s) => s.selectedComponentId);
+    const selectComponent = useAppStore((s) => s.selectComponent);
 
     useEffect(() => {
         if (centerPanelRef.current) {
@@ -64,7 +27,6 @@ export default function Home() {
         }
     }, [screens, currentScreenIndex]);
 
-    // Deselect component on outside click
     useEffect(() => {
         const inputElements = ["INPUT", "SELECT", "TEXTAREA"];
         let isAdjustingInput = false;

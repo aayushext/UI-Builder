@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 const PySideLabel = ({
     text,
     fontSize,
@@ -22,6 +24,15 @@ const PySideLabel = ({
             {text}
         </label>
     );
+};
+
+PySideLabel.propTypes = {
+    text: PropTypes.string,
+    fontSize: PropTypes.number,
+    textColor: PropTypes.string,
+    backgroundColor: PropTypes.string,
+    borderColor: PropTypes.string,
+    radius: PropTypes.number,
 };
 
 export default PySideLabel;

@@ -1,21 +1,20 @@
-import React from "react";
+import React, { useMemo } from "react";
+import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import Widget from "./Widget";
 import PySideButton from "@/components/pyside-components/PySideButton";
 import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
-import PySideFrame from "@/components/pyside-components/PySideFrame"; // Import Frame
+import PySideFrame from "@/components/pyside-components/PySideFrame";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useAppStore } from "../store/useAppStore";
 
-// Helper function to render components recursively
 const renderComponent = (
     component,
     allComponents,
     selectedComponentId,
     handlers,
     zoomLevel
-    // Removed parentAbsolutePos - position is now always relative to the DOM parent
 ) => {
     const {
         onDeleteComponent,
@@ -25,14 +24,12 @@ const renderComponent = (
         onSelectComponent,
     } = handlers;
 
-    // Find children ONLY if the current component is a Frame
     let renderedChildren = null;
     if (component.type === "PySideFrame") {
         renderedChildren = allComponents
             .filter((comp) => comp.parentId === component.id)
             .map((childComp) =>
                 renderComponent(
-                    // Recursive call for children
                     childComp,
                     allComponents,
                     selectedComponentId,
@@ -46,7 +43,7 @@ const renderComponent = (
         <Widget
             key={component.id}
             id={component.id}
-            componentType={component.type} // NEW: pass type for z-index
+            componentType={component.type}
             x={component.x}
             y={component.y}
             width={component.width}
@@ -59,7 +56,6 @@ const renderComponent = (
             isSelected={component.id === selectedComponentId}
             zoomLevel={zoomLevel}>
             {/* Render the specific PySide component */}
-            {/* Pass rendered children down to the Widget, which will pass it to PySideFrame */}
             {component.type === "PySideButton" && (
                 <PySideButton
                     text={component.text}
@@ -100,7 +96,6 @@ const renderComponent = (
                     frameShadow={component.frameShadow}
                     lineWidth={component.lineWidth}
                     midLineWidth={component.midLineWidth}>
-                    {/* PySideFrame now renders the child Widgets passed down */}
                     {renderedChildren}
                 </PySideFrame>
             )}
@@ -135,23 +130,31 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
     const screenWidth = screen.width || 1280;
     const screenHeight = screen.height || 800;
 
-    // Filter top-level components (those without a parent)
     const topLevelComponents = allComponents.filter(
         (comp) => comp.parentId === null
     );
 
-    const handlers = {
-        onDeleteComponent,
-        onDuplicateComponent,
-        onResizeComponent,
-        onMoveComponent,
-        onSelectComponent,
-    };
+    const handlers = useMemo(
+        () => ({
+            onDeleteComponent,
+            onDuplicateComponent,
+            onResizeComponent,
+            onMoveComponent,
+            onSelectComponent,
+        }),
+        [
+            onDeleteComponent,
+            onDuplicateComponent,
+            onResizeComponent,
+            onMoveComponent,
+            onSelectComponent,
+        ]
+    );
 
     return (
         <main
             ref={ref}
-            className="flex-1 p-4 overflow-hidden relative bg-gray-400 dark:bg-gray-900" // Changed overflow to hidden
+            className="flex-1 p-4 overflow-hidden relative bg-gray-400 dark:bg-gray-900"
             style={{
                 minWidth: 0,
                 cursor: useAppStore.getState().isPanning ? "grabbing" : "grab",
@@ -168,15 +171,14 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                     height: `${screenHeight}px`,
                     backgroundColor: backgroundColor,
                     boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-                    overflow: "hidden", // Keep overflow hidden for the main screen area
+                    overflow: "hidden",
                     transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
                     transition: useAppStore.getState().isPanning
                         ? "none"
                         : "transform 0.1s ease-out",
                     willChange: "transform",
-                    // This div establishes the absolute positioning context for top-level Widgets
                 }}>
-                {/* Render only top-level components; children are rendered recursively inside their parent's Widget */}
+                {/* Render only top-level components;*/}
                 {topLevelComponents.map((component) =>
                     renderComponent(
                         component,

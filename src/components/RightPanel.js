@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import { getComponentDefinitionByType } from "../utils/componentLoader";
 import CustomColorPicker from "./CustomColorPicker";
 import { useAppStore } from "../store/useAppStore";
@@ -57,6 +58,27 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
         default:
             return <div>Unknown property type: {property.type}</div>;
     }
+};
+
+PropertyEditor.propTypes = {
+    property: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        label: PropTypes.string,
+        step: PropTypes.number,
+        min: PropTypes.number,
+        max: PropTypes.number,
+        hasMaxRadius: PropTypes.bool,
+        options: PropTypes.arrayOf(
+            PropTypes.shape({
+                value: PropTypes.string.isRequired,
+                label: PropTypes.string.isRequired,
+            })
+        ),
+    }).isRequired,
+    value: PropTypes.any,
+    onChange: PropTypes.func.isRequired,
+    component: PropTypes.object.isRequired,
 };
 
 const RightPanel = () => {
@@ -212,7 +234,7 @@ const RightPanel = () => {
                         Duplicate Widget
                     </button>
 
-                    {/* Position and size properties are always available */}
+                    {/* Position and size properties */}
                     <div className="mb-4">
                         <label
                             htmlFor="x"
@@ -301,7 +323,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    {/* Dynamically render property editors based on component definition */}
+                    {/* Dynamically render property editors */}
                     {componentDefinition.properties.map((property) => (
                         <div className="mb-4" key={property.name}>
                             <label
@@ -331,5 +353,7 @@ const RightPanel = () => {
         </aside>
     );
 };
+
+RightPanel.propTypes = {};
 
 export default RightPanel;

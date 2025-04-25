@@ -1,8 +1,11 @@
 import { generateQtUiFile } from "@/utils/generatePySideCode";
 
-// Function to parse a hex color from rgba format (returns #RRGGBB or #RRGGBBAA)
+/**
+ * Parses an rgba color string into a hex color string (#RRGGBB or #RRGGBBAA).
+ * @param {string} rgbaStr - The rgba color string (e.g., "rgba(255, 0, 0, 0.5)").
+ * @returns {string} The hex color string, or #000000 if parsing fails.
+ */
 const parseRgba = (rgbaStr) => {
-    // Match rgba format (r, g, b, a)
     const match = rgbaStr.match(
         /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/
     );
@@ -26,21 +29,45 @@ const parseRgba = (rgbaStr) => {
     return `#${rHex}${gHex}${bHex}${aHex}`;
 };
 
+/**
+ * Exports the current design screens to a downloadable .ui file.
+ * @param {Array} screens - Array of screen objects.
+ * @param {number} currentScreenIndex - Index of the currently active screen.
+ */
 export const exportToUiFile = (screens, currentScreenIndex) => {
-    const uiFile = generateQtUiFile(screens, currentScreenIndex);
-    const blob = new Blob([uiFile], { type: "application/xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "ui-design.ui";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+        const uiFile = generateQtUiFile(screens, currentScreenIndex);
+        const blob = new Blob([uiFile], {
+            type: "application/xml;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "ui-design.ui";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Failed to export UI file:", error);
+        alert(`Error exporting UI file: ${error.message}`);
+    }
 };
 
+/**
+ * Imports application state from a .ui file.
+ * @param {File} file - The .ui file to import.
+ * @returns {Promise<object>} A promise that resolves with the parsed application state object
+ *                            (containing screens, next IDs, etc.) or rejects with an error.
+ */
 export const importFromUiFile = (file) => {
     return new Promise((resolve, reject) => {
+        if (!file || !file.name.endsWith(".ui")) {
+            return reject(
+                new Error("Invalid file type. Please select a .ui file.")
+            );
+        }
+
         const reader = new FileReader();
 
         reader.onload = (event) => {
@@ -51,19 +78,42 @@ export const importFromUiFile = (file) => {
                     "text/xml"
                 );
 
+                const parserError = xmlDoc.querySelector("parsererror");
+                if (parserError) {
+                    throw new Error(
+                        `XML parsing error: ${parserError.textContent}`
+                    );
+                }
+
                 const appState = parseUiFile(xmlDoc);
                 resolve(appState);
             } catch (error) {
-                reject(new Error(`Failed to parse UI file: ${error.message}`));
+                console.error("Error parsing UI file:", error);
+                reject(
+                    new Error(
+                        `Failed to parse UI file: ${error.message}. Please ensure it's a valid Qt Designer file.`
+                    )
+                );
             }
         };
 
-        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.onerror = (event) => {
+            console.error("File reading error:", event.target.error);
+            reject(new Error(`Failed to read file: ${event.target.error}`));
+        };
+
         reader.readAsText(file);
     });
 };
 
-// Recursive function to parse components
+/**
+ * Recursively parses a widget element from the XML DOM into a component object.
+ * @param {Element} componentWidget - The XML element representing the widget.
+ * @param {number | null} parentId - The ID of the parent component (null for top-level).
+ * @param {{value: number}} nextComponentIdRef - A reference object to track the next available component ID.
+ * @returns {Array<object>} An array containing the parsed component and any parsed descendants.
+ * @private
+ */
 const parseComponentWidget = (
     componentWidget,
     parentId,
@@ -76,11 +126,11 @@ const parseComponentWidget = (
         QPushButton: "PySideButton",
         QLabel: "PySideLabel",
         QSlider: "PySideSlider",
-        QFrame: "PySideFrame", // Add Frame mapping
+        QFrame: "PySideFrame",
     };
 
     if (!typeMap[componentTypeQt]) {
-        return []; // Skip unknown widget types or the container itself
+        return [];
     }
 
     const currentId = nextComponentIdRef.value++;
@@ -88,13 +138,12 @@ const parseComponentWidget = (
         id: currentId,
         type: typeMap[componentTypeQt],
         componentId,
-        parentId, // Assign parent ID
+        parentId,
     };
 
-    // Common properties
     const geometry = componentWidget.querySelector(
         ":scope > property[name='geometry'] > rect"
-    ); // Use :scope for direct children
+    );
     if (geometry) {
         component.x = parseInt(geometry.querySelector("x").textContent);
         component.y = parseInt(geometry.querySelector("y").textContent);
@@ -103,7 +152,6 @@ const parseComponentWidget = (
             geometry.querySelector("height").textContent
         );
     } else {
-        // Default geometry if missing (shouldn't happen in valid .ui)
         component.x = 0;
         component.y = 0;
         component.width = 100;
@@ -112,9 +160,8 @@ const parseComponentWidget = (
 
     const componentStyle = componentWidget.querySelector(
         ":scope > property[name='styleSheet'] > string"
-    ); // Use :scope
+    );
 
-    // Type-specific properties
     if (component.type === "PySideButton" || component.type === "PySideLabel") {
         const textProp = componentWidget.querySelector(
             ":scope > property[name='text'] > string"
@@ -156,7 +203,7 @@ const parseComponentWidget = (
             } else if (component.type === "PySideLabel") {
                 const borderColorMatch = content.match(
                     /border:\s*1px solid rgba\(([^)]+)\)/
-                ); // Assuming 1px solid border
+                );
                 if (borderColorMatch)
                     component.borderColor = parseRgba(
                         `rgba(${borderColorMatch[1]})`
@@ -243,13 +290,12 @@ const parseComponentWidget = (
     setDefaultProperties(component);
     let parsedComponents = [component];
 
-    // Recursively parse children for frames
     if (component.type === "PySideFrame") {
         const childWidgets =
-            componentWidget.querySelectorAll(":scope > widget"); // Direct children only
+            componentWidget.querySelectorAll(":scope > widget");
         childWidgets.forEach((childWidget) => {
             parsedComponents = parsedComponents.concat(
-                parseComponentWidget(childWidget, currentId, nextComponentIdRef) // Pass current component's ID as parentId
+                parseComponentWidget(childWidget, currentId, nextComponentIdRef)
             );
         });
     }
@@ -257,9 +303,16 @@ const parseComponentWidget = (
     return parsedComponents;
 };
 
+/**
+ * Parses the entire .ui file XML document into an application state object.
+ * @param {XMLDocument} xmlDoc - The parsed XML document.
+ * @returns {object} The application state object { screens, nextScreenId, currentScreenIndex, nextComponentId }.
+ * @throws {Error} If the expected structure (QMainWindow > QStackedWidget > QWidget) is not found.
+ * @private
+ */
 const parseUiFile = (xmlDoc) => {
     const screens = [];
-    let nextComponentIdRef = { value: 0 }; // Use ref object for mutable counter
+    let nextComponentIdRef = { value: 0 };
 
     const mainWindow = xmlDoc.querySelector("widget[class='QMainWindow']");
     if (!mainWindow) throw new Error("QMainWindow widget not found in UI file");
@@ -294,7 +347,7 @@ const parseUiFile = (xmlDoc) => {
         const styleSheet = screenWidget.querySelector(
             ":scope > property[name='styleSheet'] > string"
         );
-        let backgroundColor = "#ffffff"; // Default screen background
+        let backgroundColor = "#ffffff";
         if (styleSheet) {
             const bgColorMatch = styleSheet.textContent.match(
                 /background-color:\s*rgba\(([^)]+)\)/
@@ -314,16 +367,15 @@ const parseUiFile = (xmlDoc) => {
             height: defaultHeight,
         };
 
-        // Parse top-level components within the screen widget
         const componentWidgets =
-            screenWidget.querySelectorAll(":scope > widget"); // Direct children only
+            screenWidget.querySelectorAll(":scope > widget");
         componentWidgets.forEach((componentWidget) => {
             screen.components.push(
                 ...parseComponentWidget(
                     componentWidget,
                     null,
                     nextComponentIdRef
-                ) // Parent is null for top-level
+                )
             );
         });
 
@@ -338,8 +390,12 @@ const parseUiFile = (xmlDoc) => {
     };
 };
 
+/**
+ * Sets default property values for a component if they are missing after parsing.
+ * @param {object} component - The component object to set defaults for.
+ * @private
+ */
 const setDefaultProperties = (component) => {
-    // ... existing defaults for Button, Label, Slider ...
     if (component.type === "PySideButton") {
         component.text = component.text ?? "Button";
         component.fontSize = component.fontSize ?? 16;

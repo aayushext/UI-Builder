@@ -1,8 +1,53 @@
 import { Rnd } from "react-rnd";
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+
+const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
+    <div
+        className="absolute -top-3 -right-3 flex gap-1"
+        style={{ pointerEvents: "auto", zIndex: 10 }}>
+        <button
+            onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate();
+            }}
+            className="bg-blue-500 hover:bg-blue-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
+            style={{
+                minWidth: "20px",
+                touchAction: "manipulation",
+            }}
+            title="Duplicate">
+            <IconContext.Provider value={{ size: "0.7em" }}>
+                <FaCopy />
+            </IconContext.Provider>
+        </button>
+
+        <button
+            onClick={(e) => {
+                e.stopPropagation();
+                onDelete(id);
+            }}
+            className="bg-red-500 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
+            style={{
+                minWidth: "20px",
+                touchAction: "manipulation",
+            }}
+            title="Delete">
+            <IconContext.Provider value={{ size: "0.8em" }}>
+                <IoMdClose />
+            </IconContext.Provider>
+        </button>
+    </div>
+);
+
+WidgetToolbar.propTypes = {
+    id: PropTypes.number.isRequired,
+    onDuplicate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
+};
 
 const Widget = ({
     id,
@@ -90,52 +135,41 @@ const Widget = ({
             <div
                 className="relative w-full h-full"
                 style={{ pointerEvents: "none" }}>
+                {/* Component Container */}
                 <div
                     className="absolute inset-0"
                     style={{ pointerEvents: "auto" }}>
                     {children}
                 </div>
 
+                {/* Toolbar */}
                 {(isHovered || isSelected) && (
-                    <div
-                        className="absolute -top-3 -right-3 flex gap-1"
-                        style={{ pointerEvents: "auto", zIndex: 10 }}>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDuplicate();
-                            }}
-                            className="bg-blue-500 hover:bg-blue-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
-                            style={{
-                                minWidth: "20px",
-                                touchAction: "manipulation",
-                            }}
-                            title="Duplicate">
-                            <IconContext.Provider value={{ size: "0.7em" }}>
-                                <FaCopy />
-                            </IconContext.Provider>
-                        </button>
-
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDelete(id);
-                            }}
-                            className="bg-red-500 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
-                            style={{
-                                minWidth: "20px",
-                                touchAction: "manipulation",
-                            }}
-                            title="Delete">
-                            <IconContext.Provider value={{ size: "0.8em" }}>
-                                <IoMdClose />
-                            </IconContext.Provider>
-                        </button>
-                    </div>
+                    <WidgetToolbar
+                        id={id}
+                        onDuplicate={onDuplicate}
+                        onDelete={onDelete}
+                    />
                 )}
             </div>
         </Rnd>
     );
+};
+
+Widget.propTypes = {
+    id: PropTypes.number.isRequired,
+    componentType: PropTypes.string.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    onDuplicate: PropTypes.func.isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    children: PropTypes.node,
+    onResize: PropTypes.func.isRequired,
+    onMove: PropTypes.func.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    isSelected: PropTypes.bool.isRequired,
+    zoomLevel: PropTypes.number,
 };
 
 export default Widget;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 const PySideButton = ({
     text,
@@ -42,6 +43,16 @@ const PySideButton = ({
             {text}
         </button>
     );
+};
+
+PySideButton.propTypes = {
+    text: PropTypes.string,
+    fontSize: PropTypes.number,
+    textColor: PropTypes.string,
+    backgroundColor: PropTypes.string,
+    radius: PropTypes.number,
+    pressedColor: PropTypes.string,
+    hoverColor: PropTypes.string,
 };
 
 export default PySideButton;

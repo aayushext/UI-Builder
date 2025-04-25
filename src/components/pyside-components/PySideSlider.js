@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const PySideSlider = ({
     width,
@@ -81,6 +82,17 @@ const PySideSlider = ({
             />
         </div>
     );
+};
+
+PySideSlider.propTypes = {
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    minimum: PropTypes.number,
+    maximum: PropTypes.number,
+    value: PropTypes.number,
+    orientation: PropTypes.oneOf(["horizontal", "vertical"]),
+    sliderColor: PropTypes.string,
+    backgroundColor: PropTypes.string,
 };
 
 export default PySideSlider;

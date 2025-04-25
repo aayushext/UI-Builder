@@ -1,3 +1,8 @@
+/**
+ * Converts a hex color string (with optional alpha) to an rgba CSS string fragment.
+ * @param {string | undefined} hex - The hex color string (e.g., #RRGGBB, #RGB, #RRGGBBAA).
+ * @returns {string} The rgba string fragment (e.g., "255, 0, 0, 0.5"). Defaults to "0, 0, 0, 1".
+ */
 const hexToRgba = (hex) => {
     if (!hex) return "0, 0, 0, 1";
 
@@ -31,116 +36,185 @@ const hexToRgba = (hex) => {
     return `${r}, ${g}, ${b}, ${a}`;
 };
 
+/**
+ * Generates the Python code for a basic PySide6 application that loads a .ui file.
+ * @returns {string} The Python loader code.
+ */
 export const generatePythonLoaderCode = () => {
     return `
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QSlider, QFrame, QStackedWidget # Import necessary widgets
 from PySide6.QtCore import QFile, QIODevice
 from PySide6.QtUiTools import QUiLoader
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.ui = None # Initialize ui attribute
         self.load_ui()
-        
+
     def load_ui(self):
-        ui_file = QFile("ui-designer.ui")
+        # Use a relative path or ensure the .ui file is in the correct location
+        ui_file_path = "ui-designer.ui"
+        ui_file = QFile(ui_file_path)
+
+        if not ui_file.exists():
+            print(f"UI file not found at: {ui_file_path}")
+            return
+
         if not ui_file.open(QIODevice.ReadOnly):
             print(f"Cannot open UI file: {ui_file.errorString()}")
             return
-            
+
         loader = QUiLoader()
-        self.ui = loader.load(ui_file)
-        ui_file.close()
-        
-        if not self.ui:
+        # Make custom widgets known to the loader if needed in the future
+        # loader.registerCustomWidget(MyCustomWidget)
+
+        try:
+            self.ui = loader.load(ui_file)
+        except Exception as e:
+            print(f"Error loading UI file: {e}")
             print(loader.errorString())
+            ui_file.close()
             return
-            
-        self.ui.show()
-        
-        # Connect any signals/slots here
-        # Example: self.ui.findChild(QPushButton, "myButton").clicked.connect(self.button_clicked)
-    
-    # Define your slot functions here
-    # def button_clicked(self):
-    #     print("Button clicked!")
+
+        ui_file.close()
+
+        if not self.ui:
+            print(f"Failed to load UI: {loader.errorString()}")
+            return
+
+        # Set the loaded UI as the central widget of the QMainWindow
+        self.setCentralWidget(self.ui)
+        self.setWindowTitle("UI Loader") # Set a window title
+
+        # --- Find Widgets and Connect Signals ---
+        # Example: Find a button named 'myButton' and connect its clicked signal
+        # try:
+        #     my_button = self.ui.findChild(QPushButton, "myButton")
+        #     if my_button:
+        #         my_button.clicked.connect(self.on_my_button_clicked)
+        #     else:
+        #         print("Widget 'myButton' not found.")
+        # except AttributeError as e:
+        #     print(f"Error finding/connecting widget: {e}")
+
+        # Add more findChild calls and signal connections as needed
+        # self.find_and_connect_widgets() # Optional: Move finding logic to a method
+
+        self.show() # Show the main window
+
+    # --- Optional: Method to find and connect multiple widgets ---
+    # def find_and_connect_widgets(self):
+    #     widget_connections = {
+    #         "button1": (QPushButton, self.on_button1_clicked),
+    #         "slider1": (QSlider, self.on_slider1_value_changed, "valueChanged"), # Specify signal
+    #         # Add more widgets here
+    #     }
+    #
+    #     for name, details in widget_connections.items():
+    #         widget_class = details[0]
+    #         slot_function = details[1]
+    #         signal_name = details[2] if len(details) > 2 else "clicked" # Default to clicked
+    #
+    #         try:
+    #             widget = self.ui.findChild(widget_class, name)
+    #             if widget:
+    #                 signal = getattr(widget, signal_name)
+    #                 signal.connect(slot_function)
+    #             else:
+    #                 print(f"Widget '{name}' not found.")
+    #         except AttributeError as e:
+    #             print(f"Error finding/connecting widget '{name}': {e}")
+    #         except Exception as e:
+    #              print(f"Unexpected error connecting widget '{name}': {e}")
+
+    # --- Define Slot Functions (Callbacks) ---
+    # def on_my_button_clicked(self):
+    #     print("My Button was clicked!")
+    #
+    # def on_slider1_value_changed(self, value):
+    #     print(f"Slider 1 value changed: {value}")
+
+    # Add more slot functions for other connected signals
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
-    sys.exit(app.exec())
+    if window.ui: # Only run exec if UI loaded successfully
+        sys.exit(app.exec())
+    else:
+        print("Application exiting due to UI load failure.")
+        sys.exit(1) # Indicate error exit
 `;
 };
 
+/**
+ * Recursively generates the XML string for a component and its children.
+ * @param {object} component - The component object.
+ * @param {Array} allComponents - The array of all components in the screen.
+ * @param {number} indentLevel - The current indentation level.
+ * @returns {string} The generated XML string for the component.
+ */
 const generateComponentXml = (component, allComponents, indentLevel) => {
     const indent = " ".repeat(indentLevel * 2);
     let xml = "";
-    const compName =
+    const compNameRaw =
         component.componentId ||
-        `${component.type}${component.id}_screen${component.parentId ?? "root"}`; // Use ID for uniqueness
-
-    // Log component being processed
-    console.log(
-        `${indent}Processing Component: ID=${component.id}, Type=${component.type}, ParentID=${component.parentId}, Name=${compName}`
-    );
+        `${component.type}${component.id}_screen${component.parentId ?? "root"}`;
+    const compName = compNameRaw.replace(/[^a-zA-Z0-9_]/g, "_"); // Sanitize
 
     const commonGeometry = `${indent}  <property name="geometry">
 ${indent}   <rect>
-${indent}    <x>${component.x}</x>
-${indent}    <y>${component.y}</y>
-${indent}    <width>${component.width}</width>
-${indent}    <height>${component.height}</height>
+${indent}    <x>${Math.round(component.x)}</x>
+${indent}    <y>${Math.round(component.y)}</y>
+${indent}    <width>${Math.round(component.width)}</width>
+${indent}    <height>${Math.round(component.height)}</height>
 ${indent}   </rect>
 ${indent}  </property>\n`;
 
     if (component.type === "PySideButton") {
         xml += `${indent}<widget class="QPushButton" name="${compName}">\n`;
         xml += `${indent}  <property name="text">
-${indent}    <string>${component.text}</string>
+${indent}    <string>${
+            component.text?.replace(/</g, "&lt;").replace(/>/g, "&gt;") || ""
+        }</string>
 ${indent}  </property>\n`;
         xml += commonGeometry;
         xml += `${indent}  <property name="styleSheet">
 ${indent}    <string>
-${indent}        QPushButton {
-${indent}            color: rgba(${hexToRgba(component.textColor)});
-${indent}            background-color: rgba(${hexToRgba(
-            component.backgroundColor
-        )});
-${indent}            border-radius: ${component.radius}px;
-${indent}            font-size: ${component.fontSize}px;
-${indent}        }
-${indent}        QPushButton:hover {
-${indent}            background-color: rgba(${hexToRgba(component.hoverColor)});
-${indent}        }
-${indent}        QPushButton:pressed {
-${indent}            background-color: rgba(${hexToRgba(
-            component.pressedColor
-        )});
-${indent}        }
+${indent}QPushButton {
+${indent}    color: rgba(${hexToRgba(component.textColor)});
+${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
+${indent}    border-radius: ${component.radius}px;
+${indent}    font-size: ${component.fontSize}px;
+${indent}}
+${indent}QPushButton:hover {
+${indent}    background-color: rgba(${hexToRgba(component.hoverColor)});
+${indent}}
+${indent}QPushButton:pressed {
+${indent}    background-color: rgba(${hexToRgba(component.pressedColor)});
+${indent}}
 ${indent}    </string>
 ${indent}  </property>\n`;
-        // Buttons typically don't have children in Qt Designer structure
         xml += `${indent}</widget>\n`;
     } else if (component.type === "PySideLabel") {
         xml += `${indent}<widget class="QLabel" name="${compName}">\n`;
         xml += `${indent}  <property name="text">
-${indent}    <string>${component.text}</string>
+${indent}    <string>${
+            component.text?.replace(/</g, "&lt;").replace(/>/g, "&gt;") || ""
+        }</string>
 ${indent}  </property>\n`;
         xml += commonGeometry;
         xml += `${indent}  <property name="styleSheet">
 ${indent}    <string>
-${indent}        QLabel {
-${indent}            color: rgba(${hexToRgba(component.textColor)});
-${indent}            background-color: rgba(${hexToRgba(
-            component.backgroundColor
-        )});
-${indent}            border-radius: ${component.radius}px;
-${indent}            font-size: ${component.fontSize}px;
-${indent}            border: 1px solid rgba(${hexToRgba(
-            component.borderColor
-        )});
-${indent}        }
+${indent}QLabel {
+${indent}    color: rgba(${hexToRgba(component.textColor)});
+${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
+${indent}    border-radius: ${component.radius}px;
+${indent}    font-size: ${component.fontSize}px;
+${indent}    border: 1px solid rgba(${hexToRgba(component.borderColor)});
+${indent}}
 ${indent}    </string>
 ${indent}  </property>\n`;
         xml += `${indent}</widget>\n`;
@@ -165,31 +239,49 @@ ${indent}  </property>\n`;
         xml += commonGeometry;
         xml += `${indent}  <property name="styleSheet">
 ${indent}    <string>
-${indent}        QSlider {
-${indent}            background-color: rgba(${hexToRgba(
-            component.backgroundColor
-        )});
-${indent}        }
-${indent}        QSlider::groove:${
-            component.orientation === "vertical" ? "vertical" : "horizontal"
-        } {
-${indent}            background: rgba(204, 204, 204, 1);
-${indent}            ${
+${indent}/* Base Slider Style */
+${indent}QSlider {
+${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
+${indent}}
+${indent}/* Groove (Track) */
+${indent}QSlider::groove:${component.orientation ?? "horizontal"} {
+${indent}    background: rgba(200, 200, 200, 1); /* Lighter gray track */
+${indent}    border: 1px solid rgba(150, 150, 150, 1);
+${indent}    border-radius: 4px;
+${indent}    ${
             component.orientation === "vertical"
-                ? "width: 8px; margin: 0 2px;"
-                : "height: 8px; margin: 2px 0;"
+                ? "width: 8px; margin: 0 4px;"
+                : "height: 8px; margin: 4px 0;"
         }
-${indent}        }
-${indent}        QSlider::handle:${
-            component.orientation === "vertical" ? "vertical" : "horizontal"
-        } {
-${indent}            background: rgba(${hexToRgba(component.sliderColor)});
-${indent}            border: 1px solid rgba(92, 92, 92, 1);
-${indent}            width: 16px;
-${indent}            height: 16px;
-${indent}            margin: -4px 0;
-${indent}            border-radius: 8px;
-${indent}        }
+${indent}}
+${indent}/* Handle (Thumb) */
+${indent}QSlider::handle:${component.orientation ?? "horizontal"} {
+${indent}    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(${hexToRgba(
+            component.sliderColor
+        )}), stop:1 rgba(${hexToRgba(component.sliderColor, 0.8)})); /* Gradient */
+${indent}    border: 1px solid rgba(50, 50, 50, 1);
+${indent}    width: 18px;  /* Slightly larger handle */
+${indent}    height: 18px;
+${indent}    ${
+            component.orientation === "vertical"
+                ? "margin: 0 -5px;"
+                : "margin: -5px 0;"
+        }
+${indent}    border-radius: 9px; /* Fully rounded */
+${indent}}
+${indent}/* Handle Hover/Pressed States (Optional) */
+${indent}QSlider::handle:${component.orientation ?? "horizontal"}:hover {
+${indent}    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(${hexToRgba(
+            component.sliderColor,
+            1.1
+        )}), stop:1 rgba(${hexToRgba(component.sliderColor, 0.9)}));
+${indent}}
+${indent}QSlider::handle:${component.orientation ?? "horizontal"}:pressed {
+${indent}    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(${hexToRgba(
+            component.sliderColor,
+            0.8
+        )}), stop:1 rgba(${hexToRgba(component.sliderColor, 0.7)}));
+${indent}}
 ${indent}    </string>
 ${indent}  </property>\n`;
         xml += `${indent}</widget>\n`;
@@ -197,36 +289,26 @@ ${indent}  </property>\n`;
         xml += `${indent}<widget class="QFrame" name="${compName}">\n`;
         xml += commonGeometry;
         xml += `${indent}  <property name="styleSheet">
-${indent}      <string>background-color: rgba(${hexToRgba(
+${indent}      <string>QFrame#${compName} { background-color: rgba(${hexToRgba(
             component.backgroundColor
-        )});</string>
+        )}); }</string>
 ${indent}  </property>\n`;
         xml += `${indent}  <property name="frameShape">
-${indent}      <enum>QFrame::${component.frameShape}</enum>
+${indent}      <enum>QFrame::${component.frameShape ?? "StyledPanel"}</enum>
 ${indent}  </property>\n`;
         xml += `${indent}  <property name="frameShadow">
-${indent}      <enum>QFrame::${component.frameShadow}</enum>
+${indent}      <enum>QFrame::${component.frameShadow ?? "Sunken"}</enum>
 ${indent}  </property>\n`;
         xml += `${indent}  <property name="lineWidth">
-${indent}      <number>${component.lineWidth}</number>
+${indent}      <number>${component.lineWidth ?? 1}</number>
 ${indent}  </property>\n`;
         xml += `${indent}  <property name="midLineWidth">
-${indent}      <number>${component.midLineWidth}</number>
+${indent}      <number>${component.midLineWidth ?? 0}</number>
 ${indent}  </property>\n`;
 
-        // Find and log children
         const children = allComponents.filter(
             (comp) => comp.parentId === component.id
         );
-        console.log(
-            `${indent}  Frame ${compName} (ID: ${component.id}) - Found ${
-                children.length
-            } children: [${children
-                .map((c) => `ID=${c.id}, Type=${c.type}`)
-                .join(", ")}]`
-        );
-
-        // Recursively generate children's XML
         let childrenXml = "";
         children.forEach((child) => {
             childrenXml += generateComponentXml(
@@ -236,20 +318,29 @@ ${indent}  </property>\n`;
             );
         });
 
-        // Append children XML *before* the closing tag
         if (childrenXml) {
             xml += childrenXml;
         }
 
-        // Add the closing tag for the frame
         xml += `${indent}</widget>\n`;
     }
 
     return xml;
 };
 
+/**
+ * Generates the complete Qt Designer .ui file content as an XML string.
+ * @param {Array} screens - Array of screen objects.
+ * @param {number} currentScreenIndex - The index of the currently visible screen.
+ * @returns {string} The generated .ui file content.
+ */
 export const generateQtUiFile = (screens, currentScreenIndex) => {
-    console.log("--- Starting UI File Generation ---");
+    const currentScreen = screens[currentScreenIndex];
+    if (!currentScreen) {
+        console.error("Current screen not found for UI generation.");
+        return '<?xml version="1.0" encoding="UTF-8"?><ui version="4.0"><error>Current screen not found</error></ui>';
+    }
+
     let uiCode = `<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
@@ -258,46 +349,70 @@ export const generateQtUiFile = (screens, currentScreenIndex) => {
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>${screens[currentScreenIndex].width || 1280}</width>
-    <height>${screens[currentScreenIndex].height || 800}</height>
+    <width>${currentScreen.width || 1280}</width>
+    <height>${currentScreen.height || 800}</height>
    </rect>
   </property>
-  <widget class="QStackedWidget" name="stackedWidget">
-`;
+  <property name="windowTitle">
+     <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"> <!-- Central widget is needed -->
+   <widget class="QStackedWidget" name="stackedWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x> <!-- StackedWidget should fill centralwidget -->
+      <y>0</y>
+      <width>${currentScreen.width || 1280}</width>
+      <height>${currentScreen.height || 800}</height>
+     </rect>
+    </property>\n`;
 
     screens.forEach((screen, screenIndex) => {
-        const screenId = screen.customId || `screen_${screenIndex}`;
+        const screenId = (screen.customId || `screen_${screenIndex}`).replace(
+            /[^a-zA-Z0-9_]/g,
+            "_"
+        );
         const allComponents = screen.components;
         const topLevelComponents = allComponents.filter(
             (comp) => comp.parentId === null
         );
 
-        console.log(
-            `Screen ${screenIndex} (${screenId}): Processing ${allComponents.length} total components.`
-        );
-        // Optional: Log all components for the screen if needed for deep debugging
-        // console.log(JSON.stringify(allComponents, null, 2));
-
-        uiCode += `   <widget class="QWidget" name="${screenId}">
-    <property name="styleSheet">
-      <string>background-color: rgba(${hexToRgba(
+        uiCode += `    <widget class="QWidget" name="${screenId}">
+     <property name="styleSheet">
+      <string>QWidget#${screenId} { background-color: rgba(${hexToRgba(
           screen.backgroundColor
-      )});</string>
-    </property>\n`; // Added newline for clarity
+      )}); }</string>
+     </property>\n`;
 
-        // Generate XML for top-level components and their children recursively
         topLevelComponents.forEach((component) => {
-            uiCode += generateComponentXml(component, allComponents, 2); // Start indent level at 2
+            uiCode += generateComponentXml(component, allComponents, 3);
         });
 
-        uiCode += `   </widget>\n`; // Added newline
+        uiCode += `    </widget>\n`;
     });
-    uiCode += `  </widget>
+
+    uiCode += `    <property name="currentIndex">
+     <number>${currentScreenIndex}</number>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>
 </ui>
 `;
-    console.log("--- Finished UI File Generation ---");
     return uiCode;
 };
+
+// Helper function to adjust color brightness (used in slider gradient)
+hexToRgba.lighten = (hex, percent) => {
+    const rgba = hexToRgba(hex)
+        .split(",")
+        .map((v) => parseFloat(v));
+    const factor = 1 + percent / 100;
+    rgba[0] = Math.min(255, Math.round(rgba[0] * factor));
+    rgba[1] = Math.min(255, Math.round(rgba[1] * factor));
+    rgba[2] = Math.min(255, Math.round(rgba[2] * factor));
+    return `${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]}`;
+};
+hexToRgba.darken = (hex, percent) => hexToRgba.lighten(hex, -percent);

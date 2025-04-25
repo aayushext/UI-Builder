@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
+import PropTypes from "prop-types";
 import { getComponentDefinitions } from "../utils/componentLoader";
 import { useAppStore } from "../store/useAppStore";
 
 const LeftPanel = ({ centerPanelDimensions }) => {
     const fileInputRef = useRef(null);
     const [isUiFileLoaded, setIsUiFileLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const componentDefinitions = getComponentDefinitions();
 
     const addComponent = useAppStore((s) => s.addComponent);
@@ -12,17 +14,25 @@ const LeftPanel = ({ centerPanelDimensions }) => {
     const handleLoadFromUiFile = useAppStore((s) => s.handleLoadFromUiFile);
     const handleExport = useAppStore((s) => s.handleExport);
 
-    const handleFileChange = (event) => {
+    const handleFileChange = async (event) => {
         const file = event.target.files[0];
         if (file) {
-            handleLoadFromUiFile(file);
-            setIsUiFileLoaded(true);
+            setIsLoading(true);
+            try {
+                await handleLoadFromUiFile(file);
+                setIsUiFileLoaded(true);
+            } catch (error) {
+                setIsUiFileLoaded(false);
+            } finally {
+                setIsLoading(false);
+            }
         }
         event.target.value = "";
     };
 
     return (
         <aside className="w-64 bg-gray-200 dark:bg-gray-800 p-4 flex flex-col h-full flex-shrink-0">
+            {/* Components Section */}
             <div className="flex-1">
                 <h2 className="text-lg font-bold mb-2">Components</h2>
                 {componentDefinitions.map((component) => (
@@ -34,6 +44,8 @@ const LeftPanel = ({ centerPanelDimensions }) => {
                     </button>
                 ))}
             </div>
+
+            {/* Buttons Section */}
             <div className="mt-auto pt-4 space-y-2">
                 <button
                     onClick={handleSaveToUiFile}
@@ -59,10 +71,27 @@ const LeftPanel = ({ centerPanelDimensions }) => {
                     accept=".ui"
                     onChange={handleFileChange}
                     className="hidden"
+                    disabled={isLoading}
                 />
             </div>
+
+            {/* Loading Modal */}
+            {isLoading && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg">
+                        <p className="text-lg">Loading Design...</p>
+                    </div>
+                </div>
+            )}
         </aside>
     );
+};
+
+LeftPanel.propTypes = {
+    centerPanelDimensions: PropTypes.shape({
+        width: PropTypes.number,
+        height: PropTypes.number,
+    }),
 };
 
 export default LeftPanel;

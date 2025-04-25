@@ -30,6 +30,13 @@ export const useAppStore = create((set, get) => ({
     isPanning: false,
     lastMousePosition: { x: 0, y: 0 },
 
+    /**
+     * Calculates the absolute screen position of a component, traversing its parent hierarchy.
+     * @param {number} componentId - The ID of the component.
+     * @param {Array} allComponents - The array of all components in the current screen.
+     * @returns {{x: number, y: number}} The absolute position, or {x: NaN, y: NaN} if error.
+     * @private
+     */
     _getAbsolutePosition: (componentId, allComponents) => {
         let x = 0,
             y = 0,
@@ -59,6 +66,11 @@ export const useAppStore = create((set, get) => ({
         return { x, y };
     },
 
+    /**
+     * Adds a new component of the specified type to the current screen.
+     * If a Frame is selected, the new component becomes its child.
+     * @param {string} type - The type of component to add (e.g., 'PySideButton').
+     */
     addComponent: (type) => {
         const {
             nextComponentId,
@@ -99,6 +111,9 @@ export const useAppStore = create((set, get) => ({
         });
     },
 
+    /**
+     * Adds a new empty screen to the application.
+     */
     addScreen: () => {
         const { nextScreenId, screens } = get();
         const newScreen = {
@@ -117,6 +132,13 @@ export const useAppStore = create((set, get) => ({
         });
     },
 
+    /**
+     * Updates the custom ID (used in generated code) for a specific screen.
+     * Validates the ID for uniqueness and allowed characters.
+     * @param {number} screenIndex - The index of the screen to update.
+     * @param {string} newCustomId - The new custom ID.
+     * @returns {boolean} True if the update was successful, false otherwise.
+     */
     updateScreenCustomId: (screenIndex, newCustomId) => {
         const { screens } = get();
         if (!/^[a-zA-Z0-9_]+$/.test(newCustomId)) {
@@ -144,6 +166,10 @@ export const useAppStore = create((set, get) => ({
         return true;
     },
 
+    /**
+     * Deletes a screen and its components. Cannot delete the last screen.
+     * @param {number} screenId - The ID of the screen to delete.
+     */
     deleteScreen: (screenId) => {
         const { screens, currentScreenIndex } = get();
         if (screens.length <= 1) return;
@@ -160,6 +186,10 @@ export const useAppStore = create((set, get) => ({
         });
     },
 
+    /**
+     * Deletes a component and all its descendants (if it's a Frame).
+     * @param {number} id - The ID of the component to delete.
+     */
     deleteComponent: (id) => {
         const { screens, currentScreenIndex, selectedComponentId } = get();
         const currentScreen = screens[currentScreenIndex];
@@ -194,6 +224,11 @@ export const useAppStore = create((set, get) => ({
         });
     },
 
+    /**
+     * Updates the size and position of a component based on react-rnd output.
+     * @param {number} id - The ID of the component to resize/reposition.
+     * @param {object} newSizeAndPositionFromRnd - Object containing { width, height, x, y }.
+     */
     resizeComponent: (id, newSizeAndPositionFromRnd) => {
         const { screens, currentScreenIndex } = get();
         const screen = screens[currentScreenIndex];
@@ -216,6 +251,12 @@ export const useAppStore = create((set, get) => ({
         set({ screens: updatedScreens });
     },
 
+    /**
+     * Moves a component, potentially changing its parent if dropped over a Frame.
+     * Calculates the new relative position based on drop location and parent changes.
+     * @param {number} id - The ID of the component being moved.
+     * @param {object} positionData - Object containing { relativePos: {x, y}, mouseEventCoords: {clientX, clientY} }.
+     */
     moveComponent: (id, positionData) => {
         const { relativePos, mouseEventCoords } = positionData;
         const {
@@ -292,7 +333,6 @@ export const useAppStore = create((set, get) => ({
         // --- Calculate Final Position ---
         if (finalParentId !== originalParentId) {
             if (finalParentId !== null && potentialParent) {
-                // Moved INTO a frame
                 const newParentAbsPos = _getAbsolutePosition(
                     finalParentId,
                     allComponents
@@ -349,6 +389,11 @@ export const useAppStore = create((set, get) => ({
         set({ screens: updatedScreens });
     },
 
+    /**
+     * Updates specific properties of a component.
+     * @param {number} id - The ID of the component to update.
+     * @param {object} newProps - An object containing the properties to update.
+     */
     updateComponentProps: (id, newProps) => {
         const { screens } = get();
         const updatedScreens = screens.map((screen) => ({
@@ -360,6 +405,11 @@ export const useAppStore = create((set, get) => ({
         set({ screens: updatedScreens });
     },
 
+    /**
+     * Updates the background color of a specific screen.
+     * @param {number} screenIndex - The index of the screen to update.
+     * @param {string} newColor - The new background color hex string.
+     */
     updateScreenBackgroundColor: (screenIndex, newColor) => {
         const { screens } = get();
         const updatedScreens = [...screens];
@@ -367,6 +417,11 @@ export const useAppStore = create((set, get) => ({
         set({ screens: updatedScreens });
     },
 
+    /**
+     * Updates the width and/or height of a specific screen.
+     * @param {number} screenIndex - The index of the screen to update.
+     * @param {object} dimensions - Object containing { width, height }.
+     */
     updateScreenDimensions: (screenIndex, dimensions) => {
         const { screens } = get();
         const updatedScreens = [...screens];
@@ -377,8 +432,16 @@ export const useAppStore = create((set, get) => ({
         set({ screens: updatedScreens });
     },
 
+    /**
+     * Sets the currently selected component ID.
+     * @param {number | null} id - The ID of the component to select, or null to deselect.
+     */
     selectComponent: (id) => set({ selectedComponentId: id }),
 
+    /**
+     * Duplicates the currently selected component and its children (if any).
+     * Places the duplicate slightly offset from the original.
+     */
     duplicateComponent: () => {
         const {
             selectedComponentId,
@@ -433,21 +496,32 @@ export const useAppStore = create((set, get) => ({
         });
     },
 
+    /**
+     * Sets the index of the currently active screen.
+     * @param {number} idx - The index of the screen to make current.
+     */
     setCurrentScreenIndex: (idx) => set({ currentScreenIndex: idx }),
 
+    /** Sets the zoom level for the center panel. */
     setZoomLevel: (zoom) => set({ zoomLevel: zoom }),
+    /** Sets the pan position for the center panel. */
     setPanPosition: (pos) => set({ panPosition: pos }),
+    /** Sets the panning state. */
     setIsPanning: (val) => set({ isPanning: val }),
+    /** Sets the last recorded mouse position during panning. */
     setLastMousePosition: (pos) => set({ lastMousePosition: pos }),
 
+    /** Increases the zoom level. */
     handleZoomIn: () => {
         const { zoomLevel, maxZoom } = get();
         set({ zoomLevel: Math.min(maxZoom, zoomLevel + 0.1) });
     },
+    /** Decreases the zoom level. */
     handleZoomOut: () => {
         const { zoomLevel, minZoom } = get();
         set({ zoomLevel: Math.max(minZoom, zoomLevel - 0.1) });
     },
+    /** Handles mouse wheel events for zooming (if Ctrl is pressed). */
     handleWheel: (e) => {
         const { zoomLevel, minZoom, maxZoom } = get();
         if (e.ctrlKey) {
@@ -461,6 +535,7 @@ export const useAppStore = create((set, get) => ({
             });
         }
     },
+    /** Starts panning when the middle mouse button or Alt key is pressed. */
     handlePanStart: (e) => {
         if (e.button === 1 || e.altKey) {
             set({
@@ -470,6 +545,7 @@ export const useAppStore = create((set, get) => ({
             e.preventDefault();
         }
     },
+    /** Updates the pan position based on mouse movement while panning. */
     handlePanMove: (e) => {
         const { isPanning, lastMousePosition, panPosition } = get();
         if (isPanning) {
@@ -485,9 +561,15 @@ export const useAppStore = create((set, get) => ({
             e.preventDefault();
         }
     },
+    /** Stops the panning state. */
     handlePanEnd: () => set({ isPanning: false }),
+    /** Resets zoom and pan to default values. */
     handleResetView: () => set({ panPosition: { x: 0, y: 0 }, zoomLevel: 1 }),
 
+    /**
+     * Exports the current design as a zip file containing the .ui file and a Python loader script.
+     * @param {object} centerPanelDimensions - Dimensions used for UI file generation (may not be needed).
+     */
     handleExport: async (centerPanelDimensions) => {
         const { screens, currentScreenIndex } = get();
         const uiFile = generateQtUiFile(
@@ -510,11 +592,19 @@ export const useAppStore = create((set, get) => ({
         URL.revokeObjectURL(url);
     },
 
+    /**
+     * Exports the current design state as a .ui file.
+     */
     handleSaveToUiFile: () => {
         const { screens, currentScreenIndex } = get();
         exportToUiFile(screens, currentScreenIndex);
     },
 
+    /**
+     * Loads a design state from a .ui file.
+     * @param {File} file - The .ui file to load.
+     * @returns {Promise<void>} A promise that resolves when loading is complete or rejects on error.
+     */
     handleLoadFromUiFile: async (file) => {
         try {
             const appState = await importFromUiFile(file);

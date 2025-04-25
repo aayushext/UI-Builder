@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
@@ -12,16 +13,52 @@ const ScreenTabs = () => {
     const deleteScreen = useAppStore((s) => s.deleteScreen);
 
     const [hoveredIndex, setHoveredIndex] = useState(null);
+    const tabRefs = useRef([]);
+
+    useEffect(() => {
+        tabRefs.current = tabRefs.current.slice(0, screens.length);
+    }, [screens.length]);
+
+    const handleKeyDown = (e, index) => {
+        let nextIndex = -1;
+        if (e.key === "ArrowLeft") {
+            nextIndex = index > 0 ? index - 1 : screens.length - 1;
+        } else if (e.key === "ArrowRight") {
+            nextIndex = index < screens.length - 1 ? index + 1 : 0;
+        } else if (e.key === "Enter" || e.key === " ") {
+            setCurrentScreenIndex(index);
+            e.preventDefault();
+        } else if (e.key === "Delete" && screens.length > 1) {
+            deleteScreen(screens[index].id);
+            e.preventDefault();
+        }
+
+        if (nextIndex !== -1) {
+            setCurrentScreenIndex(nextIndex);
+            tabRefs.current[nextIndex]?.focus();
+            e.preventDefault();
+        }
+    };
 
     return (
-        <div className="flex items-center border-b border-gray-300 dark:border-gray-900 bg-gray-100 dark:bg-gray-600 px-4 py-2">
+        <div
+            className="flex items-center border-b border-gray-300 dark:border-gray-900 bg-gray-100 dark:bg-gray-600 px-4 py-2"
+            role="tablist"
+            aria-label="Screens">
             {screens.map((screen, index) => (
                 <div key={screen.id} className="flex items-center mr-2">
                     <button
+                        ref={(el) => (tabRefs.current[index] = el)}
+                        id={`screen-tab-${screen.id}`}
+                        role="tab"
+                        aria-selected={index === currentScreenIndex}
+                        aria-controls={`screen-panel-${screen.id}`}
+                        tabIndex={index === currentScreenIndex ? 0 : -1}
                         onClick={() => setCurrentScreenIndex(index)}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
                         onMouseEnter={() => setHoveredIndex(index)}
                         onMouseLeave={() => setHoveredIndex(null)}
-                        className={`flex items-center py-1 px-3 rounded-md ${
+                        className={`flex items-center py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                             index === currentScreenIndex
                                 ? "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 border-b-gray-400 dark:border-b-gray-800"
                                 : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-800"
@@ -41,7 +78,8 @@ const ScreenTabs = () => {
                                         e.stopPropagation();
                                         deleteScreen(screen.id);
                                     }}
-                                    className="flex hover:bg-red-500 dark:hover:bg-red-700 cursor-pointer text-xs font-bold rounded-full h-5 w-5 items-center justify-center">
+                                    className="flex hover:bg-red-500 dark:hover:bg-red-700 cursor-pointer text-xs font-bold rounded-full h-5 w-5 items-center justify-center"
+                                    aria-label={`Delete ${screen.name}`}>
                                     <IconContext.Provider
                                         value={{ size: "1em" }}>
                                         <div>
@@ -56,7 +94,8 @@ const ScreenTabs = () => {
             ))}
             <button
                 onClick={addScreen}
-                className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-900 py-2 px-2 rounded-md ml-2">
+                className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-900 py-2 px-2 rounded-md ml-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                aria-label="Add new screen">
                 <IconContext.Provider value={{ size: "1em" }}>
                     <div>
                         <FaPlus />
@@ -66,5 +105,7 @@ const ScreenTabs = () => {
         </div>
     );
 };
+
+ScreenTabs.propTypes = {};
 
 export default ScreenTabs;

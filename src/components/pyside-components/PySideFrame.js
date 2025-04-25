@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const PySideFrame = ({
     backgroundColor,
@@ -6,15 +7,14 @@ const PySideFrame = ({
     frameShadow,
     lineWidth,
     midLineWidth,
-    children, // Child Widgets are passed down
+    children,
 }) => {
-    // Basic style mapping - this is a simplified representation
     const getBorderStyle = () => {
         if (frameShape === "NoFrame") return "none";
-        if (frameShape === "HLine") return `${lineWidth}px solid black`; // Simplified
-        if (frameShape === "VLine") return `${lineWidth}px solid black`; // Simplified
+        if (frameShape === "HLine") return `${lineWidth}px solid black`;
+        if (frameShape === "VLine") return `${lineWidth}px solid black`;
 
-        const colorLight = "#ffffff"; // Simplified shadow colors
+        const colorLight = "#ffffff";
         const colorDark = "#808080";
         const colorMid = "#c0c0c0";
 
@@ -47,12 +47,21 @@ const PySideFrame = ({
         backgroundColor: backgroundColor,
         border: getBorderStyle(),
         // boxShadow: getBoxShadow(), // Simplified border handles basic shadow
-        overflow: "hidden", // Hide children overflowing the frame bounds
-        position: "relative", // Crucial: Establish positioning context for children
+        overflow: "hidden",
+        position: "relative",
         boxSizing: "border-box",
     };
 
-    return <div style={frameStyle}>{children}</div>; // Render child Widgets inside
+    return <div style={frameStyle}>{children}</div>;
+};
+
+PySideFrame.propTypes = {
+    backgroundColor: PropTypes.string,
+    frameShape: PropTypes.string,
+    frameShadow: PropTypes.string,
+    lineWidth: PropTypes.number,
+    midLineWidth: PropTypes.number,
+    children: PropTypes.node,
 };
 
 export default PySideFrame;
