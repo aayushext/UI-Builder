@@ -312,19 +312,9 @@ export const useAppStore = create((set, get) => ({
                     finalRelativeX = relativePos.x;
                     finalRelativeY = relativePos.y;
                 }
-            } else if (originalParentId !== null) {
-                // Moved TO screen FROM a frame
-                const originalParentAbsPos = _getAbsolutePosition(
-                    originalParentId,
-                    allComponents
-                );
-                if (!isNaN(originalParentAbsPos.x)) {
-                    finalRelativeX = originalParentAbsPos.x + relativePos.x;
-                    finalRelativeY = originalParentAbsPos.y + relativePos.y;
-                } else {
-                    finalRelativeX = relativePos.x;
-                    finalRelativeY = relativePos.y;
-                }
+            } else if (originalParentId !== null && finalParentId === null) {
+                finalRelativeX = adjustedMouseX - movedComponent.width / 2;
+                finalRelativeY = adjustedMouseY - movedComponent.height / 2;
             } else {
                 finalRelativeX = relativePos.x;
                 finalRelativeY = relativePos.y;
@@ -334,7 +324,7 @@ export const useAppStore = create((set, get) => ({
             finalRelativeY = relativePos.y;
         }
 
-        if (finalParentId !== null) {
+        if (finalParentId !== null && finalParentId === originalParentId) {
             finalRelativeX = Math.max(0, finalRelativeX);
             finalRelativeY = Math.max(0, finalRelativeY);
         }
@@ -406,7 +396,6 @@ export const useAppStore = create((set, get) => ({
         let newNextComponentId = nextComponentId;
         const idMap = new Map();
 
-        // Recursively duplicate component and its children
         const duplicateRecursive = (originalComp, parentId) => {
             const newId = newNextComponentId++;
             idMap.set(originalComp.id, newId);
