@@ -32,27 +32,36 @@ export const useAppStore = create((set, get) => ({
 
     // Helper function within the store to get a component's absolute position
     _getAbsolutePosition: (componentId, allComponents) => {
-        let absX = 0;
-        let absY = 0;
-        let current = allComponents.find((c) => c.id === componentId);
-        const stack = new Set(); // Cycle detection
+        let totalX = 0;
+        let totalY = 0;
+        let currentId = componentId;
+        const visited = new Set(); // Cycle detection
 
-        while (current) {
-            if (stack.has(current.id)) break; // Cycle detected
-            stack.add(current.id);
+        while (currentId !== null) {
+            if (visited.has(currentId)) {
+                console.error(
+                    "Cycle detected in parent hierarchy for ID:",
+                    componentId
+                );
+                return { x: NaN, y: NaN }; // Indicate error
+            }
+            visited.add(currentId);
 
-            absX += current.x;
-            absY += current.y;
+            const currentComp = allComponents.find((c) => c.id === currentId);
+            if (!currentComp) {
+                console.error(
+                    "Component not found during absolute position calculation for ID:",
+                    currentId
+                );
+                return { x: NaN, y: NaN }; // Indicate error
+            }
 
-            if (current.parentId === null) break; // Reached top level
-            const parent = allComponents.find((c) => c.id === current.parentId);
-            if (!parent) break; // Parent not found
-            current = parent;
+            totalX += currentComp.x;
+            totalY += currentComp.y;
+
+            currentId = currentComp.parentId;
         }
-        // If the loop broke due to cycle, the position might be wrong.
-        // The calculation sums relative positions up the tree.
-
-        return { x: absX, y: absY };
+        return { x: totalX, y: totalY };
     },
 
     // Actions
@@ -243,9 +252,16 @@ export const useAppStore = create((set, get) => ({
         set({ screens: updatedScreens });
     },
 
-    moveComponent: (id, positionFromRnd) => {
-        // positionFromRnd is the final {x, y} relative to the DOM parent from Rnd's onDragStop
-        const { screens, currentScreenIndex, _getAbsolutePosition } = get();
+    moveComponent: (id, positionData) => {
+        // positionData contains { relativePos: {x, y}, mouseEventCoords: {clientX, clientY} }
+        const { relativePos, mouseEventCoords } = positionData;
+        const {
+            screens,
+            currentScreenIndex,
+            _getAbsolutePosition,
+            zoomLevel,
+            panPosition,
+        } = get();
         const screen = screens[currentScreenIndex];
         const allComponents = screen.components;
         const movedComponent = allComponents.find((comp) => comp.id === id);
@@ -253,48 +269,57 @@ export const useAppStore = create((set, get) => ({
         if (!movedComponent) return;
 
         let finalParentId = null;
-        let finalRelativeX = positionFromRnd.x; // Default: Rnd pos is screen-relative
-        let finalRelativeY = positionFromRnd.y; // Default: Rnd pos is screen-relative
+        let finalRelativeX = 0;
+        let finalRelativeY = 0;
         let potentialParent = null;
-
-        // --- Parent Detection Logic (Still needs Absolute Coords) ---
-        // Calculate the component's *absolute* center position *at the end of the drag*
-        // This is tricky because positionFromRnd is relative to the *final* DOM parent.
-        // We need to know the absolute position to check against frames' absolute bounds.
-        // Let's approximate the absolute position for the check.
-        // A more robust way might involve getting the element's bounding rect, but let's try this first.
-
-        // Get the absolute position of the component *before* the move started
-        const originalAbsPos = _getAbsolutePosition(id, allComponents);
-        // Estimate the final absolute position for the check (this might be slightly off if parent changed)
-        // A better check might involve using the mouse event coordinates if available.
-        // For now, let's use the Rnd position added to an *estimated* parent absolute position.
-        // This part is complex. Let's simplify the check: Assume positionFromRnd is close enough to absolute for the check if it was top-level,
-        // or add its original parent's abs pos if it was nested. This is still an approximation.
-
-        // Let's try a simpler approach for the check: Use the absolute position helper on the *potential parent*
-        // and compare it with an *estimated* absolute position of the moved component.
-
-        // Estimate the final absolute position for the center check
-        let estimatedFinalAbsX = positionFromRnd.x;
-        let estimatedFinalAbsY = positionFromRnd.y;
-        if (movedComponent.parentId !== null) {
-            const originalParentAbsPos = _getAbsolutePosition(
-                movedComponent.parentId,
-                allComponents
-            );
-            if (!isNaN(originalParentAbsPos.x)) {
-                estimatedFinalAbsX += originalParentAbsPos.x;
-                estimatedFinalAbsY += originalParentAbsPos.y;
-            }
-        }
-        // If the component was just dropped onto the screen, positionFromRnd *is* the absolute position.
-        // If it was dropped into a frame, positionFromRnd is relative to that frame.
-        // The check needs the component's final absolute position.
+        const originalParentId = movedComponent.parentId; // Store original parent ID
 
         console.log(
-            `moveComponent START: ID=${id}, RndPos=${JSON.stringify(positionFromRnd)}, OriginalParentID=${movedComponent.parentId}`
+            `moveComponent START: ID=${id}, RndRelPos=${JSON.stringify(relativePos)}, MouseCoords=${JSON.stringify(mouseEventCoords)}, OriginalParentID=${originalParentId}`
         );
+
+        // --- Parent Detection Logic using Mouse Coordinates ---
+        // (Keep the existing logic using adjustedMouseX/Y for accurate parent detection)
+        const screenContainerRect = document
+            .querySelector(".relative.mx-auto.origin-top-left")
+            ?.getBoundingClientRect();
+        let adjustedMouseX = NaN;
+        let adjustedMouseY = NaN;
+
+        if (screenContainerRect && mouseEventCoords) {
+            const mouseClientX = mouseEventCoords.clientX;
+            const mouseClientY = mouseEventCoords.clientY;
+            const mouseRelativeToContainerX =
+                mouseClientX - screenContainerRect.left;
+            const mouseRelativeToContainerY =
+                mouseClientY - screenContainerRect.top;
+            adjustedMouseX =
+                (mouseRelativeToContainerX - panPosition.x) / zoomLevel;
+            adjustedMouseY =
+                (mouseRelativeToContainerY - panPosition.y) / zoomLevel;
+            // console.log(
+            //     `Adjusted Mouse Coords (relative to screen origin): x=${adjustedMouseX}, y=${adjustedMouseY}`
+            // );
+        } else {
+            console.warn(
+                "Could not find screen container or mouse coords for adjustment. Parent detection might be inaccurate."
+            );
+            // Fallback (less accurate) - Use component's last known absolute position for check
+            const lastAbsPos = _getAbsolutePosition(id, allComponents);
+            if (!isNaN(lastAbsPos.x)) {
+                adjustedMouseX =
+                    lastAbsPos.x + relativePos.x - movedComponent.x; // Approximate based on delta
+                adjustedMouseY =
+                    lastAbsPos.y + relativePos.y - movedComponent.y;
+            } else {
+                // Absolute fallback if everything fails
+                adjustedMouseX = relativePos.x;
+                adjustedMouseY = relativePos.y;
+            }
+        }
+
+        const checkX = adjustedMouseX;
+        const checkY = adjustedMouseY;
 
         const frames = allComponents.filter(
             (c) => c.type === "PySideFrame" && c.id !== id
@@ -303,80 +328,81 @@ export const useAppStore = create((set, get) => ({
             const frameAbsPos = _getAbsolutePosition(frame.id, allComponents);
             if (isNaN(frameAbsPos.x)) continue;
 
-            // Calculate the component's *absolute* center using Rnd's position relative to its *final* parent
-            // To do this accurately, we need the final parent's absolute position *first*.
-            // Let's assume the component *might* be in this frame and calculate its potential absolute center.
-            const potentialAbsCenterX =
-                frameAbsPos.x + positionFromRnd.x + movedComponent.width / 2;
-            const potentialAbsCenterY =
-                frameAbsPos.y + positionFromRnd.y + movedComponent.height / 2;
-
-            // Check if this potential absolute center falls within the frame's absolute bounds
             if (
-                potentialAbsCenterX >= frameAbsPos.x &&
-                potentialAbsCenterX <= frameAbsPos.x + frame.width &&
-                potentialAbsCenterY >= frameAbsPos.y &&
-                potentialAbsCenterY <= frameAbsPos.y + frame.height
+                checkX >= frameAbsPos.x &&
+                checkX <= frameAbsPos.x + frame.width &&
+                checkY >= frameAbsPos.y &&
+                checkY <= frameAbsPos.y + frame.height
             ) {
-                // If the check passes, assume this frame is the parent
                 potentialParent = frame;
-                console.log(
-                    `moveComponent: Found potential parent Frame ID=${frame.id} at AbsPos=${JSON.stringify(frameAbsPos)}`
-                );
+                // console.log(
+                //     `moveComponent: Mouse landed in Frame ID=${frame.id} at AbsPos=${JSON.stringify(frameAbsPos)}`
+                // );
                 break;
             }
         }
-        // If no parent frame was found by the check above, maybe it landed on the screen.
-        // Check if its Rnd position (which would be screen-relative) is outside all frames.
-        if (!potentialParent) {
-            const screenLevelAbsCenterX =
-                positionFromRnd.x + movedComponent.width / 2;
-            const screenLevelAbsCenterY =
-                positionFromRnd.y + movedComponent.height / 2;
-            let insideAnyFrame = false;
-            for (const frame of frames) {
-                const frameAbsPos = _getAbsolutePosition(
-                    frame.id,
-                    allComponents
-                );
-                if (isNaN(frameAbsPos.x)) continue;
-                if (
-                    screenLevelAbsCenterX >= frameAbsPos.x &&
-                    screenLevelAbsCenterX <= frameAbsPos.x + frame.width &&
-                    screenLevelAbsCenterY >= frameAbsPos.y &&
-                    screenLevelAbsCenterY <= frameAbsPos.y + frame.height
-                ) {
-                    insideAnyFrame = true;
-                    // This case is tricky - Rnd reported screen-relative coords, but it's inside a frame.
-                    // This implies the parent *should* be this frame. Let's assign it.
-                    potentialParent = frame;
-                    console.log(
-                        `moveComponent: Corrected parent to Frame ID=${frame.id} based on screen-relative check.`
-                    );
-                    break;
-                }
-            }
-        }
-
         // --- Parent Check Done ---
 
-        if (potentialParent) {
-            finalParentId = potentialParent.id;
-            // The positionFromRnd is already relative to this parent frame's DOM node. Store it directly.
-            finalRelativeX = positionFromRnd.x;
-            finalRelativeY = positionFromRnd.y;
-            console.log(
-                `moveComponent (In Frame): Storing RndPos directly as RelativePos=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
-            );
+        // Determine final parent ID
+        finalParentId = potentialParent ? potentialParent.id : null;
+
+        // --- Calculate Final Position ---
+        if (finalParentId !== originalParentId) {
+            // Parent has changed OR component moved to/from screen
+            if (finalParentId !== null && potentialParent) {
+                // Moved INTO a frame (from screen or another frame)
+                const newParentAbsPos = _getAbsolutePosition(
+                    finalParentId,
+                    allComponents
+                );
+                const originalParentAbsPos = originalParentId
+                    ? _getAbsolutePosition(originalParentId, allComponents)
+                    : { x: 0, y: 0 }; // Origin if moved from screen
+
+                if (
+                    !isNaN(newParentAbsPos.x) &&
+                    !isNaN(originalParentAbsPos.x)
+                ) {
+                    // Calculate the difference in parent origins
+                    const deltaX = originalParentAbsPos.x - newParentAbsPos.x;
+                    const deltaY = originalParentAbsPos.y - newParentAbsPos.y;
+
+                    // Adjust the RND relative position by the delta
+                    // This assumes relativePos is relative to the *original* parent container space
+                    finalRelativeX = relativePos.x + deltaX;
+                    finalRelativeY = relativePos.y + deltaY;
+                    console.log(
+                        `moveComponent (Into Frame): Parent changed. Delta=${JSON.stringify({ x: deltaX, y: deltaY })}, RndRelPos=${JSON.stringify(relativePos)}, FinalRelPos=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
+                    );
+                } else {
+                    console.warn(
+                        "Could not get parent positions for delta calculation. Falling back to RndRelPos."
+                    );
+                    finalRelativeX = relativePos.x; // Fallback
+                    finalRelativeY = relativePos.y; // Fallback
+                }
+            } else {
+                // Moved TO screen (finalParentId is null)
+                // RndRelPos should already be screen-relative
+                finalRelativeX = relativePos.x;
+                finalRelativeY = relativePos.y;
+                console.log(
+                    `moveComponent (To Screen): Using RndRelPos directly=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
+                );
+            }
         } else {
-            // No parent frame found, the positionFromRnd is relative to the screen container. Store it directly.
-            finalParentId = null;
-            finalRelativeX = positionFromRnd.x;
-            finalRelativeY = positionFromRnd.y;
+            // Parent did NOT change (moved within screen or within the same frame)
+            // RndRelPos is relative to the current parent, use directly.
+            finalRelativeX = relativePos.x;
+            finalRelativeY = relativePos.y;
             console.log(
-                `moveComponent (Screen): Storing RndPos directly as Screen Relative Pos=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
+                `moveComponent (No Parent Change): Using RndRelPos directly=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
             );
         }
+
+        // Ensure coordinates are not negative (relative to the determined parent)
+        finalRelativeX = Math.max(0, finalRelativeX);
+        finalRelativeY = Math.max(0, finalRelativeY);
 
         // Update state...
         const updatedScreens = screens.map((s, index) => {
@@ -387,8 +413,8 @@ export const useAppStore = create((set, get) => ({
                     component.id === id
                         ? {
                               ...component,
-                              x: finalRelativeX, // Store final relative X
-                              y: finalRelativeY, // Store final relative Y
+                              x: Math.round(finalRelativeX), // Store final relative X
+                              y: Math.round(finalRelativeY), // Store final relative Y
                               parentId: finalParentId, // Update parentId
                           }
                         : component

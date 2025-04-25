@@ -65,9 +65,16 @@ const Widget = ({
             }}
             onDragStop={(e, d) => {
                 e.stopPropagation(); // Prevent event bubbling
+                // Pass both relative position (d) and the mouse event (e)
                 onMove(id, {
-                    x: Math.round(d.x),
-                    y: Math.round(d.y),
+                    relativePos: {
+                        x: Math.round(d.x),
+                        y: Math.round(d.y),
+                    },
+                    mouseEventCoords: {
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                    },
                 });
             }}
             onClick={(e) => {
