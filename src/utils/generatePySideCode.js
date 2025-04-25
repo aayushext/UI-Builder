@@ -188,6 +188,7 @@ ${indent}    color: rgba(${hexToRgba(component.textColor)});
 ${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
 ${indent}    border-radius: ${component.radius}px;
 ${indent}    font-size: ${component.fontSize}px;
+${indent}    font-family: Arial;
 ${indent}}
 ${indent}QPushButton:hover {
 ${indent}    background-color: rgba(${hexToRgba(component.hoverColor)});
@@ -213,6 +214,7 @@ ${indent}    color: rgba(${hexToRgba(component.textColor)});
 ${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
 ${indent}    border-radius: ${component.radius}px;
 ${indent}    font-size: ${component.fontSize}px;
+${indent}    font-family: Arial;
 ${indent}    border: 1px solid rgba(${hexToRgba(component.borderColor)});
 ${indent}}
 ${indent}    </string>

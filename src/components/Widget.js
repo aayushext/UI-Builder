@@ -7,20 +7,20 @@ import { IoMdClose } from "react-icons/io";
 
 const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
     <div
-        className="absolute -top-3 -right-3 flex gap-1"
+        className="absolute -top-7 -right-3 flex gap-1"
         style={{ pointerEvents: "auto", zIndex: 10 }}>
         <button
             onClick={(e) => {
                 e.stopPropagation();
                 onDuplicate();
             }}
-            className="bg-blue-500 hover:bg-blue-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
+            className="bg-blue-500 hover:bg-blue-700 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm transition"
             style={{
                 minWidth: "20px",
                 touchAction: "manipulation",
             }}
             title="Duplicate">
-            <IconContext.Provider value={{ size: "0.7em" }}>
+            <IconContext.Provider value={{ size: "0.8em" }}>
                 <FaCopy />
             </IconContext.Provider>
         </button>
@@ -30,13 +30,13 @@ const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
                 e.stopPropagation();
                 onDelete(id);
             }}
-            className="bg-red-500 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition"
+            className="bg-red-500 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm transition"
             style={{
                 minWidth: "20px",
                 touchAction: "manipulation",
             }}
             title="Delete">
-            <IconContext.Provider value={{ size: "0.8em" }}>
+            <IconContext.Provider value={{ size: "0.9em" }}>
                 <IoMdClose />
             </IconContext.Provider>
         </button>
