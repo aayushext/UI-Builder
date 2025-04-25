@@ -30,41 +30,35 @@ export const useAppStore = create((set, get) => ({
     isPanning: false,
     lastMousePosition: { x: 0, y: 0 },
 
-    // Helper function within the store to get a component's absolute position
     _getAbsolutePosition: (componentId, allComponents) => {
-        let totalX = 0;
-        let totalY = 0;
-        let currentId = componentId;
-        const visited = new Set(); // Cycle detection
-
+        let x = 0,
+            y = 0,
+            currentId = componentId;
+        const visited = new Set();
         while (currentId !== null) {
             if (visited.has(currentId)) {
                 console.error(
                     "Cycle detected in parent hierarchy for ID:",
                     componentId
                 );
-                return { x: NaN, y: NaN }; // Indicate error
+                return { x: NaN, y: NaN };
             }
             visited.add(currentId);
-
-            const currentComp = allComponents.find((c) => c.id === currentId);
-            if (!currentComp) {
+            const comp = allComponents.find((c) => c.id === currentId);
+            if (!comp) {
                 console.error(
                     "Component not found during absolute position calculation for ID:",
                     currentId
                 );
-                return { x: NaN, y: NaN }; // Indicate error
+                return { x: NaN, y: NaN };
             }
-
-            totalX += currentComp.x;
-            totalY += currentComp.y;
-
-            currentId = currentComp.parentId;
+            x += comp.x;
+            y += comp.y;
+            currentId = comp.parentId;
         }
-        return { x: totalX, y: totalY };
+        return { x, y };
     },
 
-    // Actions
     addComponent: (type) => {
         const {
             nextComponentId,
@@ -77,15 +71,11 @@ export const useAppStore = create((set, get) => ({
             (c) => c.id === selectedComponentId
         );
 
-        let parentId = null;
-        let position = { x: 50, y: 50 }; // Default position on screen
-        let parentComponent = null; // Keep track of the parent frame if found
-
-        // If a component is selected and it's a frame, add the new component inside it
-        if (selectedComponent && selectedComponent.type === "PySideFrame") {
+        let parentId = null,
+            position = { x: 50, y: 50 };
+        if (selectedComponent?.type === "PySideFrame") {
             parentId = selectedComponent.id;
-            parentComponent = selectedComponent; // Store the parent frame
-            position = { x: 10, y: 10 }; // Default position inside frame
+            position = { x: 10, y: 10 };
             console.log(
                 `addComponent: Adding ${type} inside Frame ID ${parentId}. Initial relative position:`,
                 position
@@ -98,14 +88,14 @@ export const useAppStore = create((set, get) => ({
         }
 
         const newComponent = createComponent(type, nextComponentId, position);
-        newComponent.parentId = parentId; // Set the parentId
+        newComponent.parentId = parentId;
 
         const updatedScreens = [...screens];
         updatedScreens[currentScreenIndex].components.push(newComponent);
         set({
             screens: updatedScreens,
             nextComponentId: nextComponentId + 1,
-            selectedComponentId: newComponent.id, // Select the newly added component
+            selectedComponentId: newComponent.id,
         });
     },
 
@@ -139,11 +129,12 @@ export const useAppStore = create((set, get) => ({
             alert("Screen ID cannot exceed 20 characters");
             return false;
         }
-        const isDuplicate = screens.some(
-            (screen, idx) =>
-                idx !== screenIndex && screen.customId === newCustomId
-        );
-        if (isDuplicate) {
+        if (
+            screens.some(
+                (screen, idx) =>
+                    idx !== screenIndex && screen.customId === newCustomId
+            )
+        ) {
             alert("Screen ID must be unique");
             return false;
         }
@@ -155,54 +146,46 @@ export const useAppStore = create((set, get) => ({
 
     deleteScreen: (screenId) => {
         const { screens, currentScreenIndex } = get();
-        if (screens.length > 1) {
-            const updatedScreens = screens.filter(
-                (screen) => screen.id !== screenId
-            );
-            set({
-                screens: updatedScreens,
-                currentScreenIndex: Math.min(
-                    currentScreenIndex,
-                    updatedScreens.length - 1
-                ),
-                selectedComponentId: null,
-            });
-        }
+        if (screens.length <= 1) return;
+        const updatedScreens = screens.filter(
+            (screen) => screen.id !== screenId
+        );
+        set({
+            screens: updatedScreens,
+            currentScreenIndex: Math.min(
+                currentScreenIndex,
+                updatedScreens.length - 1
+            ),
+            selectedComponentId: null,
+        });
     },
 
     deleteComponent: (id) => {
         const { screens, currentScreenIndex, selectedComponentId } = get();
         const currentScreen = screens[currentScreenIndex];
         const components = currentScreen.components;
-
-        // Find all components to delete (the component itself and all its descendants)
         const componentsToDelete = new Set([id]);
         const findDescendants = (parentId) => {
             components.forEach((comp) => {
                 if (comp.parentId === parentId) {
                     componentsToDelete.add(comp.id);
-                    if (comp.type === "PySideFrame") {
-                        findDescendants(comp.id);
-                    }
+                    if (comp.type === "PySideFrame") findDescendants(comp.id);
                 }
             });
         };
-
         const componentToDelete = components.find((comp) => comp.id === id);
-        if (componentToDelete && componentToDelete.type === "PySideFrame") {
-            findDescendants(id);
-        }
+        if (componentToDelete?.type === "PySideFrame") findDescendants(id);
 
-        const updatedScreens = screens.map((screen, index) => {
-            if (index !== currentScreenIndex) return screen;
-            return {
-                ...screen,
-                components: screen.components.filter(
-                    (component) => !componentsToDelete.has(component.id)
-                ),
-            };
-        });
-
+        const updatedScreens = screens.map((screen, idx) =>
+            idx !== currentScreenIndex
+                ? screen
+                : {
+                      ...screen,
+                      components: screen.components.filter(
+                          (c) => !componentsToDelete.has(c.id)
+                      ),
+                  }
+        );
         set({
             screens: updatedScreens,
             selectedComponentId: componentsToDelete.has(selectedComponentId)
@@ -212,48 +195,28 @@ export const useAppStore = create((set, get) => ({
     },
 
     resizeComponent: (id, newSizeAndPositionFromRnd) => {
-        // newSizeAndPositionFromRnd contains width, height, and x, y relative to DOM parent from Rnd
         const { screens, currentScreenIndex } = get();
         const screen = screens[currentScreenIndex];
         const allComponents = screen.components;
         const resizedComponent = allComponents.find((comp) => comp.id === id);
-
         if (!resizedComponent) return;
-
-        // The parent doesn't change during resize.
-        // The position reported by Rnd (newSizeAndPositionFromRnd.x/y) is already relative
-        // to the DOM parent (either the screen container or the parent frame's div).
-        // We can store this directly.
-        const finalRelativeX = newSizeAndPositionFromRnd.x;
-        const finalRelativeY = newSizeAndPositionFromRnd.y;
-
-        console.log(
-            `resizeComponent: ID=${id}, RndPos=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}, Size=${JSON.stringify({ w: newSizeAndPositionFromRnd.width, h: newSizeAndPositionFromRnd.height })}`
+        const { x, y, width, height } = newSizeAndPositionFromRnd;
+        const updatedScreens = screens.map((s, idx) =>
+            idx !== currentScreenIndex
+                ? s
+                : {
+                      ...s,
+                      components: s.components.map((component) =>
+                          component.id === id
+                              ? { ...component, width, height, x, y }
+                              : component
+                      ),
+                  }
         );
-
-        const updatedScreens = screens.map((s, index) => {
-            if (index !== currentScreenIndex) return s;
-            return {
-                ...s,
-                components: s.components.map((component) =>
-                    component.id === id
-                        ? {
-                              ...component,
-                              width: newSizeAndPositionFromRnd.width,
-                              height: newSizeAndPositionFromRnd.height,
-                              x: finalRelativeX, // Store relative X directly from Rnd
-                              y: finalRelativeY, // Store relative Y directly from Rnd
-                              // parentId remains unchanged
-                          }
-                        : component
-                ),
-            };
-        });
         set({ screens: updatedScreens });
     },
 
     moveComponent: (id, positionData) => {
-        // positionData contains { relativePos: {x, y}, mouseEventCoords: {clientX, clientY} }
         const { relativePos, mouseEventCoords } = positionData;
         const {
             screens,
@@ -265,26 +228,19 @@ export const useAppStore = create((set, get) => ({
         const screen = screens[currentScreenIndex];
         const allComponents = screen.components;
         const movedComponent = allComponents.find((comp) => comp.id === id);
-
         if (!movedComponent) return;
 
-        let finalParentId = null;
-        let finalRelativeX = 0;
-        let finalRelativeY = 0;
-        let potentialParent = null;
-        const originalParentId = movedComponent.parentId; // Store original parent ID
-
-        console.log(
-            `moveComponent START: ID=${id}, RndRelPos=${JSON.stringify(relativePos)}, MouseCoords=${JSON.stringify(mouseEventCoords)}, OriginalParentID=${originalParentId}`
-        );
+        const originalParentId = movedComponent.parentId;
+        let finalParentId = null,
+            finalRelativeX = 0,
+            finalRelativeY = 0;
 
         // --- Parent Detection Logic using Mouse Coordinates ---
-        // (Keep the existing logic using adjustedMouseX/Y for accurate parent detection)
         const screenContainerRect = document
             .querySelector(".relative.mx-auto.origin-top-left")
             ?.getBoundingClientRect();
-        let adjustedMouseX = NaN;
-        let adjustedMouseY = NaN;
+        let adjustedMouseX = NaN,
+            adjustedMouseY = NaN;
 
         if (screenContainerRect && mouseEventCoords) {
             const mouseClientX = mouseEventCoords.clientX;
@@ -297,130 +253,109 @@ export const useAppStore = create((set, get) => ({
                 (mouseRelativeToContainerX - panPosition.x) / zoomLevel;
             adjustedMouseY =
                 (mouseRelativeToContainerY - panPosition.y) / zoomLevel;
-            // console.log(
-            //     `Adjusted Mouse Coords (relative to screen origin): x=${adjustedMouseX}, y=${adjustedMouseY}`
-            // );
         } else {
             console.warn(
                 "Could not find screen container or mouse coords for adjustment. Parent detection might be inaccurate."
             );
-            // Fallback (less accurate) - Use component's last known absolute position for check
             const lastAbsPos = _getAbsolutePosition(id, allComponents);
             if (!isNaN(lastAbsPos.x)) {
                 adjustedMouseX =
-                    lastAbsPos.x + relativePos.x - movedComponent.x; // Approximate based on delta
+                    lastAbsPos.x + relativePos.x - movedComponent.x;
                 adjustedMouseY =
                     lastAbsPos.y + relativePos.y - movedComponent.y;
             } else {
-                // Absolute fallback if everything fails
                 adjustedMouseX = relativePos.x;
                 adjustedMouseY = relativePos.y;
             }
         }
 
-        const checkX = adjustedMouseX;
-        const checkY = adjustedMouseY;
-
+        // Find potential parent frame under mouse
         const frames = allComponents.filter(
             (c) => c.type === "PySideFrame" && c.id !== id
         );
+        let potentialParent = null;
         for (const frame of frames) {
             const frameAbsPos = _getAbsolutePosition(frame.id, allComponents);
             if (isNaN(frameAbsPos.x)) continue;
-
             if (
-                checkX >= frameAbsPos.x &&
-                checkX <= frameAbsPos.x + frame.width &&
-                checkY >= frameAbsPos.y &&
-                checkY <= frameAbsPos.y + frame.height
+                adjustedMouseX >= frameAbsPos.x &&
+                adjustedMouseX <= frameAbsPos.x + frame.width &&
+                adjustedMouseY >= frameAbsPos.y &&
+                adjustedMouseY <= frameAbsPos.y + frame.height
             ) {
                 potentialParent = frame;
-                // console.log(
-                //     `moveComponent: Mouse landed in Frame ID=${frame.id} at AbsPos=${JSON.stringify(frameAbsPos)}`
-                // );
                 break;
             }
         }
-        // --- Parent Check Done ---
-
-        // Determine final parent ID
         finalParentId = potentialParent ? potentialParent.id : null;
 
         // --- Calculate Final Position ---
         if (finalParentId !== originalParentId) {
-            // Parent has changed OR component moved to/from screen
             if (finalParentId !== null && potentialParent) {
-                // Moved INTO a frame (from screen or another frame)
+                // Moved INTO a frame
                 const newParentAbsPos = _getAbsolutePosition(
                     finalParentId,
                     allComponents
                 );
                 const originalParentAbsPos = originalParentId
                     ? _getAbsolutePosition(originalParentId, allComponents)
-                    : { x: 0, y: 0 }; // Origin if moved from screen
-
+                    : { x: 0, y: 0 };
                 if (
                     !isNaN(newParentAbsPos.x) &&
                     !isNaN(originalParentAbsPos.x)
                 ) {
-                    // Calculate the difference in parent origins
                     const deltaX = originalParentAbsPos.x - newParentAbsPos.x;
                     const deltaY = originalParentAbsPos.y - newParentAbsPos.y;
-
-                    // Adjust the RND relative position by the delta
-                    // This assumes relativePos is relative to the *original* parent container space
                     finalRelativeX = relativePos.x + deltaX;
                     finalRelativeY = relativePos.y + deltaY;
-                    console.log(
-                        `moveComponent (Into Frame): Parent changed. Delta=${JSON.stringify({ x: deltaX, y: deltaY })}, RndRelPos=${JSON.stringify(relativePos)}, FinalRelPos=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
-                    );
                 } else {
-                    console.warn(
-                        "Could not get parent positions for delta calculation. Falling back to RndRelPos."
-                    );
-                    finalRelativeX = relativePos.x; // Fallback
-                    finalRelativeY = relativePos.y; // Fallback
+                    finalRelativeX = relativePos.x;
+                    finalRelativeY = relativePos.y;
+                }
+            } else if (originalParentId !== null) {
+                // Moved TO screen FROM a frame
+                const originalParentAbsPos = _getAbsolutePosition(
+                    originalParentId,
+                    allComponents
+                );
+                if (!isNaN(originalParentAbsPos.x)) {
+                    finalRelativeX = originalParentAbsPos.x + relativePos.x;
+                    finalRelativeY = originalParentAbsPos.y + relativePos.y;
+                } else {
+                    finalRelativeX = relativePos.x;
+                    finalRelativeY = relativePos.y;
                 }
             } else {
-                // Moved TO screen (finalParentId is null)
-                // RndRelPos should already be screen-relative
                 finalRelativeX = relativePos.x;
                 finalRelativeY = relativePos.y;
-                console.log(
-                    `moveComponent (To Screen): Using RndRelPos directly=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
-                );
             }
         } else {
-            // Parent did NOT change (moved within screen or within the same frame)
-            // RndRelPos is relative to the current parent, use directly.
             finalRelativeX = relativePos.x;
             finalRelativeY = relativePos.y;
-            console.log(
-                `moveComponent (No Parent Change): Using RndRelPos directly=${JSON.stringify({ x: finalRelativeX, y: finalRelativeY })}`
-            );
         }
 
-        // Ensure coordinates are not negative (relative to the determined parent)
-        finalRelativeX = Math.max(0, finalRelativeX);
-        finalRelativeY = Math.max(0, finalRelativeY);
+        if (finalParentId !== null) {
+            finalRelativeX = Math.max(0, finalRelativeX);
+            finalRelativeY = Math.max(0, finalRelativeY);
+        }
 
-        // Update state...
-        const updatedScreens = screens.map((s, index) => {
-            if (index !== currentScreenIndex) return s;
-            return {
-                ...s,
-                components: s.components.map((component) =>
-                    component.id === id
-                        ? {
-                              ...component,
-                              x: Math.round(finalRelativeX), // Store final relative X
-                              y: Math.round(finalRelativeY), // Store final relative Y
-                              parentId: finalParentId, // Update parentId
-                          }
-                        : component
-                ),
-            };
-        });
+        const updatedScreens = screens.map((s, idx) =>
+            idx !== currentScreenIndex
+                ? s
+                : {
+                      ...s,
+                      components: s.components.map((component) =>
+                          component.id === id
+                              ? {
+                                    ...component,
+                                    x: Math.round(finalRelativeX),
+                                    y: Math.round(finalRelativeY),
+                                    parentId: finalParentId,
+                                }
+                              : component
+                      ),
+                  }
+        );
         set({ screens: updatedScreens });
     },
 
@@ -459,35 +394,30 @@ export const useAppStore = create((set, get) => ({
             selectedComponentId,
             screens,
             currentScreenIndex,
-            nextComponentId: currentNextComponentId,
+            nextComponentId,
         } = get();
-
         if (selectedComponentId === null) return;
-
         const currentScreen = screens[currentScreenIndex];
         const componentToDuplicate = currentScreen.components.find(
             (comp) => comp.id === selectedComponentId
         );
-
         if (!componentToDuplicate) return;
 
-        let newNextComponentId = currentNextComponentId;
-        const idMap = new Map(); // Maps old IDs to new IDs
+        let newNextComponentId = nextComponentId;
+        const idMap = new Map();
 
-        // Recursive function to duplicate a component and its children
+        // Recursively duplicate component and its children
         const duplicateRecursive = (originalComp, parentId) => {
             const newId = newNextComponentId++;
             idMap.set(originalComp.id, newId);
-
             const duplicatedComp = {
                 ...JSON.parse(JSON.stringify(originalComp)),
                 id: newId,
-                parentId: parentId, // Use the new parent ID if applicable
-                x: originalComp.x + 20, // Offset duplicate slightly
+                parentId,
+                x: originalComp.x + 20,
                 y: originalComp.y + 20,
-                componentId: `${originalComp.type.toLowerCase()}${newId}`, // Ensure unique componentId
+                componentId: `${originalComp.type.toLowerCase()}${newId}`,
             };
-
             let children = [];
             if (originalComp.type === "PySideFrame") {
                 const originalChildren = currentScreen.components.filter(
@@ -495,30 +425,27 @@ export const useAppStore = create((set, get) => ({
                 );
                 children = originalChildren.flatMap((child) =>
                     duplicateRecursive(child, newId)
-                ); // Pass new parent ID
+                );
             }
-
             return [duplicatedComp, ...children];
         };
 
         const newComponents = duplicateRecursive(
             componentToDuplicate,
-            componentToDuplicate.parentId // Keep the same parent initially
+            componentToDuplicate.parentId
         );
-
         const updatedScreens = [...screens];
         updatedScreens[currentScreenIndex].components.push(...newComponents);
 
         set({
             screens: updatedScreens,
             nextComponentId: newNextComponentId,
-            selectedComponentId: idMap.get(selectedComponentId), // Select the top-level duplicated component
+            selectedComponentId: idMap.get(selectedComponentId),
         });
     },
 
     setCurrentScreenIndex: (idx) => set({ currentScreenIndex: idx }),
 
-    // Zoom & Pan
     setZoomLevel: (zoom) => set({ zoomLevel: zoom }),
     setPanPosition: (pos) => set({ panPosition: pos }),
     setIsPanning: (val) => set({ isPanning: val }),
@@ -572,7 +499,6 @@ export const useAppStore = create((set, get) => ({
     handlePanEnd: () => set({ isPanning: false }),
     handleResetView: () => set({ panPosition: { x: 0, y: 0 }, zoomLevel: 1 }),
 
-    // Export/Import
     handleExport: async (centerPanelDimensions) => {
         const { screens, currentScreenIndex } = get();
         const uiFile = generateQtUiFile(
