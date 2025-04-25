@@ -6,6 +6,7 @@ import { IoMdClose } from "react-icons/io";
 
 const Widget = ({
     id,
+    componentType,
     onDelete,
     onDuplicate,
     x,
@@ -24,6 +25,9 @@ const Widget = ({
     const actualPosition = { x: x, y: y };
     const actualSize = { width: width, height: height };
 
+    let zIndex = 1;
+    if (componentType !== "PySideFrame") zIndex = 10;
+
     return (
         <Rnd
             position={actualPosition}
@@ -37,6 +41,7 @@ const Widget = ({
                       : "none",
                 position: "absolute",
                 boxSizing: "border-box",
+                zIndex,
             }}
             bounds="parent"
             data-id={id}
@@ -51,10 +56,10 @@ const Widget = ({
                 topLeft: true,
             }}
             onDragStart={(e) => {
-                e.stopPropagation(); // Prevent drag start from bubbling to parent
+                e.stopPropagation();
             }}
             onResizeStop={(e, direction, ref, delta, position) => {
-                e.stopPropagation(); // Prevent event bubbling
+                e.stopPropagation();
                 const finalDimensions = {
                     width: Math.round(ref.offsetWidth / zoomLevel),
                     height: Math.round(ref.offsetHeight / zoomLevel),
@@ -64,8 +69,7 @@ const Widget = ({
                 onResize(id, finalDimensions);
             }}
             onDragStop={(e, d) => {
-                e.stopPropagation(); // Prevent event bubbling
-                // Pass both relative position (d) and the mouse event (e)
+                e.stopPropagation();
                 onMove(id, {
                     relativePos: {
                         x: Math.round(d.x),

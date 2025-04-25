@@ -46,15 +46,15 @@ const renderComponent = (
         <Widget
             key={component.id}
             id={component.id}
-            // Pass the component's stored X and Y (relative to parent)
+            componentType={component.type} // NEW: pass type for z-index
             x={component.x}
             y={component.y}
             width={component.width}
             height={component.height}
             onDelete={onDeleteComponent}
             onDuplicate={onDuplicateComponent}
-            onResize={onResizeComponent} // onResize needs adjustment in store if x/y changes
-            onMove={onMoveComponent} // onMove needs adjustment in store
+            onResize={onResizeComponent}
+            onMove={onMoveComponent}
             onSelect={onSelectComponent}
             isSelected={component.id === selectedComponentId}
             zoomLevel={zoomLevel}>
