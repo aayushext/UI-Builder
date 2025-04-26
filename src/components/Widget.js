@@ -88,7 +88,6 @@ const Widget = ({
                 boxSizing: "border-box",
                 zIndex,
             }}
-            bounds="parent"
             data-id={id}
             enableResizing={{
                 top: true,

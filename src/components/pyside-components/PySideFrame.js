@@ -47,7 +47,6 @@ const PySideFrame = ({
         backgroundColor: backgroundColor,
         border: getBorderStyle(),
         // boxShadow: getBoxShadow(), // Simplified border handles basic shadow
-        overflow: "hidden",
         position: "relative",
         boxSizing: "border-box",
     };
