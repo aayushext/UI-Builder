@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import Widget from "./Widget";
 import PySideButton from "@/components/pyside-components/PySideButton";
@@ -14,7 +13,8 @@ const renderComponent = (
     allComponents,
     selectedComponentId,
     handlers,
-    zoomLevel
+    zoomLevel,
+    dropTargetFrameId
 ) => {
     const {
         onDeleteComponent,
@@ -34,7 +34,8 @@ const renderComponent = (
                     allComponents,
                     selectedComponentId,
                     handlers,
-                    zoomLevel
+                    zoomLevel,
+                    dropTargetFrameId
                 )
             );
     }
@@ -54,8 +55,8 @@ const renderComponent = (
             onMove={onMoveComponent}
             onSelect={onSelectComponent}
             isSelected={component.id === selectedComponentId}
-            zoomLevel={zoomLevel}>
-            {/* Render the specific PySide component */}
+            zoomLevel={zoomLevel}
+            isDropTarget={component.id === dropTargetFrameId}>
             {component.type === "PySideButton" && (
                 <PySideButton
                     text={component.text}
@@ -109,6 +110,7 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
     const selectedComponentId = useAppStore((s) => s.selectedComponentId);
     const zoomLevel = useAppStore((s) => s.zoomLevel);
     const panPosition = useAppStore((s) => s.panPosition);
+    const dropTargetFrameId = useAppStore((s) => s.dropTargetFrameId);
 
     const onDeleteComponent = useAppStore((s) => s.deleteComponent);
     const onDuplicateComponent = useAppStore((s) => s.duplicateComponent);
@@ -169,7 +171,7 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                 style={{
                     width: `${screenWidth}px`,
                     height: `${screenHeight}px`,
-                    backgroundColor: backgroundColor,
+                    backgroundColor,
                     boxShadow: "0 0 10px rgba(0,0,0,0.2)",
                     overflow: "hidden",
                     transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
@@ -178,27 +180,35 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                         : "transform 0.1s ease-out",
                     willChange: "transform",
                 }}>
-                {/* Render only top-level components;*/}
+                {dropTargetFrameId === -1 && (
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                            background: "rgba(255, 152, 0, 0.18)",
+                            animation: "blink-overlay 1.2s linear infinite",
+                            borderRadius: 12,
+                            zIndex: 100,
+                        }}
+                    />
+                )}
                 {topLevelComponents.map((component) =>
                     renderComponent(
                         component,
                         allComponents,
                         selectedComponentId,
                         handlers,
-                        zoomLevel
+                        zoomLevel,
+                        dropTargetFrameId
                     )
                 )}
             </div>
-            {/* Zoom controls */}
             <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg z-50">
                 <button
                     onClick={onZoomOut}
                     className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
                     title="Zoom out">
                     <IconContext.Provider value={{ size: "1em" }}>
-                        <div>
-                            <FaMinus />
-                        </div>
+                        <FaMinus />
                     </IconContext.Provider>
                 </button>
                 <button
@@ -212,9 +222,7 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                     className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
                     title="Zoom in">
                     <IconContext.Provider value={{ size: "1em" }}>
-                        <div>
-                            <FaPlus />
-                        </div>
+                        <FaPlus />
                     </IconContext.Provider>
                 </button>
             </div>
@@ -225,3 +233,19 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
 CenterPanel.displayName = "CenterPanel";
 
 export default CenterPanel;
+
+if (
+    typeof window !== "undefined" &&
+    !document.getElementById("widget-blink-overlay-style")
+) {
+    const style = document.createElement("style");
+    style.id = "widget-blink-overlay-style";
+    style.innerHTML = `
+    @keyframes blink-overlay {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+    `;
+    document.head.appendChild(style);
+}

@@ -29,6 +29,9 @@ export const useAppStore = create((set, get) => ({
     panPosition: { x: 0, y: 0 },
     isPanning: false,
     lastMousePosition: { x: 0, y: 0 },
+    dropTargetFrameId: null,
+
+    updateDropTargetFrameId: (frameId) => set({ dropTargetFrameId: frameId }),
 
     /**
      * Calculates the absolute screen position of a component, traversing its parent hierarchy.
@@ -328,17 +331,44 @@ export const useAppStore = create((set, get) => ({
                 break;
             }
         }
-        finalParentId = potentialParent ? potentialParent.id : null;
+        // If not over any frame but inside screen, treat as main screen
+        let isOnMainScreen =
+            !potentialParent &&
+            adjustedMouseX >= 0 &&
+            adjustedMouseX <= screen.width &&
+            adjustedMouseY >= 0 &&
+            adjustedMouseY <= screen.height;
+
+        const newParentId = potentialParent
+            ? potentialParent.id
+            : isOnMainScreen
+              ? null
+              : null;
+
+        // --- Only set dropTargetFrameId for a short blink if parent is changing ---
+        if (newParentId !== movedComponent.parentId) {
+            set({
+                dropTargetFrameId: potentialParent
+                    ? potentialParent.id
+                    : isOnMainScreen
+                      ? -1
+                      : null,
+            });
+            setTimeout(() => set({ dropTargetFrameId: null }), 700);
+        }
 
         // --- Calculate Final Position ---
-        if (finalParentId !== originalParentId) {
-            if (finalParentId !== null && potentialParent) {
+        if (newParentId !== movedComponent.parentId) {
+            if (newParentId !== null && potentialParent) {
                 const newParentAbsPos = _getAbsolutePosition(
-                    finalParentId,
+                    newParentId,
                     allComponents
                 );
-                const originalParentAbsPos = originalParentId
-                    ? _getAbsolutePosition(originalParentId, allComponents)
+                const originalParentAbsPos = movedComponent.parentId
+                    ? _getAbsolutePosition(
+                          movedComponent.parentId,
+                          allComponents
+                      )
                     : { x: 0, y: 0 };
                 if (
                     !isNaN(newParentAbsPos.x) &&
@@ -352,7 +382,10 @@ export const useAppStore = create((set, get) => ({
                     finalRelativeX = relativePos.x;
                     finalRelativeY = relativePos.y;
                 }
-            } else if (originalParentId !== null && finalParentId === null) {
+            } else if (
+                movedComponent.parentId !== null &&
+                newParentId === null
+            ) {
                 finalRelativeX = adjustedMouseX - movedComponent.width / 2;
                 finalRelativeY = adjustedMouseY - movedComponent.height / 2;
             } else {
@@ -364,7 +397,7 @@ export const useAppStore = create((set, get) => ({
             finalRelativeY = relativePos.y;
         }
 
-        if (finalParentId !== null && finalParentId === originalParentId) {
+        if (newParentId !== null && newParentId === movedComponent.parentId) {
             finalRelativeX = Math.max(0, finalRelativeX);
             finalRelativeY = Math.max(0, finalRelativeY);
         }
@@ -380,7 +413,7 @@ export const useAppStore = create((set, get) => ({
                                     ...component,
                                     x: Math.round(finalRelativeX),
                                     y: Math.round(finalRelativeY),
-                                    parentId: finalParentId,
+                                    parentId: newParentId,
                                 }
                               : component
                       ),

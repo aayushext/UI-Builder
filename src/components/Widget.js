@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { useAppStore } from "../store/useAppStore";
 
 const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
     <div
@@ -15,26 +16,19 @@ const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
                 onDuplicate();
             }}
             className="bg-blue-500 hover:bg-blue-700 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm transition"
-            style={{
-                minWidth: "20px",
-                touchAction: "manipulation",
-            }}
+            style={{ minWidth: 20, touchAction: "manipulation" }}
             title="Duplicate">
             <IconContext.Provider value={{ size: "0.8em" }}>
                 <FaCopy />
             </IconContext.Provider>
         </button>
-
         <button
             onClick={(e) => {
                 e.stopPropagation();
                 onDelete(id);
             }}
             className="bg-red-500 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm transition"
-            style={{
-                minWidth: "20px",
-                touchAction: "manipulation",
-            }}
+            style={{ minWidth: 20, touchAction: "manipulation" }}
             title="Delete">
             <IconContext.Provider value={{ size: "0.9em" }}>
                 <IoMdClose />
@@ -64,14 +58,61 @@ const Widget = ({
     onSelect,
     isSelected,
     zoomLevel = 1,
+    isDropTarget = false,
 }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const updateDropTargetFrameId = useAppStore(
+        (s) => s.updateDropTargetFrameId
+    );
+    const screens = useAppStore((s) => s.screens);
+    const currentScreenIndex = useAppStore((s) => s.currentScreenIndex);
+    const zoomLevelStore = useAppStore((s) => s.zoomLevel);
+    const panPosition = useAppStore((s) => s.panPosition);
 
-    const actualPosition = { x: x, y: y };
-    const actualSize = { width: width, height: height };
+    const actualPosition = { x, y };
+    const actualSize = { width, height };
+    let zIndex = componentType !== "PySideFrame" ? 10 : 1;
 
-    let zIndex = 1;
-    if (componentType !== "PySideFrame") zIndex = 10;
+    const getFrameUnderMouse = (clientX, clientY) => {
+        const screen = screens[currentScreenIndex];
+        if (!screen) return null;
+        const allComponents = screen.components;
+        const _getAbsolutePosition =
+            useAppStore.getState()._getAbsolutePosition;
+        const frames = allComponents.filter(
+            (c) => c.type === "PySideFrame" && c.id !== id
+        );
+        const screenContainerRect = document
+            .querySelector(".relative.mx-auto.origin-top-left")
+            ?.getBoundingClientRect();
+        if (!screenContainerRect) return null;
+        const mouseRelativeToContainerX = clientX - screenContainerRect.left;
+        const mouseRelativeToContainerY = clientY - screenContainerRect.top;
+        const adjustedMouseX =
+            (mouseRelativeToContainerX - panPosition.x) / zoomLevelStore;
+        const adjustedMouseY =
+            (mouseRelativeToContainerY - panPosition.y) / zoomLevelStore;
+        for (const frame of frames) {
+            const frameAbsPos = _getAbsolutePosition(frame.id, allComponents);
+            if (
+                adjustedMouseX >= frameAbsPos.x &&
+                adjustedMouseX <= frameAbsPos.x + frame.width &&
+                adjustedMouseY >= frameAbsPos.y &&
+                adjustedMouseY <= frameAbsPos.y + frame.height
+            ) {
+                return frame.id;
+            }
+        }
+        if (
+            adjustedMouseX >= 0 &&
+            adjustedMouseX <= screen.width &&
+            adjustedMouseY >= 0 &&
+            adjustedMouseY <= screen.height
+        ) {
+            return -1;
+        }
+        return null;
+    };
 
     return (
         <Rnd
@@ -80,9 +121,9 @@ const Widget = ({
             scale={zoomLevel}
             style={{
                 border: isSelected
-                    ? `2px solid blue`
+                    ? "2px solid blue"
                     : isHovered
-                      ? `1px dashed gray`
+                      ? "1px dashed gray"
                       : "none",
                 position: "absolute",
                 boxSizing: "border-box",
@@ -112,6 +153,19 @@ const Widget = ({
                 };
                 onResize(id, finalDimensions);
             }}
+            onDrag={(e, d) => {
+                const frameId = getFrameUnderMouse(e.clientX, e.clientY);
+                const screen = screens[currentScreenIndex];
+                const allComponents = screen.components;
+                const thisComponent = allComponents.find((c) => c.id === id);
+                const currentParentId = thisComponent?.parentId ?? null;
+                const wouldBeParentId = frameId === -1 ? null : frameId;
+                if (wouldBeParentId !== currentParentId) {
+                    updateDropTargetFrameId(frameId);
+                } else {
+                    updateDropTargetFrameId(null);
+                }
+            }}
             onDragStop={(e, d) => {
                 e.stopPropagation();
                 onMove(id, {
@@ -134,14 +188,22 @@ const Widget = ({
             <div
                 className="relative w-full h-full"
                 style={{ pointerEvents: "none" }}>
-                {/* Component Container */}
+                {isDropTarget && (
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                            background: "rgba(255, 152, 0, 0.25)",
+                            animation: "blink-overlay 1.2s linear infinite",
+                            borderRadius: 8,
+                            zIndex: 100,
+                        }}
+                    />
+                )}
                 <div
                     className="absolute inset-0"
                     style={{ pointerEvents: "auto" }}>
                     {children}
                 </div>
-
-                {/* Toolbar */}
                 {(isHovered || isSelected) && (
                     <WidgetToolbar
                         id={id}
@@ -169,6 +231,23 @@ Widget.propTypes = {
     onSelect: PropTypes.func.isRequired,
     isSelected: PropTypes.bool.isRequired,
     zoomLevel: PropTypes.number,
+    isDropTarget: PropTypes.bool,
 };
+
+if (
+    typeof window !== "undefined" &&
+    !document.getElementById("widget-blink-overlay-style")
+) {
+    const style = document.createElement("style");
+    style.id = "widget-blink-overlay-style";
+    style.innerHTML = `
+    @keyframes blink-overlay {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+    `;
+    document.head.appendChild(style);
+}
 
 export default Widget;
