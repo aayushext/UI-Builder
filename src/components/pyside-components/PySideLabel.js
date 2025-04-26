@@ -14,13 +14,12 @@ const PySideLabel = ({
         backgroundColor: backgroundColor,
         borderRadius: `${radius}px`,
         border: `1px solid ${borderColor}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
     };
 
     return (
-        <label className="w-full h-full" style={labelStyle}>
+        <label
+            className="w-full h-full flex items-center justify-center"
+            style={labelStyle}>
             {text}
         </label>
     );

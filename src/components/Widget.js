@@ -119,16 +119,17 @@ const Widget = ({
             position={actualPosition}
             size={actualSize}
             scale={zoomLevel}
-            style={{
-                border: isSelected
-                    ? "2px solid blue"
+            className={`absolute ${
+                isSelected
+                    ? "border-2 border-blue-500"
                     : isHovered
-                      ? "1px dashed gray"
-                      : "none",
-                position: "absolute",
-                boxSizing: "border-box",
-                zIndex,
-            }}
+                      ? "border border-dashed border-gray-500"
+                      : "border-none"
+            } z-[${zIndex}]`}
+            // style={{
+            //     // border removed, handled by className
+            //     zIndex,
+            // }}
             data-id={id}
             enableResizing={{
                 top: true,
@@ -185,15 +186,11 @@ const Widget = ({
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
-            <div
-                className="relative w-full h-full"
-                style={{ pointerEvents: "none" }}>
+            <div className="relative w-full h-full pointer-events-none">
                 {isDropTarget && (
                     <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-900 bg-sky-900/40 animate-[blink-overlay_1.5s_linear_infinite] rounded-md z-[100]" />
                 )}
-                <div
-                    className="absolute inset-0"
-                    style={{ pointerEvents: "auto" }}>
+                <div className="absolute inset-0 pointer-events-auto">
                     {children}
                 </div>
                 {(isHovered || isSelected) && (

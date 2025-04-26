@@ -91,7 +91,7 @@ const CustomColorPicker = ({ value, onChange }) => {
                     />
                     <input
                         type="text"
-                        className="mt-2 py-1 px-2 block w-full rounded-md bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-2 py-1 px-2 block w-full rounded-md bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         value={color}
                         onChange={(e) => handleColorChange(e.target.value)}
                         onMouseDown={(e) => e.stopPropagation()}

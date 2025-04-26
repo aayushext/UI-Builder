@@ -25,15 +25,11 @@ const PySideButton = ({
         color: textColor,
         backgroundColor: currentBackgroundColor,
         borderRadius: `${radius}px`,
-        border: "none",
-        padding: "10px 15px",
-        cursor: "pointer",
-        transition: "background-color 0.2s ease",
     };
 
     return (
         <button
-            className="w-full h-full"
+            className="w-full h-full border-none px-4 py-2.5 cursor-pointer transition-colors duration-200 ease-in-out"
             style={buttonStyle}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
