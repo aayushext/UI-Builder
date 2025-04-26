@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import "./globals.css";
 
 export const metadata = {
-    title: "UI Builder",
+    title: "UI Forge",
     description: "A simple UI builder for PySide6 used by the DPEA",
 };
 
