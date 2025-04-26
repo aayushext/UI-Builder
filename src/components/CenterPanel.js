@@ -182,12 +182,12 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                 }}>
                 {dropTargetFrameId === -1 && (
                     <div
-                        className="absolute inset-0 pointer-events-none"
+                        className="absolute inset-0 pointer-events-none border-2 border-dashed z-[100]"
                         style={{
-                            background: "rgba(255, 152, 0, 0.18)",
-                            animation: "blink-overlay 1.2s linear infinite",
-                            borderRadius: 12,
-                            zIndex: 100,
+                            background: "rgba(40, 70, 92, 0.4)",
+                            borderColor: "rgba(40, 70, 92, 0.8)",
+                            animation: "blink-overlay 1.5s linear infinite",
+                            filter: "invert(0.5)",
                         }}
                     />
                 )}

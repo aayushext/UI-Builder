@@ -190,12 +190,12 @@ const Widget = ({
                 style={{ pointerEvents: "none" }}>
                 {isDropTarget && (
                     <div
-                        className="absolute inset-0 pointer-events-none"
+                        className="absolute inset-0 pointer-events-none border-2 border-dashed z-[100]"
                         style={{
-                            background: "rgba(255, 152, 0, 0.25)",
-                            animation: "blink-overlay 1.2s linear infinite",
-                            borderRadius: 8,
-                            zIndex: 100,
+                            background: "rgba(40, 70, 92, 0.4)",
+                            borderCollapse: "rgba(40, 70, 92, 0.8)",
+                            animation: "blink-overlay 1.5s linear infinite",
+                            filter: "invert(0.5)",
                         }}
                     />
                 )}
