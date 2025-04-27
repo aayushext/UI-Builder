@@ -1,6 +1,11 @@
 import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
+/**
+ * Convert hex color to RGB object.
+ * @param {string} hex
+ * @returns {{r: number, g: number, b: number}|null}
+ */
 const hexToRgb = (hex) => {
     if (!hex) return null;
     hex = hex.replace("#", "");
@@ -18,6 +23,12 @@ const hexToRgb = (hex) => {
     }
     return { r, g, b };
 };
+
+/**
+ * Convert RGB object to hex color string.
+ * @param {{r: number, g: number, b: number}} rgb
+ * @returns {string}
+ */
 const rgbToHex = ({ r, g, b }) =>
     "#" +
     [r, g, b]
@@ -26,6 +37,13 @@ const rgbToHex = ({ r, g, b }) =>
             return hex.length === 1 ? "0" + hex : hex;
         })
         .join("");
+
+/**
+ * Adjust color brightness by a percentage.
+ * @param {string} hex
+ * @param {number} percent
+ * @returns {string}
+ */
 const adjustColor = (hex, percent) => {
     const rgb = hexToRgb(hex);
     if (!rgb) return hex;
@@ -36,9 +54,13 @@ const adjustColor = (hex, percent) => {
         b: Math.max(0, Math.min(255, rgb.b * factor)),
     });
 };
+
 const lightenColor = (hex, percent) => adjustColor(hex, Math.abs(percent));
 const darkenColor = (hex, percent) => adjustColor(hex, -Math.abs(percent));
 
+/**
+ * Draw a raised or sunken frame on canvas.
+ */
 const drawRaisedFrame = (
     ctx,
     width,
@@ -95,6 +117,9 @@ const drawRaisedFrame = (
     ctx.fill();
 };
 
+/**
+ * Canvas for drawing groove/raised/sunken frames.
+ */
 const BoxFrameCanvas = ({
     width,
     height,
@@ -160,8 +185,6 @@ const BoxFrameCanvas = ({
                 colorLight,
                 colorDark
             );
-
-            // Helper function to draw the raised frame
         } else if (frameShadow === "Sunken") {
             drawRaisedFrame(
                 ctx,
@@ -197,7 +220,6 @@ const BoxFrameCanvas = ({
         ctx.restore();
     }, [width, height, lineW, midLineW, frameShadow, backgroundColor]);
 
-    // Only render canvas if width and height are positive numbers
     if (!width || !height) return null;
 
     return (
@@ -219,15 +241,9 @@ const BoxFrameCanvas = ({
     );
 };
 
-BoxFrameCanvas.propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    lineW: PropTypes.number.isRequired,
-    midLineW: PropTypes.number.isRequired,
-    frameShadow: PropTypes.string.isRequired,
-    backgroundColor: PropTypes.string,
-};
-
+/**
+ * PySideFrame - Professional, flexible frame component.
+ */
 const PySideFrame = ({
     backgroundColor,
     frameShape,
@@ -241,6 +257,7 @@ const PySideFrame = ({
     height,
     children,
 }) => {
+    // Calculate line widths
     const lineW = lineWidth !== undefined ? Math.max(0, lineWidth) : 1;
     const midLineW = midLineWidth !== undefined ? Math.max(0, midLineWidth) : 0;
     const totalWidth = lineW + midLineW;
@@ -251,6 +268,7 @@ const PySideFrame = ({
     const colorMidLight = lightenColor(baseColor, 15);
     const colorMidDark = darkenColor(baseColor, 15);
 
+    // Base style
     const style = {
         backgroundColor,
         boxShadow: "none",
@@ -265,6 +283,7 @@ const PySideFrame = ({
         overflow: "hidden",
     };
 
+    // Custom border override
     if (useCustomBorder) {
         style.borderTop =
             style.borderRight =
@@ -278,13 +297,18 @@ const PySideFrame = ({
         );
     }
 
-    if (
-        frameShape === "Box" &&
+    // Groove/Panel/WinPanel with Raised/Sunken shadow
+    const isGrooveFrame =
+        (frameShape === "Box" ||
+            frameShape === "Panel" ||
+            frameShape === "WinPanel") &&
+        (frameShadow === "Raised" || frameShadow === "Sunken") &&
         typeof width === "number" &&
         typeof height === "number" &&
         width > 0 &&
-        height > 0
-    ) {
+        height > 0;
+
+    if (isGrooveFrame) {
         return (
             <div
                 className="w-full h-full relative"
@@ -297,19 +321,22 @@ const PySideFrame = ({
                     frameShadow={frameShadow}
                     backgroundColor={backgroundColor}
                 />
-                <div
-                    style={{
-                        position: "relative",
-                        width: "100%",
-                        height: "100%",
-                        zIndex: 3,
-                    }}>
-                    {children}
-                </div>
+                {frameShape === "Box" && (
+                    <div
+                        style={{
+                            position: "relative",
+                            width: "100%",
+                            height: "100%",
+                            zIndex: 3,
+                        }}>
+                        {children}
+                    </div>
+                )}
             </div>
         );
     }
 
+    // HLine/VLine logic
     if (frameShape === "HLine" || frameShape === "VLine") {
         style.backgroundColor = "transparent";
         style.boxShadow = "none";
@@ -349,6 +376,7 @@ const PySideFrame = ({
         );
     }
 
+    // NoFrame logic
     if (frameShape === "NoFrame") {
         return (
             <div className="w-full h-full relative" style={style}>
@@ -357,6 +385,7 @@ const PySideFrame = ({
         );
     }
 
+    // Plain frame with no width
     if (totalWidth <= 0 && frameShadow === "Plain") {
         return (
             <div className="w-full h-full relative" style={style}>
@@ -365,9 +394,11 @@ const PySideFrame = ({
         );
     }
 
+    // Determine plain border color
     let plainBorderColor = colorDark;
     if (frameShape === "StyledPanel") plainBorderColor = colorMidDark;
 
+    // Main frame rendering logic
     if (frameShadow === "Raised") {
         if (totalWidth > 0) {
             style.boxShadow = `inset ${lineW}px ${lineW}px 0 0 ${colorLight}, inset -${lineW}px -${lineW}px 0 0 ${colorDark}${midLineW > 0 ? `, inset 0 0 0 ${midLineW}px ${colorMid}` : ""}`;

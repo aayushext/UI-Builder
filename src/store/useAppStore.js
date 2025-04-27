@@ -357,49 +357,69 @@ export const useAppStore = create((set, get) => ({
 
         // --- Calculate Final Position ---
         if (newParentId !== movedComponent.parentId) {
-            if (newParentId !== null && potentialParent) {
+            // Calculate position relative to the *new* parent
+            if (newParentId !== null) {
                 const newParentAbsPos = _getAbsolutePosition(
                     newParentId,
                     allComponents
                 );
-                const originalParentAbsPos = movedComponent.parentId
-                    ? _getAbsolutePosition(
-                          movedComponent.parentId,
-                          allComponents
-                      )
-                    : { x: 0, y: 0 };
-                if (
-                    !isNaN(newParentAbsPos.x) &&
-                    !isNaN(originalParentAbsPos.x)
-                ) {
-                    const deltaX = originalParentAbsPos.x - newParentAbsPos.x;
-                    const deltaY = originalParentAbsPos.y - newParentAbsPos.y;
-                    finalRelativeX = relativePos.x + deltaX;
-                    finalRelativeY = relativePos.y + deltaY;
+                if (!isNaN(newParentAbsPos.x)) {
+                    finalRelativeX =
+                        adjustedMouseX -
+                        newParentAbsPos.x -
+                        movedComponent.width / 2;
+                    finalRelativeY =
+                        adjustedMouseY -
+                        newParentAbsPos.y -
+                        movedComponent.height / 2;
                 } else {
-                    finalRelativeX = relativePos.x;
+                    console.error(
+                        `Could not get absolute position for new parent ${newParentId}`
+                    );
+                    finalRelativeX = relativePos.x; // Fallback
                     finalRelativeY = relativePos.y;
                 }
-            } else if (
-                movedComponent.parentId !== null &&
-                newParentId === null
-            ) {
+            } else {
                 finalRelativeX = adjustedMouseX - movedComponent.width / 2;
                 finalRelativeY = adjustedMouseY - movedComponent.height / 2;
-            } else {
-                finalRelativeX = relativePos.x;
-                finalRelativeY = relativePos.y;
             }
         } else {
+            // Moving within the same parent (or staying at top level)
             finalRelativeX = relativePos.x;
             finalRelativeY = relativePos.y;
         }
 
-        if (newParentId !== null && newParentId === movedComponent.parentId) {
-            finalRelativeX = Math.max(0, finalRelativeX);
-            finalRelativeY = Math.max(0, finalRelativeY);
+        // Clamp position to be within parent bounds if it's a frame
+        if (newParentId !== null) {
+            const parentFrame = allComponents.find((c) => c.id === newParentId);
+            if (parentFrame) {
+                finalRelativeX = Math.max(
+                    0,
+                    Math.min(
+                        finalRelativeX,
+                        parentFrame.width - movedComponent.width
+                    )
+                );
+                finalRelativeY = Math.max(
+                    0,
+                    Math.min(
+                        finalRelativeY,
+                        parentFrame.height - movedComponent.height
+                    )
+                );
+            }
+        } else {
+            finalRelativeX = Math.max(
+                0,
+                Math.min(finalRelativeX, screen.width - movedComponent.width)
+            );
+            finalRelativeY = Math.max(
+                0,
+                Math.min(finalRelativeY, screen.height - movedComponent.height)
+            );
         }
 
+        // --- Update state ---
         const updatedScreens = screens.map((s, idx) =>
             idx !== currentScreenIndex
                 ? s
