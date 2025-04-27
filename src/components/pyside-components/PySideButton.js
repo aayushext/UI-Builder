@@ -9,15 +9,23 @@ const PySideButton = ({
     radius,
     pressedColor,
     hoverColor,
+    borderColor,
+    borderWidth,
+    hoverBorderColor,
+    pressedBorderColor,
 }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
 
     let currentBackgroundColor = backgroundColor;
+    let currentBorderColor = borderColor;
+
     if (isPressed) {
         currentBackgroundColor = pressedColor;
+        currentBorderColor = pressedBorderColor ?? borderColor;
     } else if (isHovered) {
         currentBackgroundColor = hoverColor;
+        currentBorderColor = hoverBorderColor ?? borderColor;
     }
 
     const buttonStyle = {
@@ -25,11 +33,12 @@ const PySideButton = ({
         color: textColor,
         backgroundColor: currentBackgroundColor,
         borderRadius: `${radius}px`,
+        border: `${borderWidth}px solid ${currentBorderColor}`,
     };
 
     return (
         <button
-            className="w-full h-full border-none px-4 py-2.5 cursor-pointer transition-colors duration-200 ease-in-out"
+            className="w-full h-full px-4 py-2.5 cursor-pointer transition-colors duration-200 ease-in-out box-border"
             style={buttonStyle}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -49,6 +58,10 @@ PySideButton.propTypes = {
     radius: PropTypes.number,
     pressedColor: PropTypes.string,
     hoverColor: PropTypes.string,
+    borderColor: PropTypes.string,
+    borderWidth: PropTypes.number,
+    hoverBorderColor: PropTypes.string,
+    pressedBorderColor: PropTypes.string,
 };
 
 export default PySideButton;

@@ -66,6 +66,10 @@ const renderComponent = (
                     radius={component.radius}
                     pressedColor={component.pressedColor}
                     hoverColor={component.hoverColor}
+                    borderColor={component.borderColor}
+                    borderWidth={component.borderWidth}
+                    hoverBorderColor={component.hoverBorderColor}
+                    pressedBorderColor={component.pressedBorderColor}
                 />
             )}
             {component.type === "PySideLabel" && (
@@ -76,6 +80,8 @@ const renderComponent = (
                     backgroundColor={component.backgroundColor}
                     borderColor={component.borderColor}
                     radius={component.radius}
+                    borderWidth={component.borderWidth}
+                    textAlign={component.textAlign}
                 />
             )}
             {component.type === "PySideSlider" && (
@@ -88,6 +94,8 @@ const renderComponent = (
                     orientation={component.orientation}
                     sliderColor={component.sliderColor}
                     backgroundColor={component.backgroundColor}
+                    trackColor={component.trackColor}
+                    trackWidth={component.trackWidth}
                 />
             )}
             {component.type === "PySideFrame" && (
@@ -96,7 +104,12 @@ const renderComponent = (
                     frameShape={component.frameShape}
                     frameShadow={component.frameShadow}
                     lineWidth={component.lineWidth}
-                    midLineWidth={component.midLineWidth}>
+                    midLineWidth={component.midLineWidth}
+                    borderColor={component.borderColor}
+                    borderWidth={component.borderWidth}
+                    useCustomBorder={component.useCustomBorder}
+                    width={component.width}
+                    height={component.height}>
                     {renderedChildren}
                 </PySideFrame>
             )}

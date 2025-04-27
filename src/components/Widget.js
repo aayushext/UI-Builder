@@ -88,10 +88,8 @@ const Widget = ({
         if (!screenContainerRect) return null;
         const mouseRelativeToContainerX = clientX - screenContainerRect.left;
         const mouseRelativeToContainerY = clientY - screenContainerRect.top;
-        const adjustedMouseX =
-            (mouseRelativeToContainerX - panPosition.x) / zoomLevelStore;
-        const adjustedMouseY =
-            (mouseRelativeToContainerY - panPosition.y) / zoomLevelStore;
+        const adjustedMouseX = mouseRelativeToContainerX - panPosition.x;
+        const adjustedMouseY = mouseRelativeToContainerY - panPosition.y;
         for (const frame of frames) {
             const frameAbsPos = _getAbsolutePosition(frame.id, allComponents);
             if (
@@ -125,11 +123,10 @@ const Widget = ({
                     : isHovered
                       ? "border border-dashed border-gray-500"
                       : "border-none"
-            } z-[${zIndex}]`}
-            // style={{
-            //     // border removed, handled by className
-            //     zIndex,
-            // }}
+            }`}
+            style={{
+                zIndex,
+            }}
             data-id={id}
             enableResizing={{
                 top: true,
@@ -147,8 +144,8 @@ const Widget = ({
             onResizeStop={(e, direction, ref, delta, position) => {
                 e.stopPropagation();
                 const finalDimensions = {
-                    width: Math.round(ref.offsetWidth / zoomLevel),
-                    height: Math.round(ref.offsetHeight / zoomLevel),
+                    width: Math.round(ref.offsetWidth),
+                    height: Math.round(ref.offsetHeight),
                     x: Math.round(position.x),
                     y: Math.round(position.y),
                 };

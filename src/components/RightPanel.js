@@ -55,6 +55,18 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                 </select>
             );
 
+        case "boolean":
+            return (
+                <input
+                    type="checkbox"
+                    id={property.name}
+                    checked={value}
+                    onChange={(e) => onChange(e.target.checked)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+            );
+
         default:
             return <div>Unknown property type: {property.type}</div>;
     }
@@ -324,30 +336,49 @@ const RightPanel = () => {
                     </div>
 
                     {/* Dynamically render property editors */}
-                    {componentDefinition.properties.map((property) => (
-                        <div className="mb-4" key={property.name}>
-                            <label
-                                htmlFor={property.name}
-                                className="block text-sm font-medium ">
-                                {property.label}
-                                {property.hasMaxRadius &&
-                                    ` (Max: ${
-                                        Math.min(
-                                            selectedComponent.width,
-                                            selectedComponent.height
-                                        ) / 2
-                                    })`}
-                            </label>
-                            <PropertyEditor
-                                property={property}
-                                value={selectedComponent[property.name]}
-                                onChange={(value) =>
-                                    handlePropertyChange(property.name, value)
-                                }
-                                component={selectedComponent}
-                            />
-                        </div>
-                    ))}
+                    {componentDefinition.properties.map((property) => {
+                        // Conditional rendering for Frame border properties
+                        if (
+                            selectedComponent.type === "PySideFrame" &&
+                            (property.name === "borderColor" ||
+                                property.name === "borderWidth") &&
+                            !selectedComponent.useCustomBorder
+                        ) {
+                            return null; // Don't render if useCustomBorder is false
+                        }
+
+                        return (
+                            <div className="mb-4" key={property.name}>
+                                <label
+                                    htmlFor={property.name}
+                                    className={`block text-sm font-medium ${
+                                        property.type === "boolean"
+                                            ? "inline-block mr-2"
+                                            : ""
+                                    }`}>
+                                    {property.label}
+                                    {property.hasMaxRadius &&
+                                        ` (Max: ${
+                                            Math.min(
+                                                selectedComponent.width,
+                                                selectedComponent.height
+                                            ) / 2
+                                        })`}
+                                </label>
+                                <PropertyEditor
+                                    property={property}
+                                    value={selectedComponent[property.name]}
+                                    onChange={(value) =>
+                                        handlePropertyChange(
+                                            property.name,
+                                            value
+                                        )
+                                    }
+                                    component={selectedComponent}
+                                />
+                            </div>
+                        );
+                    })}
                 </>
             )}
         </aside>

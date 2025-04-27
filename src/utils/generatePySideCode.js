@@ -162,7 +162,7 @@ const generateComponentXml = (component, allComponents, indentLevel) => {
     const compNameRaw =
         component.componentId ||
         `${component.type}${component.id}_screen${component.parentId ?? "root"}`;
-    const compName = compNameRaw.replace(/[^a-zA-Z0-9_]/g, "_"); // Sanitize
+    const compName = compNameRaw.replace(/[^a-zA-Z0-9_]/g, "_");
 
     const commonGeometry = `${indent}  <property name="geometry">
 ${indent}   <rect>
@@ -189,12 +189,21 @@ ${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
 ${indent}    border-radius: ${component.radius}px;
 ${indent}    font-size: ${component.fontSize}px;
 ${indent}    font-family: Arial;
+${indent}    border: ${component.borderWidth}px solid rgba(${hexToRgba(
+            component.borderColor
+        )});
 ${indent}}
 ${indent}QPushButton:hover {
 ${indent}    background-color: rgba(${hexToRgba(component.hoverColor)});
+${indent}    border-color: rgba(${hexToRgba(
+            component.hoverBorderColor ?? component.borderColor
+        )});
 ${indent}}
 ${indent}QPushButton:pressed {
 ${indent}    background-color: rgba(${hexToRgba(component.pressedColor)});
+${indent}    border-color: rgba(${hexToRgba(
+            component.pressedBorderColor ?? component.borderColor
+        )});
 ${indent}}
 ${indent}    </string>
 ${indent}  </property>\n`;
@@ -215,9 +224,21 @@ ${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
 ${indent}    border-radius: ${component.radius}px;
 ${indent}    font-size: ${component.fontSize}px;
 ${indent}    font-family: Arial;
-${indent}    border: 1px solid rgba(${hexToRgba(component.borderColor)});
+${indent}    border: ${component.borderWidth}px solid rgba(${hexToRgba(
+            component.borderColor
+        )});
+${indent}
 ${indent}}
 ${indent}    </string>
+${indent}  </property>\n`;
+        xml += `${indent}  <property name="alignment">
+${indent}    <set>Qt::Align${
+            component.textAlign === "left"
+                ? "Left"
+                : component.textAlign === "right"
+                  ? "Right"
+                  : "Center"
+        }|Qt::AlignVCenter</set>
 ${indent}  </property>\n`;
         xml += `${indent}</widget>\n`;
     } else if (component.type === "PySideSlider") {
@@ -247,13 +268,13 @@ ${indent}    background-color: rgba(${hexToRgba(component.backgroundColor)});
 ${indent}}
 ${indent}/* Groove (Track) */
 ${indent}QSlider::groove:${component.orientation ?? "horizontal"} {
-${indent}    background: rgba(200, 200, 200, 1); /* Lighter gray track */
+${indent}    background: rgba(${hexToRgba(component.trackColor)});
 ${indent}    border: 1px solid rgba(150, 150, 150, 1);
-${indent}    border-radius: 4px;
+${indent}    border-radius: ${Math.round((component.trackWidth ?? 8) / 2)}px;
 ${indent}    ${
             component.orientation === "vertical"
-                ? "width: 8px; margin: 0 4px;"
-                : "height: 8px; margin: 4px 0;"
+                ? `width: ${component.trackWidth ?? 8}px; margin: 0 4px;`
+                : `height: ${component.trackWidth ?? 8}px; margin: 4px 0;`
         }
 ${indent}}
 ${indent}/* Handle (Thumb) */
@@ -290,10 +311,18 @@ ${indent}  </property>\n`;
     } else if (component.type === "PySideFrame") {
         xml += `${indent}<widget class="QFrame" name="${compName}">\n`;
         xml += commonGeometry;
+        const borderStyle = component.useCustomBorder
+            ? `${indent}          border: ${
+                  component.borderWidth
+              }px solid rgba(${hexToRgba(component.borderColor)});`
+            : "";
+
         xml += `${indent}  <property name="styleSheet">
-${indent}      <string>QFrame#${compName} { background-color: rgba(${hexToRgba(
+${indent}      <string>QFrame#${compName} {
+${indent}          background-color: rgba(${hexToRgba(
             component.backgroundColor
-        )}); }</string>
+        )});
+${borderStyle ? borderStyle + "\n" : ""}${indent}      }</string>
 ${indent}  </property>\n`;
         xml += `${indent}  <property name="frameShape">
 ${indent}      <enum>QFrame::${component.frameShape ?? "StyledPanel"}</enum>

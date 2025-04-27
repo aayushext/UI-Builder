@@ -185,6 +185,14 @@ const parseComponentWidget = (
             const radiusMatch = content.match(/border-radius:\s*(\d+)px/);
             if (radiusMatch) component.radius = parseInt(radiusMatch[1]);
 
+            const borderMatch = content.match(
+                /border:\s*(\d+)px solid rgba\(([^)]+)\)/
+            );
+            if (borderMatch) {
+                component.borderWidth = parseInt(borderMatch[1]);
+                component.borderColor = parseRgba(`rgba(${borderMatch[2]})`);
+            }
+
             if (component.type === "PySideButton") {
                 const hoverColorMatch = content.match(
                     /QPushButton:hover\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
@@ -200,14 +208,46 @@ const parseComponentWidget = (
                     component.pressedColor = parseRgba(
                         `rgba(${pressedColorMatch[1]})`
                     );
-            } else if (component.type === "PySideLabel") {
-                const borderColorMatch = content.match(
-                    /border:\s*1px solid rgba\(([^)]+)\)/
+                const hoverBorderMatch = content.match(
+                    /QPushButton:hover\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/
                 );
-                if (borderColorMatch)
-                    component.borderColor = parseRgba(
-                        `rgba(${borderColorMatch[1]})`
+                if (hoverBorderMatch)
+                    component.hoverBorderColor = parseRgba(
+                        `rgba(${hoverBorderMatch[1]})`
                     );
+                const pressedBorderMatch = content.match(
+                    /QPushButton:pressed\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/
+                );
+                if (pressedBorderMatch)
+                    component.pressedBorderColor = parseRgba(
+                        `rgba(${pressedBorderMatch[1]})`
+                    );
+            } else if (component.type === "PySideLabel") {
+                const textAlignMatch = content.match(/text-align:\s*(\w+)/);
+                if (textAlignMatch) component.textAlign = textAlignMatch[1];
+                const alignmentProp = componentWidget.querySelector(
+                    ":scope > property[name='alignment'] > set"
+                );
+                if (alignmentProp) {
+                    const alignText = alignmentProp.textContent;
+                    if (alignText.includes("AlignLeft"))
+                        component.textAlign = "left";
+                    else if (alignText.includes("AlignRight"))
+                        component.textAlign = "right";
+                    else if (alignText.includes("AlignCenter"))
+                        component.textAlign = "center";
+                }
+                if (component.borderWidth === undefined) {
+                    const labelBorderMatch = content.match(
+                        /border:\s*1px solid rgba\(([^)]+)\)/
+                    );
+                    if (labelBorderMatch) {
+                        component.borderWidth = 1;
+                        component.borderColor = parseRgba(
+                            `rgba(${labelBorderMatch[1]})`
+                        );
+                    }
+                }
             }
         }
     } else if (component.type === "PySideSlider") {
@@ -248,9 +288,27 @@ const parseComponentWidget = (
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
+            const trackColorMatch = componentStyle.textContent.match(
+                /QSlider::groove[^}]*background:\s*rgba\(([^)]+)\)/
+            );
+            if (trackColorMatch)
+                component.trackColor = parseRgba(`rgba(${trackColorMatch[1]})`);
+
+            const trackWidthMatch = componentStyle.textContent.match(
+                /QSlider::groove:horizontal\s*{[^}]*height:\s*(\d+)px/
+            );
+            if (trackWidthMatch) {
+                component.trackWidth = parseInt(trackWidthMatch[1]);
+            } else {
+                const trackWidthVerticalMatch =
+                    componentStyle.textContent.match(
+                        /QSlider::groove:vertical\s*{[^}]*width:\s*(\d+)px/
+                    );
+                if (trackWidthVerticalMatch)
+                    component.trackWidth = parseInt(trackWidthVerticalMatch[1]);
+            }
         }
     } else if (component.type === "PySideFrame") {
-        // Parse Frame properties
         if (componentStyle) {
             const bgColorMatch = componentStyle.textContent.match(
                 /background-color:\s*rgba\(([^)]+)\)/
@@ -259,6 +317,13 @@ const parseComponentWidget = (
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
+            const borderMatch = componentStyle.textContent.match(
+                /border:\s*(\d+)px solid rgba\(([^)]+)\)/
+            );
+            if (borderMatch) {
+                component.borderWidth = parseInt(borderMatch[1]);
+                component.borderColor = parseRgba(`rgba(${borderMatch[2]})`);
+            }
         }
         const shapeProp = componentWidget.querySelector(
             ":scope > property[name='frameShape'] > enum"
@@ -404,6 +469,12 @@ const setDefaultProperties = (component) => {
         component.radius = component.radius ?? 4;
         component.pressedColor = component.pressedColor ?? "#1d4ed8";
         component.hoverColor = component.hoverColor ?? "#60a5fa";
+        component.borderColor = component.borderColor ?? "#000000ff";
+        component.borderWidth = component.borderWidth ?? 0;
+        component.hoverBorderColor =
+            component.hoverBorderColor ?? component.borderColor;
+        component.pressedBorderColor =
+            component.pressedBorderColor ?? component.borderColor;
     } else if (component.type === "PySideLabel") {
         component.text = component.text ?? "Label";
         component.fontSize = component.fontSize ?? 14;
@@ -411,6 +482,8 @@ const setDefaultProperties = (component) => {
         component.backgroundColor = component.backgroundColor ?? "#f0f0f0";
         component.radius = component.radius ?? 0;
         component.borderColor = component.borderColor ?? "#cccccc";
+        component.borderWidth = component.borderWidth ?? 1;
+        component.textAlign = component.textAlign ?? "center";
     } else if (component.type === "PySideSlider") {
         component.minimum = component.minimum ?? 0;
         component.maximum = component.maximum ?? 100;
@@ -418,12 +491,16 @@ const setDefaultProperties = (component) => {
         component.orientation = component.orientation ?? "horizontal";
         component.sliderColor = component.sliderColor ?? "#3b82f6";
         component.backgroundColor = component.backgroundColor ?? "#f0f0f0";
+        component.trackColor = component.trackColor ?? "#c8c8c8";
+        component.trackWidth = component.trackWidth ?? 8;
     } else if (component.type === "PySideFrame") {
-        // Add defaults for Frame
         component.backgroundColor = component.backgroundColor ?? "#e0e0e0";
         component.frameShape = component.frameShape ?? "StyledPanel";
         component.frameShadow = component.frameShadow ?? "Sunken";
         component.lineWidth = component.lineWidth ?? 1;
         component.midLineWidth = component.midLineWidth ?? 0;
+        component.borderColor = component.borderColor ?? "#808080";
+        component.borderWidth = component.borderWidth ?? 1;
+        component.useCustomBorder = component.useCustomBorder ?? false;
     }
 };

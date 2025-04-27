@@ -10,25 +10,29 @@ const PySideSlider = ({
     orientation = "horizontal",
     sliderColor = "#3b82f6",
     backgroundColor = "#000000ff",
+    trackColor = "#c8c8c8",
+    trackWidth = 8,
 }) => {
     const isHorizontal = orientation === "horizontal";
-    const trackHeight = isHorizontal
-        ? Math.max(Math.min(height / 3, 12), 8)
+    const actualTrackHeight = isHorizontal
+        ? Math.max(trackWidth, 2)
         : height - 20;
-    const trackWidth = isHorizontal
-        ? Math.max(width - 20, 8)
-        : Math.min(width / 3, 8);
+    const actualTrackWidth = isHorizontal
+        ? width - 20
+        : Math.max(trackWidth, 2);
 
     const range = maximum - minimum;
     const percentage = range > 0 ? (value - minimum) / range : 0;
     const thumbSize = Math.min(
-        Math.min(Math.max(height, 16), Math.max(width, 16)),
+        Math.max(isHorizontal ? height * 0.8 : width * 0.8, trackWidth + 4, 16),
         32
     );
 
     const thumbPosition = isHorizontal
-        ? percentage * (width - 20 - thumbSize) + 10
-        : (1 - percentage) * (height - 20 - thumbSize) + 10;
+        ? percentage * (actualTrackWidth - thumbSize) + 10 + thumbSize / 2
+        : (1 - percentage) * (actualTrackHeight - thumbSize) +
+          10 +
+          thumbSize / 2;
 
     return (
         <div
@@ -36,16 +40,18 @@ const PySideSlider = ({
             style={{ backgroundColor }}>
             {/* Slider track */}
             <div
-                className="absolute bg-gray-300 border border-gray-400 rounded z-10"
+                className="absolute border border-gray-400 rounded z-10"
                 style={{
                     left: isHorizontal
                         ? "10px"
-                        : `${width / 2 - trackWidth / 2}px`,
+                        : `${width / 2 - actualTrackWidth / 2}px`,
                     top: isHorizontal
-                        ? `${height / 2 - trackHeight / 2}px`
+                        ? `${height / 2 - actualTrackHeight / 2}px`
                         : "10px",
-                    width: trackWidth,
-                    height: trackHeight,
+                    width: actualTrackWidth,
+                    height: actualTrackHeight,
+                    backgroundColor: trackColor,
+                    borderRadius: `${Math.round(trackWidth / 2)}px`,
                 }}
             />
 
@@ -71,7 +77,7 @@ const PySideSlider = ({
 
             {/* Thumb */}
             <div
-                className="absolute border-2 border-white rounded-full -translate-x-1/2 -translate-y-1/2 shadow z-30"
+                className="absolute border border-gray-600 rounded-full -translate-x-1/2 -translate-y-1/2 shadow z-30"
                 style={{
                     left: isHorizontal ? thumbPosition : `${width / 2}px`,
                     top: isHorizontal ? `${height / 2}px` : thumbPosition,
@@ -93,6 +99,8 @@ PySideSlider.propTypes = {
     orientation: PropTypes.oneOf(["horizontal", "vertical"]),
     sliderColor: PropTypes.string,
     backgroundColor: PropTypes.string,
+    trackColor: PropTypes.string,
+    trackWidth: PropTypes.number,
 };
 
 export default PySideSlider;
