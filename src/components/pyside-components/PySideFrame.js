@@ -67,6 +67,7 @@ const drawRaisedFrame = (
     height,
     lineW,
     midLineW,
+    frameShape,
     colorLight,
     colorDark
 ) => {
@@ -82,16 +83,18 @@ const drawRaisedFrame = (
     ctx.closePath();
     ctx.fill();
 
-    // Bottom Right Inside
-    ctx.beginPath();
-    ctx.moveTo(lineW / 2 + midLineW, height - lineW / 2 - midLineW);
-    ctx.lineTo(width - lineW / 2 - midLineW, height - lineW / 2 - midLineW);
-    ctx.lineTo(width - lineW / 2 - midLineW, lineW / 2 + midLineW);
-    ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
-    ctx.lineTo(width - lineW - midLineW, height - lineW - midLineW);
-    ctx.lineTo(lineW + midLineW, height - lineW - midLineW);
-    ctx.closePath();
-    ctx.fill();
+    if (frameShape === "Box") {
+        // Bottom Right Inside
+        ctx.beginPath();
+        ctx.moveTo(lineW / 2 + midLineW, height - lineW / 2 - midLineW);
+        ctx.lineTo(width - lineW / 2 - midLineW, height - lineW / 2 - midLineW);
+        ctx.lineTo(width - lineW / 2 - midLineW, lineW / 2 + midLineW);
+        ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
+        ctx.lineTo(width - lineW - midLineW, height - lineW - midLineW);
+        ctx.lineTo(lineW + midLineW, height - lineW - midLineW);
+        ctx.closePath();
+        ctx.fill();
+    }
 
     // Bottom Right Outside
     ctx.fillStyle = colorDark;
@@ -105,16 +108,18 @@ const drawRaisedFrame = (
     ctx.closePath();
     ctx.fill();
 
-    // Top Left Inside
-    ctx.beginPath();
-    ctx.moveTo(lineW / 2 + midLineW, height - lineW / 2 - midLineW);
-    ctx.lineTo(lineW / 2 + midLineW, lineW / 2 + midLineW);
-    ctx.lineTo(width - lineW / 2 - midLineW, lineW / 2 + midLineW);
-    ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
-    ctx.lineTo(lineW + midLineW, lineW + midLineW);
-    ctx.lineTo(lineW + midLineW, height - lineW - midLineW);
-    ctx.closePath();
-    ctx.fill();
+    if (frameShape === "Box") {
+        // Top Left Inside
+        ctx.beginPath();
+        ctx.moveTo(lineW / 2 + midLineW, height - lineW / 2 - midLineW);
+        ctx.lineTo(lineW / 2 + midLineW, lineW / 2 + midLineW);
+        ctx.lineTo(width - lineW / 2 - midLineW, lineW / 2 + midLineW);
+        ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
+        ctx.lineTo(lineW + midLineW, lineW + midLineW);
+        ctx.lineTo(lineW + midLineW, height - lineW - midLineW);
+        ctx.closePath();
+        ctx.fill();
+    }
 };
 
 /**
@@ -125,6 +130,7 @@ const BoxFrameCanvas = ({
     height,
     lineW,
     midLineW,
+    frameShape,
     frameShadow,
     backgroundColor,
 }) => {
@@ -134,6 +140,7 @@ const BoxFrameCanvas = ({
         height: 0,
         lineW: 0,
         midLineW: 0,
+        frameShape: "",
         frameShadow: "",
         backgroundColor: "",
     });
@@ -144,6 +151,7 @@ const BoxFrameCanvas = ({
             prev.current.height === height &&
             prev.current.lineW === lineW &&
             prev.current.midLineW === midLineW &&
+            prev.current.frameShape === frameShape &&
             prev.current.frameShadow === frameShadow &&
             prev.current.backgroundColor === backgroundColor
         ) {
@@ -154,6 +162,7 @@ const BoxFrameCanvas = ({
             height,
             lineW,
             midLineW,
+            frameShape,
             frameShadow,
             backgroundColor,
         };
@@ -182,6 +191,7 @@ const BoxFrameCanvas = ({
                 height,
                 lineW,
                 midLineW,
+                frameShape,
                 colorLight,
                 colorDark
             );
@@ -192,6 +202,7 @@ const BoxFrameCanvas = ({
                 height,
                 lineW,
                 midLineW,
+                frameShape,
                 colorDark,
                 colorLight
             );
@@ -218,7 +229,15 @@ const BoxFrameCanvas = ({
         }
 
         ctx.restore();
-    }, [width, height, lineW, midLineW, frameShadow, backgroundColor]);
+    }, [
+        width,
+        height,
+        lineW,
+        midLineW,
+        frameShape,
+        frameShadow,
+        backgroundColor,
+    ]);
 
     if (!width || !height) return null;
 
@@ -318,6 +337,7 @@ const PySideFrame = ({
                     height={height}
                     lineW={lineW}
                     midLineW={midLineW}
+                    frameShape={frameShape}
                     frameShadow={frameShadow}
                     backgroundColor={backgroundColor}
                 />
