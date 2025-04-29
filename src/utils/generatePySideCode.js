@@ -1,40 +1,4 @@
-/**
- * Converts a hex color string (with optional alpha) to an rgba CSS string fragment.
- * @param {string | undefined} hex - The hex color string (e.g., #RRGGBB, #RGB, #RRGGBBAA).
- * @returns {string} The rgba string fragment (e.g., "255, 0, 0, 0.5"). Defaults to "0, 0, 0, 1".
- */
-const hexToRgba = (hex) => {
-    if (!hex) return "0, 0, 0, 1";
-
-    hex = hex.replace("#", "");
-    let r,
-        g,
-        b,
-        a = 1;
-
-    if (hex.length === 3) {
-        // Handle shorthand hex format (#RGB)
-        r = parseInt(hex[0] + hex[0], 16);
-        g = parseInt(hex[1] + hex[1], 16);
-        b = parseInt(hex[2] + hex[2], 16);
-    } else if (hex.length === 6) {
-        // Handle standard hex format (#RRGGBB)
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
-    } else if (hex.length === 8) {
-        // Handle hex format with alpha (#RRGGBBAA)
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
-        a = parseInt(hex.substring(6, 8), 16) / 255;
-    } else {
-        // Default to black if invalid format
-        return "0, 0, 0, 1";
-    }
-
-    return `${r}, ${g}, ${b}, ${a}`;
-};
+import { hexToRgba } from "@/utils/colorUtils";
 
 /**
  * Generates the Python code for a basic PySide6 application that loads a .ui file.
@@ -434,16 +398,3 @@ export const generateQtUiFile = (screens, currentScreenIndex) => {
 `;
     return uiCode;
 };
-
-// Helper function to adjust color brightness (used in slider gradient)
-hexToRgba.lighten = (hex, percent) => {
-    const rgba = hexToRgba(hex)
-        .split(",")
-        .map((v) => parseFloat(v));
-    const factor = 1 + percent / 100;
-    rgba[0] = Math.min(255, Math.round(rgba[0] * factor));
-    rgba[1] = Math.min(255, Math.round(rgba[1] * factor));
-    rgba[2] = Math.min(255, Math.round(rgba[2] * factor));
-    return `${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]}`;
-};
-hexToRgba.darken = (hex, percent) => hexToRgba.lighten(hex, -percent);

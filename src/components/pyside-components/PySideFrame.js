@@ -77,21 +77,22 @@ const drawRaisedFrame = (
     ctx.moveTo(0, height);
     ctx.lineTo(0, 0);
     ctx.lineTo(width, 0);
-    ctx.lineTo(width - lineW / 2, lineW / 2);
-    ctx.lineTo(lineW / 2, lineW / 2);
-    ctx.lineTo(lineW / 2, height - lineW / 2);
+    ctx.lineTo(width - lineW, lineW);
+    ctx.lineTo(lineW, lineW);
+    ctx.lineTo(lineW, height - lineW);
     ctx.closePath();
     ctx.fill();
 
     if (frameShape === "Box") {
         // Bottom Right Inside
+        ctx.fillStyle = colorLight;
         ctx.beginPath();
-        ctx.moveTo(lineW / 2 + midLineW, height - lineW / 2 - midLineW);
-        ctx.lineTo(width - lineW / 2 - midLineW, height - lineW / 2 - midLineW);
-        ctx.lineTo(width - lineW / 2 - midLineW, lineW / 2 + midLineW);
-        ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
+        ctx.moveTo(lineW + midLineW, height - lineW - midLineW);
         ctx.lineTo(width - lineW - midLineW, height - lineW - midLineW);
-        ctx.lineTo(lineW + midLineW, height - lineW - midLineW);
+        ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
+        ctx.lineTo(width - lineW * 2 - midLineW, lineW * 2 + midLineW);
+        ctx.lineTo(width - lineW * 2 - midLineW, height - lineW * 2 - midLineW);
+        ctx.lineTo(lineW * 2 + midLineW, height - lineW * 2 - midLineW);
         ctx.closePath();
         ctx.fill();
     }
@@ -102,21 +103,22 @@ const drawRaisedFrame = (
     ctx.moveTo(0, height);
     ctx.lineTo(width, height);
     ctx.lineTo(width, 0);
-    ctx.lineTo(width - lineW / 2, lineW / 2);
-    ctx.lineTo(width - lineW / 2, height - lineW / 2);
-    ctx.lineTo(lineW / 2, height - lineW / 2);
+    ctx.lineTo(width - lineW, lineW);
+    ctx.lineTo(width - lineW, height - lineW);
+    ctx.lineTo(lineW, height - lineW);
     ctx.closePath();
     ctx.fill();
 
     if (frameShape === "Box") {
         // Top Left Inside
+        ctx.fillStyle = colorDark;
         ctx.beginPath();
-        ctx.moveTo(lineW / 2 + midLineW, height - lineW / 2 - midLineW);
-        ctx.lineTo(lineW / 2 + midLineW, lineW / 2 + midLineW);
-        ctx.lineTo(width - lineW / 2 - midLineW, lineW / 2 + midLineW);
-        ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
+        ctx.moveTo(lineW + midLineW, height - lineW - midLineW);
         ctx.lineTo(lineW + midLineW, lineW + midLineW);
-        ctx.lineTo(lineW + midLineW, height - lineW - midLineW);
+        ctx.lineTo(width - lineW - midLineW, lineW + midLineW);
+        ctx.lineTo(width - lineW * 2 - midLineW, lineW * 2 + midLineW);
+        ctx.lineTo(lineW * 2 + midLineW, lineW * 2 + midLineW);
+        ctx.lineTo(lineW * 2 + midLineW, height - lineW * 2 - midLineW);
         ctx.closePath();
         ctx.fill();
     }
@@ -221,10 +223,10 @@ const BoxFrameCanvas = ({
             ctx.strokeStyle = colorMid;
             ctx.lineWidth = midLineW;
             ctx.strokeRect(
-                lineW / 2 + midLineW / 2,
-                lineW / 2 + midLineW / 2,
-                Math.max(0, width - lineW - midLineW),
-                Math.max(0, height - lineW - midLineW)
+                lineW + midLineW / 2,
+                lineW + midLineW / 2,
+                Math.max(0, width - lineW * 2 - midLineW),
+                Math.max(0, height - lineW * 2 - midLineW)
             );
         }
 

@@ -1,33 +1,12 @@
 import { generateQtUiFile } from "@/utils/generatePySideCode";
+import { rgbaToHex } from "@/utils/colorUtils";
 
 /**
  * Parses an rgba color string into a hex color string (#RRGGBB or #RRGGBBAA).
  * @param {string} rgbaStr - The rgba color string (e.g., "rgba(255, 0, 0, 0.5)").
  * @returns {string} The hex color string, or #000000 if parsing fails.
  */
-const parseRgba = (rgbaStr) => {
-    const match = rgbaStr.match(
-        /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/
-    );
-    if (!match) return "#000000";
-
-    const r = parseInt(match[1]);
-    const g = parseInt(match[2]);
-    const b = parseInt(match[3]);
-    const a = match[4] ? parseFloat(match[4]) : 1;
-
-    const rHex = r.toString(16).padStart(2, "0");
-    const gHex = g.toString(16).padStart(2, "0");
-    const bHex = b.toString(16).padStart(2, "0");
-    const aHex =
-        a < 1
-            ? Math.round(a * 255)
-                  .toString(16)
-                  .padStart(2, "0")
-            : "";
-
-    return `#${rHex}${gHex}${bHex}${aHex}`;
-};
+const parseRgba = rgbaToHex;
 
 /**
  * Exports the current design screens to a downloadable .ui file.
@@ -186,7 +165,7 @@ const parseComponentWidget = (
             if (radiusMatch) component.radius = parseInt(radiusMatch[1]);
 
             const borderMatch = content.match(
-                /border:\s*(\d+)px solid rgba\(([^)]+)\)/
+                /border:\s*(\d+)px solid rgba\(([^)]+)\)/g
             );
             if (borderMatch) {
                 component.borderWidth = parseInt(borderMatch[1]);
@@ -195,28 +174,28 @@ const parseComponentWidget = (
 
             if (component.type === "PySideButton") {
                 const hoverColorMatch = content.match(
-                    /QPushButton:hover\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
+                    /QPushButton:hover\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/g
                 );
                 if (hoverColorMatch)
                     component.hoverColor = parseRgba(
                         `rgba(${hoverColorMatch[1]})`
                     );
                 const pressedColorMatch = content.match(
-                    /QPushButton:pressed\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
+                    /QPushButton:pressed\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/g
                 );
                 if (pressedColorMatch)
                     component.pressedColor = parseRgba(
                         `rgba(${pressedColorMatch[1]})`
                     );
                 const hoverBorderMatch = content.match(
-                    /QPushButton:hover\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/
+                    /QPushButton:hover\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/g
                 );
                 if (hoverBorderMatch)
                     component.hoverBorderColor = parseRgba(
                         `rgba(${hoverBorderMatch[1]})`
                     );
                 const pressedBorderMatch = content.match(
-                    /QPushButton:pressed\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/
+                    /QPushButton:pressed\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/g
                 );
                 if (pressedBorderMatch)
                     component.pressedBorderColor = parseRgba(
@@ -239,7 +218,7 @@ const parseComponentWidget = (
                 }
                 if (component.borderWidth === undefined) {
                     const labelBorderMatch = content.match(
-                        /border:\s*1px solid rgba\(([^)]+)\)/
+                        /border:\s*1px solid rgba\(([^)]+)\)/g
                     );
                     if (labelBorderMatch) {
                         component.borderWidth = 1;
@@ -275,21 +254,21 @@ const parseComponentWidget = (
 
         if (componentStyle) {
             const handleColorMatch = componentStyle.textContent.match(
-                /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/
+                /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/g
             );
             if (handleColorMatch)
                 component.sliderColor = parseRgba(
                     `rgba(${handleColorMatch[1]})`
                 );
             const bgColorMatch = componentStyle.textContent.match(
-                /QSlider\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
+                /QSlider\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/g
             );
             if (bgColorMatch)
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
             const trackColorMatch = componentStyle.textContent.match(
-                /QSlider::groove[^}]*background:\s*rgba\(([^)]+)\)/
+                /QSlider::groove[^}]*background:\s*rgba\(([^)]+)\)/g
             );
             if (trackColorMatch)
                 component.trackColor = parseRgba(`rgba(${trackColorMatch[1]})`);
@@ -311,14 +290,14 @@ const parseComponentWidget = (
     } else if (component.type === "PySideFrame") {
         if (componentStyle) {
             const bgColorMatch = componentStyle.textContent.match(
-                /background-color:\s*rgba\(([^)]+)\)/
+                /background-color:\s*rgba\(([^)]+)\)/g
             );
             if (bgColorMatch)
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
             const borderMatch = componentStyle.textContent.match(
-                /border:\s*(\d+)px solid rgba\(([^)]+)\)/
+                /border:\s*(\d+)px solid rgba\(([^)]+)\)/g
             );
             if (borderMatch) {
                 component.borderWidth = parseInt(borderMatch[1]);
@@ -415,7 +394,7 @@ const parseUiFile = (xmlDoc) => {
         let backgroundColor = "#ffffff";
         if (styleSheet) {
             const bgColorMatch = styleSheet.textContent.match(
-                /background-color:\s*rgba\(([^)]+)\)/
+                /background-color:\s*rgba\(([^)]+)\)/g
             );
             if (bgColorMatch) {
                 backgroundColor = parseRgba(`rgba(${bgColorMatch[1]})`);
