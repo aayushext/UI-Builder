@@ -165,7 +165,7 @@ const parseComponentWidget = (
             if (radiusMatch) component.radius = parseInt(radiusMatch[1]);
 
             const borderMatch = content.match(
-                /border:\s*(\d+)px solid rgba\(([^)]+)\)/g
+                /border:\s*(\d+)px solid rgba\(([^)]+)\)/
             );
             if (borderMatch) {
                 component.borderWidth = parseInt(borderMatch[1]);
@@ -174,28 +174,28 @@ const parseComponentWidget = (
 
             if (component.type === "PySideButton") {
                 const hoverColorMatch = content.match(
-                    /QPushButton:hover\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/g
+                    /QPushButton:hover\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
                 );
                 if (hoverColorMatch)
                     component.hoverColor = parseRgba(
                         `rgba(${hoverColorMatch[1]})`
                     );
                 const pressedColorMatch = content.match(
-                    /QPushButton:pressed\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/g
+                    /QPushButton:pressed\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
                 );
                 if (pressedColorMatch)
                     component.pressedColor = parseRgba(
                         `rgba(${pressedColorMatch[1]})`
                     );
                 const hoverBorderMatch = content.match(
-                    /QPushButton:hover\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/g
+                    /QPushButton:hover\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/
                 );
                 if (hoverBorderMatch)
                     component.hoverBorderColor = parseRgba(
                         `rgba(${hoverBorderMatch[1]})`
                     );
                 const pressedBorderMatch = content.match(
-                    /QPushButton:pressed\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/g
+                    /QPushButton:pressed\s*{[^}]*border-color:\s*rgba\(([^)]+)\)/
                 );
                 if (pressedBorderMatch)
                     component.pressedBorderColor = parseRgba(
@@ -218,7 +218,7 @@ const parseComponentWidget = (
                 }
                 if (component.borderWidth === undefined) {
                     const labelBorderMatch = content.match(
-                        /border:\s*1px solid rgba\(([^)]+)\)/g
+                        /border:\s*1px solid rgba\(([^)]+)\)/
                     );
                     if (labelBorderMatch) {
                         component.borderWidth = 1;
@@ -254,21 +254,21 @@ const parseComponentWidget = (
 
         if (componentStyle) {
             const handleColorMatch = componentStyle.textContent.match(
-                /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/g
+                /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/
             );
             if (handleColorMatch)
                 component.sliderColor = parseRgba(
                     `rgba(${handleColorMatch[1]})`
                 );
             const bgColorMatch = componentStyle.textContent.match(
-                /QSlider\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/g
+                /QSlider\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
             );
             if (bgColorMatch)
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
             const trackColorMatch = componentStyle.textContent.match(
-                /QSlider::groove[^}]*background:\s*rgba\(([^)]+)\)/g
+                /QSlider::groove[^}]*background:\s*rgba\(([^)]+)\)/
             );
             if (trackColorMatch)
                 component.trackColor = parseRgba(`rgba(${trackColorMatch[1]})`);
@@ -290,18 +290,21 @@ const parseComponentWidget = (
     } else if (component.type === "PySideFrame") {
         if (componentStyle) {
             const bgColorMatch = componentStyle.textContent.match(
-                /background-color:\s*rgba\(([^)]+)\)/g
+                /background-color:\s*rgba\(([^)]+)\)/
             );
             if (bgColorMatch)
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
             const borderMatch = componentStyle.textContent.match(
-                /border:\s*(\d+)px solid rgba\(([^)]+)\)/g
+                /border:\s*(\d+)px solid rgba\(([^)]+)\)/
             );
             if (borderMatch) {
                 component.borderWidth = parseInt(borderMatch[1]);
                 component.borderColor = parseRgba(`rgba(${borderMatch[2]})`);
+                component.useCustomBorder = true;
+            } else {
+                component.useCustomBorder = false;
             }
         }
         const shapeProp = componentWidget.querySelector(
@@ -394,7 +397,7 @@ const parseUiFile = (xmlDoc) => {
         let backgroundColor = "#ffffff";
         if (styleSheet) {
             const bgColorMatch = styleSheet.textContent.match(
-                /background-color:\s*rgba\(([^)]+)\)/g
+                /background-color:\s*rgba\(([^)]+)\)/
             );
             if (bgColorMatch) {
                 backgroundColor = parseRgba(`rgba(${bgColorMatch[1]})`);

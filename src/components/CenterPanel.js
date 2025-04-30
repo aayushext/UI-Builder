@@ -14,7 +14,8 @@ const renderComponent = (
     selectedComponentId,
     handlers,
     zoomLevel,
-    dropTargetFrameId
+    dropTargetFrameId,
+    mainBackgroundColor
 ) => {
     const {
         onDeleteComponent,
@@ -35,7 +36,8 @@ const renderComponent = (
                     selectedComponentId,
                     handlers,
                     zoomLevel,
-                    dropTargetFrameId
+                    dropTargetFrameId,
+                    mainBackgroundColor
                 )
             );
     }
@@ -109,7 +111,8 @@ const renderComponent = (
                     borderWidth={component.borderWidth}
                     useCustomBorder={component.useCustomBorder}
                     width={component.width}
-                    height={component.height}>
+                    height={component.height}
+                    mainBackgroundColor={mainBackgroundColor}>
                     {renderedChildren}
                 </PySideFrame>
             )}
@@ -203,7 +206,8 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                         selectedComponentId,
                         handlers,
                         zoomLevel,
-                        dropTargetFrameId
+                        dropTargetFrameId,
+                        backgroundColor
                     )
                 )}
             </div>

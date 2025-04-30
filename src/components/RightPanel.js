@@ -335,7 +335,6 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    {/* Dynamically render property editors */}
                     {componentDefinition.properties.map((property) => {
                         // Conditional rendering for Frame border properties
                         if (
@@ -344,7 +343,7 @@ const RightPanel = () => {
                                 property.name === "borderWidth") &&
                             !selectedComponent.useCustomBorder
                         ) {
-                            return null; // Don't render if useCustomBorder is false
+                            return null;
                         }
 
                         return (
