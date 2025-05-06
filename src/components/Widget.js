@@ -185,7 +185,7 @@ const Widget = ({
             onMouseLeave={() => setIsHovered(false)}>
             <div className="relative w-full h-full pointer-events-none ">
                 {isDropTarget && (
-                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-900 bg-sky-900/40 animate-[blink-overlay_1.5s_linear_infinite] rounded-md z-[100]" />
+                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-900 bg-sky-900/40 animate-[blink-overlay_1.5s_linear_infinite] rounded-md z-100" />
                 )}
                 <div className="absolute inset-0 pointer-events-auto">
                     {children}

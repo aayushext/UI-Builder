@@ -31,7 +31,7 @@ const LeftPanel = ({ centerPanelDimensions }) => {
     };
 
     return (
-        <aside className="w-64 bg-gray-200 dark:bg-gray-800 p-4 flex flex-col h-full flex-shrink-0">
+        <aside className="w-64 bg-gray-200 dark:bg-gray-800 p-4 flex flex-col h-full shrink-0">
             {/* Components Section */}
             <div className="flex-1">
                 <h2 className="text-lg font-bold mb-2">Components</h2>
