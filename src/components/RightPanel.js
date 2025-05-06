@@ -130,6 +130,28 @@ const RightPanel = () => {
         setScreenCustomId(currentScreen?.customId || "screen_0");
     }, [currentScreen]);
 
+    // --- Hide lineWidth for HLine/VLine + Plain, and force it to 0 ---
+    useEffect(() => {
+        if (
+            selectedComponent &&
+            selectedComponent.type === "PySideFrame" &&
+            (selectedComponent.frameShape === "HLine" ||
+                selectedComponent.frameShape === "VLine") &&
+            selectedComponent.frameShadow === "Plain"
+        ) {
+            if (selectedComponent.lineWidth !== 0) {
+                updateComponentProps(selectedComponent.id, { lineWidth: 0 });
+            }
+        }
+    }, [
+        selectedComponent?.id,
+        selectedComponent?.type,
+        selectedComponent?.frameShape,
+        selectedComponent?.frameShadow,
+        selectedComponent?.lineWidth,
+        updateComponentProps,
+    ]);
+
     const handleScreenWidthChange = (value) => {
         const width = parseInt(value) || 1280;
         setScreenWidth(width);
@@ -160,11 +182,11 @@ const RightPanel = () => {
     return (
         <aside
             id="right-panel"
-            className="w-64 bg-gray-200 dark:bg-gray-800 p-4 overflow-auto flex-shrink-0">
+            className="w-64 bg-gray-200 dark:bg-gray-800 p-4 overflow-auto flex-shrink-0 overflow-x-clip">
             <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
 
             {/* Screen Width */}
-            <div className="mb-4">
+            <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenWidth"
                     className="block text-sm font-medium">
@@ -182,7 +204,7 @@ const RightPanel = () => {
             </div>
 
             {/* Screen Height */}
-            <div className="mb-4">
+            <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenHeight"
                     className="block text-sm font-medium">
@@ -200,7 +222,7 @@ const RightPanel = () => {
             </div>
 
             {/* Screen ID */}
-            <div className="mb-4">
+            <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[200ms] motion-delay-[200ms]/scale motion-delay-[200ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenCustomId"
                     className="block text-sm font-medium">
@@ -219,7 +241,7 @@ const RightPanel = () => {
             </div>
 
             {/* Background Color */}
-            <div className="mb-4">
+            <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[300ms] motion-delay-[300ms]/scale motion-delay-[300ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenBackgroundColor"
                     className="block text-sm font-medium">
@@ -236,18 +258,18 @@ const RightPanel = () => {
 
             {selectedComponent && componentDefinition && (
                 <>
-                    <h2 className="text-lg font-bold mb-2 mt-4">
+                    <h2 className="text-lg font-bold mb-2 mt-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         Component Properties
                     </h2>
 
                     <button
                         onClick={duplicateComponent}
-                        className="bg-teal-500 dark:bg-teal-600 dark:hover:bg-teal-800 hover:bg-teal-700 font-bold py-2 px-4 rounded-sm mb-4 w-full">
+                        className="bg-teal-500 dark:bg-teal-600 dark:hover:bg-teal-800 hover:bg-teal-700 font-bold py-2 px-4 rounded-sm mb-4 w-full motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         Duplicate Widget
                     </button>
 
                     {/* Position and size properties */}
-                    <div className="mb-4">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="x"
                             className="block text-sm font-medium ">
@@ -269,7 +291,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="y"
                             className="block text-sm font-medium ">
@@ -291,7 +313,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="width"
                             className="block text-sm font-medium ">
@@ -313,7 +335,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="height"
                             className="block text-sm font-medium ">
@@ -346,8 +368,21 @@ const RightPanel = () => {
                             return null;
                         }
 
+                        // Hide lineWidth for HLine/VLine + Plain
+                        if (
+                            selectedComponent.type === "PySideFrame" &&
+                            property.name === "lineWidth" &&
+                            (selectedComponent.frameShape === "HLine" ||
+                                selectedComponent.frameShape === "VLine") &&
+                            selectedComponent.frameShadow === "Plain"
+                        ) {
+                            return null;
+                        }
+
                         return (
-                            <div className="mb-4" key={property.name}>
+                            <div
+                                className={`mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier`}
+                                key={property.name}>
                                 <label
                                     htmlFor={property.name}
                                     className={`block text-sm font-medium ${

@@ -299,6 +299,9 @@ const BoxFrameCanvas = ({
             ctx.lineWidth = midLineW;
 
             if (frameShape === "HLine") {
+                if (frameShadow === "Plain") {
+                    ctx.fillStyle = mainBackgroundColor || "#ffffff";
+                }
                 ctx.fillRect(
                     lineW,
                     height / 2 - midLineW,
@@ -562,7 +565,9 @@ const PySideFrame = ({
     }
 
     return (
-        <div className="w-full h-full relative" style={style}>
+        <div
+            className="w-full h-full relative motion-scale-in-[1.5] motion-opacity-in-[0%] motion-duration-[250ms] motion-ease-spring-bouncier"
+            style={style}>
             {children}
         </div>
     );

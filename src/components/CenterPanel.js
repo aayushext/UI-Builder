@@ -102,6 +102,7 @@ const renderComponent = (
             )}
             {component.type === "PySideFrame" && (
                 <PySideFrame
+                    key={component.id + "_" + mainBackgroundColor}
                     backgroundColor={component.backgroundColor}
                     frameShape={component.frameShape}
                     frameShadow={component.frameShadow}
@@ -211,10 +212,10 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                     )
                 )}
             </div>
-            <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg z-50">
+            <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg z-50 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
                 <button
                     onClick={onZoomOut}
-                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
+                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
                     title="Zoom out">
                     <IconContext.Provider value={{ size: "1em" }}>
                         <FaMinus />
@@ -222,13 +223,13 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                 </button>
                 <button
                     onClick={onResetView}
-                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md px-2 flex items-center justify-center"
+                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md px-2 flex items-center justify-center motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[200ms] motion-delay-[200ms]/scale motion-delay-[200ms]/opacity motion-ease-spring-bouncier"
                     title="Reset view">
                     {Math.round(zoomLevel * 100)}%
                 </button>
                 <button
                     onClick={onZoomIn}
-                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center"
+                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md w-8 h-8 flex items-center justify-center motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
                     title="Zoom in">
                     <IconContext.Provider value={{ size: "1em" }}>
                         <FaPlus />

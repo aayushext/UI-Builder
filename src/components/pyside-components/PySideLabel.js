@@ -31,7 +31,7 @@ const PySideLabel = ({
 
     return (
         <label
-            className={`w-full h-full flex items-center ${justificationClass} box-border overflow-hidden whitespace-nowrap`} // Added box-border, overflow, whitespace, justification
+            className={`w-full h-full flex items-center ${justificationClass} box-border overflow-hidden whitespace-nowrap motion-scale-in-[1.5] motion-opacity-in-[0%] motion-duration-[250ms] motion-ease-spring-bouncier`}
             style={labelStyle}>
             {text}
         </label>

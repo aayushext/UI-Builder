@@ -35,32 +35,42 @@ const LeftPanel = ({ centerPanelDimensions }) => {
             {/* Components Section */}
             <div className="flex-1">
                 <h2 className="text-lg font-bold mb-2">Components</h2>
-                {componentDefinitions.map((component) => (
-                    <button
-                        key={component.type}
-                        onClick={() => addComponent(component.type)}
-                        className="bg-blue-500 hover:bg-blue-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded mt-4 w-full">
-                        Add {component.displayName}
-                    </button>
-                ))}
+                {componentDefinitions.map((component, idx) => {
+                    const delay = idx * 100;
+                    return (
+                        <button
+                            key={component.type}
+                            onClick={() => addComponent(component.type)}
+                            className={
+                                `bg-blue-500 hover:bg-blue-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded mt-4 w-full ` +
+                                `motion-scale-in-[1.5] motion-opacity-in-[0%] ` +
+                                `motion-delay-[${delay}ms] ` +
+                                `motion-delay-[${delay}ms]/scale ` +
+                                `motion-delay-[${delay}ms]/opacity ` +
+                                `motion-ease-spring-bouncier`
+                            }>
+                            Add {component.displayName}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Buttons Section */}
             <div className="mt-auto pt-4 space-y-2">
                 <button
                     onClick={handleSaveToUiFile}
-                    className="bg-purple-500 hover:bg-purple-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
+                    className="bg-purple-500 hover:bg-purple-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
                     Export Design
                 </button>
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-indigo-500 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full">
+                    className="bg-indigo-500 hover:bg-indigo-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier">
                     Load Design
                 </button>
                 <button
                     onClick={() => handleExport(centerPanelDimensions)}
                     disabled={isUiFileLoaded}
-                    className={`bg-green-600 hover:bg-green-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full ${
+                    className={`bg-green-600 hover:bg-green-700 text-white dark:text-gray-200 font-bold py-2 px-4 rounded w-full motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[200ms] motion-delay-[200ms]/scale motion-delay-[200ms]/opacity motion-ease-spring-bouncier ${
                         isUiFileLoaded ? "opacity-50 cursor-not-allowed" : ""
                     }`}>
                     Export Project

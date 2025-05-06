@@ -46,7 +46,9 @@ const ScreenTabs = () => {
             role="tablist"
             aria-label="Screens">
             {screens.map((screen, index) => (
-                <div key={screen.id} className="flex items-center mr-2">
+                <div
+                    key={screen.id}
+                    className="flex items-center mr-2 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
                     <button
                         ref={(el) => (tabRefs.current[index] = el)}
                         id={`screen-tab-${screen.id}`}
@@ -94,7 +96,7 @@ const ScreenTabs = () => {
             ))}
             <button
                 onClick={addScreen}
-                className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-900 py-2 px-2 rounded-md ml-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-900 py-2 px-2 rounded-md ml-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
                 aria-label="Add new screen">
                 <IconContext.Provider value={{ size: "1em" }}>
                     <div>

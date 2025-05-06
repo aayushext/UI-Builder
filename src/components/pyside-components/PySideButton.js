@@ -38,7 +38,7 @@ const PySideButton = ({
 
     return (
         <button
-            className="w-full h-full px-4 py-2.5 cursor-pointer transition-colors duration-200 ease-in-out box-border"
+            className="w-full h-full px-4 py-2.5 cursor-pointer transition-colors duration-200 ease-in-out box-border motion-scale-in-[1.5] motion-opacity-in-[0%] motion-duration-[250ms] motion-ease-spring-bouncier"
             style={buttonStyle}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}

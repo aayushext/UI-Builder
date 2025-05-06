@@ -71,7 +71,7 @@ const PySideSlider = ({
 
             {/* Thumb */}
             <div
-                className="absolute border-2 border-white rounded-full -translate-x-1/2 -translate-y-1/2 shadow z-30"
+                className="absolute border-2 border-white rounded-full -translate-x-1/2 -translate-y-1/2 shadow z-30 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-duration-[250ms] motion-ease-spring-bouncier"
                 style={{
                     left: isHorizontal ? thumbPosition : `${width / 2}px`,
                     top: isHorizontal ? `${height / 2}px` : thumbPosition,
