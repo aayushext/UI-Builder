@@ -157,6 +157,48 @@ const RightPanel = () => {
         updateComponentProps,
     ]);
 
+    // Effect to adjust PySideFrame properties based on shape/shadow
+    useEffect(() => {
+        if (selectedComponent && selectedComponent.type === "PySideFrame") {
+            const { id, frameShape, lineWidth, midLineWidth } =
+                selectedComponent;
+            let propsToUpdate = {};
+            let needsUpdate = false;
+
+            if (frameShape === "NoFrame") {
+                if (lineWidth !== 0) {
+                    propsToUpdate.lineWidth = 0;
+                    needsUpdate = true;
+                }
+                if (midLineWidth !== 0) {
+                    propsToUpdate.midLineWidth = 0;
+                    needsUpdate = true;
+                }
+            } else if (frameShape === "WinPanel") {
+                if (lineWidth !== 1) {
+                    propsToUpdate.lineWidth = 1;
+                    needsUpdate = true;
+                }
+                if (midLineWidth !== 1) {
+                    propsToUpdate.midLineWidth = 1;
+                    needsUpdate = true;
+                }
+            } else if (
+                (frameShape === "HLine" || frameShape === "VLine") &&
+                selectedComponent.frameShadow === "Plain"
+            ) {
+                if (lineWidth !== 0) {
+                    propsToUpdate.lineWidth = 0;
+                    needsUpdate = true;
+                }
+            }
+
+            if (needsUpdate && Object.keys(propsToUpdate).length > 0) {
+                updateComponentProps(id, propsToUpdate);
+            }
+        }
+    }, [selectedComponent, updateComponentProps]);
+
     const handleScreenWidthChange = (value) => {
         const width = parseInt(value) || 1280;
         setScreenWidth(width);
@@ -371,6 +413,17 @@ const RightPanel = () => {
                             (property.name === "borderColor" ||
                                 property.name === "borderWidth") &&
                             !selectedComponent.useCustomBorder
+                        ) {
+                            return null;
+                        }
+
+                        // Hide lineWidth and midLineWidth for NoFrame and WinPanel
+                        if (
+                            selectedComponent.type === "PySideFrame" &&
+                            (property.name === "lineWidth" ||
+                                property.name === "midLineWidth") &&
+                            (selectedComponent.frameShape === "NoFrame" ||
+                                selectedComponent.frameShape === "WinPanel")
                         ) {
                             return null;
                         }

@@ -207,8 +207,8 @@ const BoxFrameCanvas = ({
     midLineW,
     frameShape,
     frameShadow,
-    backgroundColor, // Base color for the frame's background fill
-    mainBackgroundColor, // Background color of the screen/parent, for HLine/VLine plain middle
+    backgroundColor,
+    mainBackgroundColor,
 }) => {
     const canvasRef = useRef(null);
     // Add mainBackgroundColor to prev.current and useEffect dependency array
@@ -220,7 +220,7 @@ const BoxFrameCanvas = ({
         frameShape: "",
         frameShadow: "",
         backgroundColor: "",
-        mainBackgroundColor: "", // Added
+        mainBackgroundColor: "",
     });
 
     useEffect(() => {
@@ -232,7 +232,7 @@ const BoxFrameCanvas = ({
             prev.current.frameShape === frameShape &&
             prev.current.frameShadow === frameShadow &&
             prev.current.backgroundColor === backgroundColor &&
-            prev.current.mainBackgroundColor === mainBackgroundColor // Added
+            prev.current.mainBackgroundColor === mainBackgroundColor
         ) {
             return;
         }
@@ -263,9 +263,10 @@ const BoxFrameCanvas = ({
         // Colors for raised/sunken effects
         const colorBaseLight = lightenColor(baseColor, 30);
         const colorBaseDark = darkenColor(baseColor, 30);
+        const colorDarkest = darkenColor(baseColor, 60); // Always use for mid-line
 
         // Colors for plain borders (derived based on frameShape for Plain shadow)
-        let plainBorderColor = darkenColor(baseColor, 60); // Default (like colorDark)
+        let plainBorderColor = colorDarkest;
         if (frameShadow === "Plain") {
             if (frameShape === "StyledPanel") {
                 plainBorderColor = darkenColor(baseColor, 15); // like colorMidDark
@@ -286,6 +287,23 @@ const BoxFrameCanvas = ({
                 colorBaseLight,
                 colorBaseDark
             );
+            // Draw mid-line for Raised using the darkest color
+            if (
+                (frameShape === "Box" ||
+                    frameShape === "Panel" ||
+                    frameShape === "WinPanel" ||
+                    frameShape === "StyledPanel") &&
+                midLineW > 0
+            ) {
+                ctx.strokeStyle = colorDarkest;
+                ctx.lineWidth = midLineW;
+                ctx.strokeRect(
+                    lineW + midLineW / 2,
+                    lineW + midLineW / 2,
+                    Math.max(0, width - lineW * 2 - midLineW),
+                    Math.max(0, height - lineW * 2 - midLineW)
+                );
+            }
         } else if (frameShadow === "Sunken") {
             drawRaisedFrame(
                 ctx,
@@ -297,6 +315,23 @@ const BoxFrameCanvas = ({
                 colorBaseDark,
                 colorBaseLight
             );
+            // Draw mid-line for Sunken using the darkest color
+            if (
+                (frameShape === "Box" ||
+                    frameShape === "Panel" ||
+                    frameShape === "WinPanel" ||
+                    frameShape === "StyledPanel") &&
+                midLineW > 0
+            ) {
+                ctx.strokeStyle = colorDarkest;
+                ctx.lineWidth = midLineW;
+                ctx.strokeRect(
+                    lineW + midLineW / 2,
+                    lineW + midLineW / 2,
+                    Math.max(0, width - lineW * 2 - midLineW),
+                    Math.max(0, height - lineW * 2 - midLineW)
+                );
+            }
         } else if (frameShadow === "Plain") {
             if (frameShape === "HLine" || frameShape === "VLine") {
                 // Draw plain lines
@@ -383,7 +418,7 @@ const BoxFrameCanvas = ({
                     }
                     if (midLineW > 0) {
                         // For plain shadow, midLineWidth usually just makes the border thicker or is an inner line of same color
-                        ctx.strokeStyle = plainBorderColor; // Or a specific midLine color if defined
+                        ctx.strokeStyle = colorDarkest; // Always use darkest for mid-line
                         ctx.lineWidth = midLineW;
                         ctx.strokeRect(
                             lineW + midLineW / 2,
@@ -522,7 +557,6 @@ const PySideFrame = ({
             />
             <div
                 style={{
-                    position: "position",
                     zIndex: 3,
                     overflow: "hidden",
                 }}>
