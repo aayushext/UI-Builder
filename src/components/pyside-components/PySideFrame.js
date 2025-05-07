@@ -512,13 +512,30 @@ const PySideFrame = ({
     };
 
     if (useCustomBorder) {
-        const customBorderStyle = {
-            ...componentRootStyle,
-            border: `${borderWidth}px solid ${borderColor}`,
-        };
         return (
-            <div className="w-full h-full relative" style={customBorderStyle}>
-                {children}
+            <div
+                className="w-full h-full relative"
+                style={{ ...componentRootStyle, overflow: "visible" }}>
+                <div
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        border: `${borderWidth}px solid ${borderColor}`,
+                        borderRadius: componentRootStyle.borderRadius,
+                        pointerEvents: "none",
+                        zIndex: 0,
+                        boxSizing: "border-box",
+                    }}
+                />
+                <div
+                    style={{
+                        position: "relative",
+                        zIndex: 1,
+                        width: "100%",
+                        height: "100%",
+                    }}>
+                    {children}
+                </div>
             </div>
         );
     }
