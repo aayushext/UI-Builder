@@ -102,7 +102,7 @@ const renderComponent = (
             )}
             {component.type === "PySideFrame" && (
                 <PySideFrame
-                    key={component.id + "_" + mainBackgroundColor}
+                    key={component.id}
                     backgroundColor={component.backgroundColor}
                     frameShape={component.frameShape}
                     frameShadow={component.frameShadow}
