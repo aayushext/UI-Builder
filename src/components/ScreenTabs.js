@@ -42,7 +42,7 @@ const ScreenTabs = () => {
 
     return (
         <div
-            className="flex items-center border-b border-gray-300 dark:border-gray-900 bg-gray-100 dark:bg-gray-600 px-4 py-2"
+            className="flex items-center border-b border-gray-300 dark:border-gray-900 bg-gray-100 dark:bg-gray-700 px-4 py-2 motion-translate-x-in-[0%] motion-translate-y-in-[-75%] motion-duration-[500ms] motion-delay-[100ms] motion-delay-[0ms]/translate"
             role="tablist"
             aria-label="Screens">
             {screens.map((screen, index) => (

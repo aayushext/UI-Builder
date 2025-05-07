@@ -182,7 +182,7 @@ const RightPanel = () => {
     return (
         <aside
             id="right-panel"
-            className="w-64 bg-gray-200 dark:bg-gray-800 p-4 overflow-auto shrink-0 overflow-x-clip">
+            className="w-64 bg-gray-200 dark:bg-gray-800 p-4 overflow-auto shrink-0 overflow-x-clip motion-translate-x-in-[25%] motion-translate-y-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncy">
             <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
 
             {/* Screen Width */}
