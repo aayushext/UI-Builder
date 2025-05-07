@@ -170,6 +170,19 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
         ]
     );
 
+    React.useEffect(() => {
+        const element = ref.current;
+        if (element) {
+            element.addEventListener("wheel", onWheel, { passive: false });
+
+            return () => {
+                element.removeEventListener("wheel", onWheel, {
+                    passive: false,
+                });
+            };
+        }
+    }, [ref, onWheel]);
+
     return (
         <main
             ref={ref}
@@ -178,7 +191,6 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                 minWidth: 0,
                 cursor: useAppStore.getState().isPanning ? "grabbing" : "grab",
             }}
-            onWheel={onWheel}
             onMouseDown={onPanStart}
             onMouseMove={onPanMove}
             onMouseUp={onPanEnd}
