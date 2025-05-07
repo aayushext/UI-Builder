@@ -86,30 +86,45 @@ const Widget = ({
             .querySelector(".relative.mx-auto.origin-top-left")
             ?.getBoundingClientRect();
         if (!screenContainerRect) return null;
-        const mouseRelativeToContainerX = clientX - screenContainerRect.left;
-        const mouseRelativeToContainerY = clientY - screenContainerRect.top;
-        const adjustedMouseX = mouseRelativeToContainerX - panPosition.x;
-        const adjustedMouseY = mouseRelativeToContainerY - panPosition.y;
+
+        // mouseXInViewportOfScreen / mouseYInViewportOfScreen are mouse coordinates
+        // relative to the screen's transformed top-left corner, in scaled viewport pixels.
+        const mouseXInViewportOfScreen = clientX - screenContainerRect.left;
+        const mouseYInViewportOfScreen = clientY - screenContainerRect.top;
+
+        // To get coordinates in the screen's own unscaled system, divide by zoomLevelStore.
+        // zoomLevelStore is the zoom level from the app store.
+        const unscaledMouseX = mouseXInViewportOfScreen / zoomLevelStore;
+        const unscaledMouseY = mouseYInViewportOfScreen / zoomLevelStore;
+
+        let potentialParentFrameId = null;
         for (const frame of frames) {
-            const frameAbsPos = _getAbsolutePosition(frame.id, allComponents);
+            const frameAbsPos = _getAbsolutePosition(frame.id, allComponents); // These are unscaled
             if (
-                adjustedMouseX >= frameAbsPos.x &&
-                adjustedMouseX <= frameAbsPos.x + frame.width &&
-                adjustedMouseY >= frameAbsPos.y &&
-                adjustedMouseY <= frameAbsPos.y + frame.height
+                unscaledMouseX >= frameAbsPos.x &&
+                unscaledMouseX <= frameAbsPos.x + frame.width &&
+                unscaledMouseY >= frameAbsPos.y &&
+                unscaledMouseY <= frameAbsPos.y + frame.height
             ) {
-                return frame.id;
+                potentialParentFrameId = frame.id;
+                break;
             }
         }
-        if (
-            adjustedMouseX >= 0 &&
-            adjustedMouseX <= screen.width &&
-            adjustedMouseY >= 0 &&
-            adjustedMouseY <= screen.height
-        ) {
-            return -1;
+
+        if (potentialParentFrameId !== null) {
+            return potentialParentFrameId;
         }
-        return null;
+
+        // If not over any frame, check if inside the main screen area
+        if (
+            unscaledMouseX >= 0 &&
+            unscaledMouseX <= screen.width && // screen.width is unscaled
+            unscaledMouseY >= 0 &&
+            unscaledMouseY <= screen.height // screen.height is unscaled
+        ) {
+            return -1; // Special ID indicating the main screen
+        }
+        return null; // Not over any valid drop target
     };
 
     return (

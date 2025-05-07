@@ -287,14 +287,13 @@ export const useAppStore = create((set, get) => ({
             adjustedMouseY = NaN;
 
         if (screenContainerRect && mouseEventCoords) {
-            const mouseClientX = mouseEventCoords.clientX;
-            const mouseClientY = mouseEventCoords.clientY;
-            const mouseRelativeToContainerX =
-                mouseClientX - screenContainerRect.left;
-            const mouseRelativeToContainerY =
-                mouseClientY - screenContainerRect.top;
-            adjustedMouseX = mouseRelativeToContainerX - panPosition.x;
-            adjustedMouseY = mouseRelativeToContainerY - panPosition.y;
+            const mouseXInViewportOfScreen =
+                mouseEventCoords.clientX - screenContainerRect.left;
+            const mouseYInViewportOfScreen =
+                mouseEventCoords.clientY - screenContainerRect.top;
+
+            adjustedMouseX = mouseXInViewportOfScreen / zoomLevel; // Correctly divides by zoomLevel
+            adjustedMouseY = mouseYInViewportOfScreen / zoomLevel; // Correctly divides by zoomLevel
         } else {
             console.warn(
                 "Could not find screen container or mouse coords for adjustment. Parent detection might be inaccurate."
