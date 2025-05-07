@@ -429,10 +429,12 @@ const PySideFrame = ({
         height > 0;
 
     if (isGrooveFrame) {
+        // isGrooveFrame is true for Box, Panel, or WinPanel with Raised/Sunken shadow.
+        // These shapes should act as containers and render children.
         return (
             <div
                 className="w-full h-full relative"
-                style={{ ...style, backgroundColor }}>
+                style={{ ...style /* backgroundColor is already in style */ }}>
                 <BoxFrameCanvas
                     width={width}
                     height={height}
@@ -440,20 +442,19 @@ const PySideFrame = ({
                     midLineW={midLineW}
                     frameShape={frameShape}
                     frameShadow={frameShadow}
-                    backgroundColor={backgroundColor}
+                    backgroundColor={backgroundColor} // Canvas uses this for its base
                     mainBackgroundColor={mainBackgroundColor}
                 />
-                {frameShape === "Box" && (
-                    <div
-                        style={{
-                            position: "relative",
-                            width: "100%",
-                            height: "100%",
-                            zIndex: 3,
-                        }}>
-                        {children}
-                    </div>
-                )}
+                {/* Container for children, rendered for all isGrooveFrame types */}
+                <div
+                    style={{
+                        position: "relative",
+                        width: "100%",
+                        height: "100%",
+                        zIndex: 3, // Ensure children are on top of the canvas
+                    }}>
+                    {children}
+                </div>
             </div>
         );
     }
