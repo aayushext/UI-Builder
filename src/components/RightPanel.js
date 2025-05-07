@@ -265,18 +265,18 @@ const RightPanel = () => {
 
             {selectedComponent && componentDefinition && (
                 <>
-                    <h2 className="text-lg font-semibold mb-2 mt-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier text-slate-700 dark:text-slate-200">
+                    <h2 className="text-lg font-semibold mb-2 mt-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier text-slate-700 dark:text-slate-200 -z-[1] sticky">
                         Component Properties
                     </h2>
 
                     <button
                         onClick={duplicateComponent}
-                        className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-md mb-4 w-full shadow-md hover:shadow-lg transition-all duration-150 ease-in-out motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                        className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-md mb-4 w-full shadow-md hover:shadow-lg transition-all duration-150 ease-in-out motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier -z-[1] sticky">
                         Duplicate Widget
                     </button>
 
                     {/* Position and size properties */}
-                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier -z-[1] sticky">
                         <label
                             htmlFor="x"
                             className="block text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -298,7 +298,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier -z-[1] sticky">
                         <label
                             htmlFor="y"
                             className="block text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -320,7 +320,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier -z-[1] sticky">
                         <label
                             htmlFor="width"
                             className="block text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -342,7 +342,7 @@ const RightPanel = () => {
                         />
                     </div>
 
-                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                    <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier -z-[1] sticky">
                         <label
                             htmlFor="height"
                             className="block text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -388,7 +388,7 @@ const RightPanel = () => {
 
                         return (
                             <div
-                                className={`mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier`}
+                                className={`mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier -z-[1] sticky`}
                                 key={property.name}>
                                 <label
                                     htmlFor={property.name}
