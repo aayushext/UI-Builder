@@ -119,10 +119,10 @@ const Widget = ({
             scale={zoomLevel}
             className={`absolute ${
                 isSelected
-                    ? "border-2 border-blue-500"
+                    ? "border-2 border-blue-500 rounded-md shadow-lg"
                     : isHovered
-                      ? "border border-dashed border-slate-500"
-                      : "border-none"
+                      ? "border border-solid border-slate-400 dark:border-slate-600 rounded-md"
+                      : "border border-transparent rounded-md"
             }`}
             style={{
                 zIndex,
@@ -156,8 +156,10 @@ const Widget = ({
                 const screen = screens[currentScreenIndex];
                 const allComponents = screen.components;
                 const thisComponent = allComponents.find((c) => c.id === id);
-                const currentParentId = thisComponent?.parentId ?? null;
+                if (!thisComponent) return;
+                const currentParentId = thisComponent.parentId ?? null;
                 const wouldBeParentId = frameId === -1 ? null : frameId;
+
                 if (wouldBeParentId !== currentParentId) {
                     updateDropTargetFrameId(frameId);
                 } else {
@@ -166,6 +168,7 @@ const Widget = ({
             }}
             onDragStop={(e, d) => {
                 e.stopPropagation();
+                updateDropTargetFrameId(null);
                 onMove(id, {
                     relativePos: {
                         x: Math.round(d.x),
@@ -185,7 +188,7 @@ const Widget = ({
             onMouseLeave={() => setIsHovered(false)}>
             <div className="relative w-full h-full pointer-events-none ">
                 {isDropTarget && (
-                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-900 bg-sky-900/40 animate-[blink-overlay_1.5s_linear_infinite] rounded-md z-100" />
+                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-600 bg-sky-500/40 animate-[blink-overlay_1.5s_linear_infinite] rounded-md z-100" />
                 )}
                 <div className="absolute inset-0 pointer-events-auto">
                     {children}

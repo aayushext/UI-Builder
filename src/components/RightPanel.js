@@ -17,7 +17,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     id={property.name}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 selection:border-slate-300 dark:selection:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                 />
             );
 
@@ -32,7 +32,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     max={maxRadius || property.max}
                     onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                 />
             );
 
@@ -46,7 +46,12 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150 appearance-none bg-no-repeat bg-right pr-8"
+                    style={{
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: "right 0.5rem center",
+                        backgroundSize: "1.5em 1.5em",
+                    }}>
                     {property.options.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}
@@ -63,7 +68,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     checked={value}
                     onChange={(e) => onChange(e.target.checked)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="mt-1 h-4 w-4 rounded-md border-slate-400 dark:border-slate-500 text-indigo-600 focus:ring-indigo-500/50 focus:ring-2 shadow-sm"
                 />
             );
 
@@ -182,14 +187,16 @@ const RightPanel = () => {
     return (
         <aside
             id="right-panel"
-            className="w-64 bg-slate-200 dark:bg-slate-800 p-4 overflow-auto shrink-0 overflow-x-clip motion-translate-x-in-[25%] motion-translate-y-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncy">
-            <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
+            className="w-64 bg-slate-200 dark:bg-slate-800 p-4 overflow-auto shrink-0 overflow-x-clip motion-translate-x-in-[25%] motion-translate-y-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncy fixed top-3 right-3 h-[calc(100vh-1.5rem)] shadow-2xl rounded-xl">
+            <h2 className="text-lg font-semibold mb-2 text-slate-700 dark:text-slate-200">
+                Screen Properties
+            </h2>
 
             {/* Screen Width */}
             <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenWidth"
-                    className="block text-sm font-medium">
+                    className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                     Width (px)
                 </label>
                 <input
@@ -199,7 +206,7 @@ const RightPanel = () => {
                     min="320"
                     step="10"
                     onChange={(e) => handleScreenWidthChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                 />
             </div>
 
@@ -207,7 +214,7 @@ const RightPanel = () => {
             <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenHeight"
-                    className="block text-sm font-medium">
+                    className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                     Height (px)
                 </label>
                 <input
@@ -217,7 +224,7 @@ const RightPanel = () => {
                     min="240"
                     step="10"
                     onChange={(e) => handleScreenHeightChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                 />
             </div>
 
@@ -225,7 +232,7 @@ const RightPanel = () => {
             <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[200ms] motion-delay-[200ms]/scale motion-delay-[200ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenCustomId"
-                    className="block text-sm font-medium">
+                    className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                     Screen ID
                 </label>
                 <input
@@ -233,9 +240,9 @@ const RightPanel = () => {
                     id="screenCustomId"
                     value={screenCustomId}
                     onChange={(e) => handleScreenCustomIdChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Used as the widget name in the UI file
                 </p>
             </div>
@@ -244,7 +251,7 @@ const RightPanel = () => {
             <div className="mb-4 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[300ms] motion-delay-[300ms]/scale motion-delay-[300ms]/opacity motion-ease-spring-bouncier">
                 <label
                     htmlFor="screenBackgroundColor"
-                    className="block text-sm font-medium">
+                    className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                     Background Color
                 </label>
                 <CustomColorPicker
@@ -258,13 +265,13 @@ const RightPanel = () => {
 
             {selectedComponent && componentDefinition && (
                 <>
-                    <h2 className="text-lg font-bold mb-2 mt-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                    <h2 className="text-lg font-semibold mb-2 mt-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier text-slate-700 dark:text-slate-200">
                         Component Properties
                     </h2>
 
                     <button
                         onClick={duplicateComponent}
-                        className="bg-teal-500 dark:bg-teal-600 dark:hover:bg-teal-800 hover:bg-teal-700 font-bold py-2 px-4 rounded-sm mb-4 w-full motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
+                        className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-md mb-4 w-full shadow-md hover:shadow-lg transition-all duration-150 ease-in-out motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         Duplicate Widget
                     </button>
 
@@ -272,7 +279,7 @@ const RightPanel = () => {
                     <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="x"
-                            className="block text-sm font-medium ">
+                            className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                             X Position
                         </label>
                         <input
@@ -287,14 +294,14 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                         />
                     </div>
 
                     <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="y"
-                            className="block text-sm font-medium ">
+                            className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                             Y Position
                         </label>
                         <input
@@ -309,14 +316,14 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                         />
                     </div>
 
                     <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="width"
-                            className="block text-sm font-medium ">
+                            className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                             Width
                         </label>
                         <input
@@ -331,14 +338,14 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                         />
                     </div>
 
                     <div className="mb-4 motion-scale-in-[0.5] motion-opacity-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncier">
                         <label
                             htmlFor="height"
-                            className="block text-sm font-medium ">
+                            className="block text-sm font-medium text-slate-600 dark:text-slate-300">
                             Height
                         </label>
                         <input
@@ -353,7 +360,7 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-md bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 sm:text-sm transition-colors duration-150"
                         />
                     </div>
 
@@ -385,9 +392,9 @@ const RightPanel = () => {
                                 key={property.name}>
                                 <label
                                     htmlFor={property.name}
-                                    className={`block text-sm font-medium ${
+                                    className={`block text-sm font-medium text-slate-600 dark:text-slate-300 ${
                                         property.type === "boolean"
-                                            ? "inline-block mr-2"
+                                            ? "inline-block mr-2 align-middle"
                                             : ""
                                     }`}>
                                     {property.label}

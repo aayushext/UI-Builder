@@ -186,7 +186,7 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
     return (
         <main
             ref={ref}
-            className="flex-1 p-4 overflow-hidden relative bg-slate-400 dark:bg-slate-900"
+            className="flex-1 p-0 overflow-hidden relative bg-transparent dark:bg-linear-to-b dark:from-slate-950 dark:to-slate-900 rounded-b-xl"
             style={{
                 minWidth: 0,
                 cursor: useAppStore.getState().isPanning ? "grabbing" : "grab",
@@ -195,39 +195,41 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
             onMouseMove={onPanMove}
             onMouseUp={onPanEnd}
             onMouseLeave={onPanEnd}>
-            <div
-                className="relative mx-auto origin-top-left"
-                style={{
-                    width: `${screenWidth}px`,
-                    height: `${screenHeight}px`,
-                    backgroundColor,
-                    boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-                    overflow: "hidden",
-                    transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
-                    transition: useAppStore.getState().isPanning
-                        ? "none"
-                        : "transform 0.1s ease-out",
-                    willChange: "transform",
-                }}>
-                {dropTargetFrameId === -1 && (
-                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-900 bg-sky-900/30 animate-[blink-overlay_1.5s_linear_infinite] rounded-lg z-100" />
-                )}
-                {topLevelComponents.map((component) =>
-                    renderComponent(
-                        component,
-                        allComponents,
-                        selectedComponentId,
-                        handlers,
-                        zoomLevel,
-                        dropTargetFrameId,
-                        backgroundColor
-                    )
-                )}
+            <div className="w-full h-full overflow-hidden p-4 relative">
+                <div
+                    className="relative mx-auto origin-top-left rounded-md shadow-2xl"
+                    style={{
+                        width: `${screenWidth}px`,
+                        height: `${screenHeight}px`,
+                        backgroundColor,
+                        boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+                        overflow: "hidden",
+                        transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
+                        transition: useAppStore.getState().isPanning
+                            ? "none"
+                            : "transform 0.1s ease-out",
+                        willChange: "transform",
+                    }}>
+                    {dropTargetFrameId === -1 && (
+                        <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-sky-600 bg-sky-500/30 animate-[blink-overlay_1.5s_linear_infinite] rounded-lg z-100" />
+                    )}
+                    {topLevelComponents.map((component) =>
+                        renderComponent(
+                            component,
+                            allComponents,
+                            selectedComponentId,
+                            handlers,
+                            zoomLevel,
+                            dropTargetFrameId,
+                            backgroundColor
+                        )
+                    )}
+                </div>
             </div>
-            <div className="fixed bottom-4 right-72 flex gap-2 bg-white dark:bg-slate-800 p-2 rounded-md shadow-lg z-50 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
+            <div className="fixed bottom-6 right-[calc(16rem+0.75rem+1.5rem)] flex gap-2 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md p-2 rounded-lg shadow-xl z-50 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[0ms] motion-delay-[0ms]/scale motion-delay-[0ms]/opacity motion-ease-spring-bouncier">
                 <button
                     onClick={onZoomOut}
-                    className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-md w-8 h-8 flex items-center justify-center motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
+                    className="bg-slate-200/70 dark:bg-slate-700/70 hover:bg-slate-300/90 dark:hover:bg-slate-600/90 text-slate-700 dark:text-slate-200 rounded-md w-9 h-9 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-150 ease-in-out motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
                     title="Zoom out">
                     <IconContext.Provider value={{ size: "1em" }}>
                         <FaMinus />
@@ -235,13 +237,13 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
                 </button>
                 <button
                     onClick={onResetView}
-                    className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-md px-2 flex items-center justify-center motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[200ms] motion-delay-[200ms]/scale motion-delay-[200ms]/opacity motion-ease-spring-bouncier"
+                    className="bg-slate-200/70 dark:bg-slate-700/70 hover:bg-slate-300/90 dark:hover:bg-slate-600/90 text-slate-700 dark:text-slate-200 rounded-md px-3.5 py-1.5 h-9 flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all duration-150 ease-in-out motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[200ms] motion-delay-[200ms]/scale motion-delay-[200ms]/opacity motion-ease-spring-bouncier"
                     title="Reset view">
                     {Math.round(zoomLevel * 100)}%
                 </button>
                 <button
                     onClick={onZoomIn}
-                    className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-md w-8 h-8 flex items-center justify-center motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
+                    className="bg-slate-200/70 dark:bg-slate-700/70 hover:bg-slate-300/90 dark:hover:bg-slate-600/90 text-slate-700 dark:text-slate-200 rounded-md w-9 h-9 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-150 ease-in-out motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
                     title="Zoom in">
                     <IconContext.Provider value={{ size: "1em" }}>
                         <FaPlus />

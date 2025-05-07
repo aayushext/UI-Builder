@@ -78,10 +78,10 @@ export default function Home() {
     );
 
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col h-screen bg-slate-300 dark:bg-slate-950">
+            <div className="flex flex-1 overflow-hidden relative p-3 gap-3">
                 <LeftPanel centerPanelDimensions={centerPanelDimensions} />
-                <div className="flex flex-col flex-1 min-w-0">
+                <div className="flex flex-col flex-1 min-w-0 ml-[calc(16rem+0.75rem)] mr-[calc(16rem+0.75rem)]">
                     <ScreenTabs />
                     <CenterPanel
                         ref={centerPanelRef}
