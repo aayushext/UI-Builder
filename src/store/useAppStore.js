@@ -7,6 +7,10 @@ import {
 import { exportToUiFile, importFromUiFile } from "../utils/saveSystem";
 import JSZip from "jszip";
 
+/**
+ * The initial screen state for the application.
+ * @type {object}
+ */
 const initialScreen = {
     id: 0,
     name: "Screen 1",
@@ -17,6 +21,9 @@ const initialScreen = {
     height: 800,
 };
 
+/**
+ * Zustand store for managing the application state.
+ */
 export const useAppStore = create((set, get) => ({
     screens: [initialScreen],
     nextScreenId: 1,
@@ -31,6 +38,10 @@ export const useAppStore = create((set, get) => ({
     lastMousePosition: { x: 0, y: 0 },
     dropTargetFrameId: null,
 
+    /**
+     * Set the drop target frame ID for drag-and-drop feedback.
+     * @param {number|null} frameId
+     */
     updateDropTargetFrameId: (frameId) => set({ dropTargetFrameId: frameId }),
 
     /**
@@ -91,15 +102,6 @@ export const useAppStore = create((set, get) => ({
         if (selectedComponent?.type === "PySideFrame") {
             parentId = selectedComponent.id;
             position = { x: 10, y: 10 };
-            console.log(
-                `addComponent: Adding ${type} inside Frame ID ${parentId}. Initial relative position:`,
-                position
-            );
-        } else {
-            console.log(
-                `addComponent: Adding ${type} to screen. Initial absolute position:`,
-                position
-            );
         }
 
         const newComponent = createComponent(type, nextComponentId, position);
@@ -262,21 +264,14 @@ export const useAppStore = create((set, get) => ({
      */
     moveComponent: (id, positionData) => {
         const { relativePos, mouseEventCoords } = positionData;
-        const {
-            screens,
-            currentScreenIndex,
-            _getAbsolutePosition,
-            zoomLevel,
-            panPosition,
-        } = get();
+        const { screens, currentScreenIndex, _getAbsolutePosition, zoomLevel } =
+            get();
         const screen = screens[currentScreenIndex];
         const allComponents = screen.components;
         const movedComponent = allComponents.find((comp) => comp.id === id);
         if (!movedComponent) return;
 
-        const originalParentId = movedComponent.parentId;
-        let finalParentId = null,
-            finalRelativeX = 0,
+        let finalRelativeX = 0,
             finalRelativeY = 0;
 
         // --- Parent Detection Logic using Mouse Coordinates ---
@@ -291,13 +286,10 @@ export const useAppStore = create((set, get) => ({
                 mouseEventCoords.clientX - screenContainerRect.left;
             const mouseYInViewportOfScreen =
                 mouseEventCoords.clientY - screenContainerRect.top;
-
-            adjustedMouseX = mouseXInViewportOfScreen / zoomLevel; // Correctly divides by zoomLevel
-            adjustedMouseY = mouseYInViewportOfScreen / zoomLevel; // Correctly divides by zoomLevel
+            adjustedMouseX = mouseXInViewportOfScreen / zoomLevel;
+            adjustedMouseY = mouseYInViewportOfScreen / zoomLevel;
         } else {
-            console.warn(
-                "Could not find screen container or mouse coords for adjustment. Parent detection might be inaccurate."
-            );
+            // Fallback: try to estimate position
             const lastAbsPos = _getAbsolutePosition(id, allComponents);
             if (!isNaN(lastAbsPos.x)) {
                 adjustedMouseX =
@@ -372,10 +364,7 @@ export const useAppStore = create((set, get) => ({
                         newParentAbsPos.y -
                         movedComponent.height / 2;
                 } else {
-                    console.error(
-                        `Could not get absolute position for new parent ${newParentId}`
-                    );
-                    finalRelativeX = relativePos.x; // Fallback
+                    finalRelativeX = relativePos.x;
                     finalRelativeY = relativePos.y;
                 }
             } else {
@@ -509,6 +498,12 @@ export const useAppStore = create((set, get) => ({
         let newNextComponentId = nextComponentId;
         const idMap = new Map();
 
+        /**
+         * Recursively duplicates a component and its children.
+         * @param {object} originalComp
+         * @param {number|null} parentId
+         * @returns {Array<object>}
+         */
         const duplicateRecursive = (originalComp, parentId) => {
             const newId = newNextComponentId++;
             idMap.set(originalComp.id, newId);
