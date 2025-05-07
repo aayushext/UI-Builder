@@ -2,9 +2,9 @@ import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
 /**
- * Convert hex color to RGB object.
- * @param {string} hex
- * @returns {{r: number, g: number, b: number}|null}
+ * Converts a hex color string to an RGB object.
+ * @param {string} hex - The hex color string.
+ * @returns {{r: number, g: number, b: number}|null} The RGB object or null if invalid.
  */
 const hexToRgb = (hex) => {
     if (!hex) return null;
@@ -25,9 +25,9 @@ const hexToRgb = (hex) => {
 };
 
 /**
- * Convert RGB object to hex color string.
- * @param {{r: number, g: number, b: number}} rgb
- * @returns {string}
+ * Converts an RGB object to a hex color string.
+ * @param {{r: number, g: number, b: number}} rgb - The RGB object.
+ * @returns {string} The hex color string.
  */
 const rgbToHex = ({ r, g, b }) =>
     "#" +
@@ -39,10 +39,10 @@ const rgbToHex = ({ r, g, b }) =>
         .join("");
 
 /**
- * Adjust color brightness by a percentage.
- * @param {string} hex
- * @param {number} percent
- * @returns {string}
+ * Adjusts color brightness by a percentage.
+ * @param {string} hex - The hex color string.
+ * @param {number} percent - The percentage to adjust.
+ * @returns {string} The adjusted hex color string.
  */
 const adjustColor = (hex, percent) => {
     const rgb = hexToRgb(hex);
@@ -55,11 +55,32 @@ const adjustColor = (hex, percent) => {
     });
 };
 
+/**
+ * Lightens a color by a percentage.
+ * @param {string} hex - The hex color string.
+ * @param {number} percent - The percentage to lighten.
+ * @returns {string} The lightened hex color string.
+ */
 const lightenColor = (hex, percent) => adjustColor(hex, Math.abs(percent));
+
+/**
+ * Darkens a color by a percentage.
+ * @param {string} hex - The hex color string.
+ * @param {number} percent - The percentage to darken.
+ * @returns {string} The darkened hex color string.
+ */
 const darkenColor = (hex, percent) => adjustColor(hex, -Math.abs(percent));
 
 /**
- * Draw a raised or sunken frame on canvas.
+ * Draws a raised or sunken frame on a canvas context.
+ * @param {CanvasRenderingContext2D} ctx - The canvas context.
+ * @param {number} width - The width of the frame.
+ * @param {number} height - The height of the frame.
+ * @param {number} lineW - The border line width.
+ * @param {number} midLineW - The mid-line width.
+ * @param {string} frameShape - The shape of the frame.
+ * @param {string} colorLight - The light color.
+ * @param {string} colorDark - The dark color.
  */
 const drawRaisedFrame = (
     ctx,
@@ -198,7 +219,9 @@ const drawRaisedFrame = (
 };
 
 /**
- * Canvas for drawing groove/raised/sunken/plain frames.
+ * Renders a canvas for drawing groove/raised/sunken/plain frames.
+ * @param {object} props - The component props.
+ * @returns {JSX.Element|null} The rendered canvas or null.
  */
 const BoxFrameCanvas = ({
     width,
@@ -211,7 +234,6 @@ const BoxFrameCanvas = ({
     mainBackgroundColor,
 }) => {
     const canvasRef = useRef(null);
-    // Add mainBackgroundColor to prev.current and useEffect dependency array
     const prev = useRef({
         width: 0,
         height: 0,
@@ -244,7 +266,7 @@ const BoxFrameCanvas = ({
             frameShape,
             frameShadow,
             backgroundColor,
-            mainBackgroundColor, // Added
+            mainBackgroundColor,
         };
 
         if (!width || !height) return;
@@ -254,25 +276,19 @@ const BoxFrameCanvas = ({
         ctx.clearRect(0, 0, width, height);
 
         const baseColor = backgroundColor || "#e0e0e0";
-        // Fill the frame's background first
         ctx.fillStyle = baseColor;
         ctx.fillRect(0, 0, width, height);
 
-        ctx.save(); // Save context state
+        ctx.save();
 
-        // Colors for raised/sunken effects
         const colorBaseLight = lightenColor(baseColor, 30);
         const colorBaseDark = darkenColor(baseColor, 30);
-        const colorDarkest = darkenColor(baseColor, 60); // Always use for mid-line
+        const colorDarkest = darkenColor(baseColor, 60);
 
-        // Colors for plain borders (derived based on frameShape for Plain shadow)
         let plainBorderColor = colorDarkest;
         if (frameShadow === "Plain") {
             if (frameShape === "StyledPanel") {
-                plainBorderColor = darkenColor(baseColor, 15); // like colorMidDark
-            } else if (frameShape === "Panel" || frameShape === "WinPanel") {
-                // For plain Panel/WinPanel, Qt often uses a color similar to colorMid
-                // colorMid was darkenColor(baseColor, 60), so default plainBorderColor is fine.
+                plainBorderColor = darkenColor(baseColor, 15);
             }
         }
 
@@ -287,7 +303,6 @@ const BoxFrameCanvas = ({
                 colorBaseLight,
                 colorBaseDark
             );
-            // Draw mid-line for Raised using the darkest color
             if (
                 (frameShape === "Box" ||
                     frameShape === "Panel" ||
@@ -315,7 +330,6 @@ const BoxFrameCanvas = ({
                 colorBaseDark,
                 colorBaseLight
             );
-            // Draw mid-line for Sunken using the darkest color
             if (
                 (frameShape === "Box" ||
                     frameShape === "Panel" ||
@@ -334,57 +348,48 @@ const BoxFrameCanvas = ({
             }
         } else if (frameShadow === "Plain") {
             if (frameShape === "HLine" || frameShape === "VLine") {
-                // Draw plain lines
                 if (lineW > 0) {
                     ctx.fillStyle = plainBorderColor;
-                    if (frameShape === "HLine") {
-                        // Top and bottom parts of the "groove"
-                        ctx.fillRect(
-                            0,
-                            height / 2 - lineW / 2 - midLineW / 2,
-                            width,
-                            lineW
-                        );
-                        // If midLineW is 0, this makes a single line of lineW thickness
-                        // If midLineW > 0, these are the outer parts of the groove
-                        if (midLineW > 0) {
+                    if (midLineW > 0) {
+                        // Draw both edges for groove effect
+                        if (frameShape === "HLine") {
                             ctx.fillRect(
                                 0,
                                 height / 2 - lineW / 2 - midLineW / 2,
                                 width,
                                 lineW
-                            ); // Top edge
+                            );
                             ctx.fillRect(
                                 0,
                                 height / 2 + midLineW / 2 - lineW / 2,
                                 width,
                                 lineW
-                            ); // Bottom edge
+                            );
                         } else {
-                            ctx.fillRect(0, (height - lineW) / 2, width, lineW); // Single centered line
-                        }
-                    } else {
-                        // VLine
-                        if (midLineW > 0) {
                             ctx.fillRect(
                                 width / 2 - lineW / 2 - midLineW / 2,
                                 0,
                                 lineW,
                                 height
-                            ); // Left edge
+                            );
                             ctx.fillRect(
                                 width / 2 + midLineW / 2 - lineW / 2,
                                 0,
                                 lineW,
                                 height
-                            ); // Right edge
+                            );
+                        }
+                    } else {
+                        // Single centered line
+                        if (frameShape === "HLine") {
+                            ctx.fillRect(0, (height - lineW) / 2, width, lineW);
                         } else {
-                            ctx.fillRect((width - lineW) / 2, 0, lineW, height); // Single centered line
+                            ctx.fillRect((width - lineW) / 2, 0, lineW, height);
                         }
                     }
                 }
                 if (midLineW > 0) {
-                    ctx.fillStyle = mainBackgroundColor || "rgba(0,0,0,0)"; // Middle part, transparent to parent
+                    ctx.fillStyle = mainBackgroundColor || "rgba(0,0,0,0)";
                     if (frameShape === "HLine") {
                         ctx.fillRect(
                             lineW > 0 ? lineW : 0,
@@ -393,7 +398,6 @@ const BoxFrameCanvas = ({
                             midLineW
                         );
                     } else {
-                        // VLine
                         ctx.fillRect(
                             width / 2 - midLineW / 2,
                             lineW > 0 ? lineW : 0,
@@ -403,7 +407,6 @@ const BoxFrameCanvas = ({
                     }
                 }
             } else {
-                // Box, Panel, StyledPanel, WinPanel with Plain shadow
                 const totalBorderWidth = lineW + midLineW;
                 if (totalBorderWidth > 0) {
                     if (lineW > 0) {
@@ -417,8 +420,7 @@ const BoxFrameCanvas = ({
                         );
                     }
                     if (midLineW > 0) {
-                        // For plain shadow, midLineWidth usually just makes the border thicker or is an inner line of same color
-                        ctx.strokeStyle = colorDarkest; // Always use darkest for mid-line
+                        ctx.strokeStyle = colorDarkest;
                         ctx.lineWidth = midLineW;
                         ctx.strokeRect(
                             lineW + midLineW / 2,
@@ -430,10 +432,7 @@ const BoxFrameCanvas = ({
                 }
             }
         }
-        // Note: The old 'else if (frameShape !== "HLine" && frameShape !== "VLine")' and its midLineWidth part
-        // for non-Raised/Sunken are now handled by the frameShadow === "Plain" block.
-
-        ctx.restore(); // Restore context state
+        ctx.restore();
     }, [
         width,
         height,
@@ -442,7 +441,7 @@ const BoxFrameCanvas = ({
         frameShape,
         frameShadow,
         backgroundColor,
-        mainBackgroundColor, // Added to dependency array
+        mainBackgroundColor,
     ]);
 
     if (!width || !height) return null;
@@ -465,6 +464,7 @@ const BoxFrameCanvas = ({
         />
     );
 };
+
 BoxFrameCanvas.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
@@ -478,6 +478,8 @@ BoxFrameCanvas.propTypes = {
 
 /**
  * PySideFrame - Professional, flexible frame component.
+ * @param {object} props - The component props.
+ * @returns {JSX.Element} The rendered frame.
  */
 const PySideFrame = ({
     backgroundColor,
@@ -485,19 +487,18 @@ const PySideFrame = ({
     frameShadow,
     lineWidth,
     midLineWidth,
-    borderColor, // For custom border
-    borderWidth, // For custom border
+    borderColor,
+    borderWidth,
     useCustomBorder,
     width,
     height,
     children,
-    mainBackgroundColor, // Pass this down to BoxFrameCanvas
+    mainBackgroundColor,
 }) => {
     const lineW = lineWidth !== undefined ? Math.max(0, lineWidth) : 1;
     const midLineW = midLineWidth !== undefined ? Math.max(0, midLineWidth) : 0;
     const totalWidth = lineW + midLineW;
 
-    // Base style for the outermost div of PySideFrame
     const componentRootStyle = {
         backgroundColor:
             frameShape === "HLine" || frameShape === "VLine"
@@ -512,7 +513,7 @@ const PySideFrame = ({
 
     if (useCustomBorder) {
         const customBorderStyle = {
-            ...componentRootStyle, // Use componentRootStyle which has the correct bg
+            ...componentRootStyle,
             border: `${borderWidth}px solid ${borderColor}`,
         };
         return (
@@ -530,17 +531,11 @@ const PySideFrame = ({
         );
     }
 
-    // Condition for container shapes that need their children inset by the border width
     const isContainerShape =
         frameShape === "Box" ||
         frameShape === "Panel" ||
         frameShape === "WinPanel" ||
         frameShape === "StyledPanel";
-    // Calculate inset for children container. Only apply if it's a container shape and has a border.
-    const insetAmount = isContainerShape && totalWidth > 0 ? totalWidth : 0;
-
-    // For all other frame styles that require drawing (Box, Panel, HLine, VLine, etc.)
-    // use BoxFrameCanvas.
     return (
         <div
             className="w-full h-full relative motion-scale-in-[1.5] motion-opacity-in-[0%] motion-duration-[250ms] motion-ease-spring-bouncier"
@@ -555,13 +550,7 @@ const PySideFrame = ({
                 backgroundColor={backgroundColor}
                 mainBackgroundColor={mainBackgroundColor}
             />
-            <div
-                style={{
-                    zIndex: 3,
-                    overflow: "hidden",
-                }}>
-                {children}
-            </div>
+            <div className="z-[3] overflow-hidden">{children}</div>
         </div>
     );
 };

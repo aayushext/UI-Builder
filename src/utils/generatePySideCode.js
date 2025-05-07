@@ -155,7 +155,7 @@ ${indent}    font-family: Arial;
 ${indent}    border: ${component.borderWidth}px solid rgba(${hexToRgba(
             component.borderColor
         )});
-${indent}    border-radius: ${component.radius + component.borderWidth != null ? component.borderWidth : 0}px;
+${indent}    border-radius: ${component.radius}px;
 ${indent}}
 ${indent}QPushButton:hover {
 ${indent}    background-color: rgba(${hexToRgba(component.hoverColor)});
