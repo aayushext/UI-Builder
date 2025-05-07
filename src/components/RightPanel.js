@@ -17,7 +17,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     id={property.name}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 selection:border-gray-300 dark:selection:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 selection:border-slate-300 dark:selection:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
             );
 
@@ -32,7 +32,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     max={maxRadius || property.max}
                     onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
             );
 
@@ -46,7 +46,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                     {property.options.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}
@@ -63,7 +63,7 @@ const PropertyEditor = ({ property, value, onChange, component }) => {
                     checked={value}
                     onChange={(e) => onChange(e.target.checked)}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
             );
 
@@ -182,7 +182,7 @@ const RightPanel = () => {
     return (
         <aside
             id="right-panel"
-            className="w-64 bg-gray-200 dark:bg-gray-800 p-4 overflow-auto shrink-0 overflow-x-clip motion-translate-x-in-[25%] motion-translate-y-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncy">
+            className="w-64 bg-slate-200 dark:bg-slate-800 p-4 overflow-auto shrink-0 overflow-x-clip motion-translate-x-in-[25%] motion-translate-y-in-[0%] motion-duration-[500ms] motion-ease-spring-bouncy">
             <h2 className="text-lg font-bold mb-2">Screen Properties</h2>
 
             {/* Screen Width */}
@@ -199,7 +199,7 @@ const RightPanel = () => {
                     min="320"
                     step="10"
                     onChange={(e) => handleScreenWidthChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
             </div>
 
@@ -217,7 +217,7 @@ const RightPanel = () => {
                     min="240"
                     step="10"
                     onChange={(e) => handleScreenHeightChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
             </div>
 
@@ -233,9 +233,9 @@ const RightPanel = () => {
                     id="screenCustomId"
                     value={screenCustomId}
                     onChange={(e) => handleScreenCustomIdChange(e.target.value)}
-                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                     Used as the widget name in the UI file
                 </p>
             </div>
@@ -287,7 +287,7 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
 
@@ -309,7 +309,7 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
 
@@ -331,7 +331,7 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
 
@@ -353,7 +353,7 @@ const RightPanel = () => {
                                 )
                             }
                             onMouseDown={(e) => e.stopPropagation()}
-                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 py-1 px-2 block w-full rounded-sm bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
 

@@ -36,7 +36,7 @@ const PySideSlider = ({
             style={{ backgroundColor }}>
             {/* Slider track */}
             <div
-                className="absolute bg-gray-300 border border-gray-400 rounded z-10"
+                className="absolute bg-slate-300 border border-slate-400 rounded z-10"
                 style={{
                     left: isHorizontal
                         ? "10px"

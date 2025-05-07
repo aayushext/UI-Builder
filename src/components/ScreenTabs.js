@@ -42,7 +42,7 @@ const ScreenTabs = () => {
 
     return (
         <div
-            className="flex items-center border-b border-gray-300 dark:border-gray-900 bg-gray-100 dark:bg-gray-700 px-4 py-2 motion-translate-x-in-[0%] motion-translate-y-in-[-75%] motion-duration-[500ms] motion-delay-[100ms] motion-delay-[0ms]/translate"
+            className="flex items-center border-b border-slate-300 dark:border-slate-900 bg-slate-100 dark:bg-slate-700 px-4 py-2 motion-translate-x-in-[0%] motion-translate-y-in-[-75%] motion-duration-[500ms] motion-delay-[100ms] motion-delay-[0ms]/translate"
             role="tablist"
             aria-label="Screens">
             {screens.map((screen, index) => (
@@ -62,8 +62,8 @@ const ScreenTabs = () => {
                         onMouseLeave={() => setHoveredIndex(null)}
                         className={`flex items-center py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                             index === currentScreenIndex
-                                ? "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 border-b-gray-400 dark:border-b-gray-800"
-                                : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-800"
+                                ? "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 border-b-slate-400 dark:border-b-slate-800"
+                                : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-800"
                         }`}>
                         {screen.name}
                         <div
@@ -96,7 +96,7 @@ const ScreenTabs = () => {
             ))}
             <button
                 onClick={addScreen}
-                className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-900 py-2 px-2 rounded-md ml-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
+                className="bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-900 py-2 px-2 rounded-md ml-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 motion-scale-in-[1.5] motion-opacity-in-[0%] motion-delay-[100ms] motion-delay-[100ms]/scale motion-delay-[100ms]/opacity motion-ease-spring-bouncier"
                 aria-label="Add new screen">
                 <IconContext.Provider value={{ size: "1em" }}>
                     <div>

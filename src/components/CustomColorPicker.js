@@ -65,7 +65,7 @@ const CustomColorPicker = ({ value, onChange }) => {
             {/* Color swatch that toggles the picker */}
             <div
                 ref={swatchRef}
-                className="mt-1 w-full h-6 rounded-md border bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 cursor-pointer"
+                className="mt-1 w-full h-6 rounded-md border bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600 cursor-pointer"
                 style={{
                     backgroundColor: color,
                     boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
@@ -76,7 +76,7 @@ const CustomColorPicker = ({ value, onChange }) => {
             {/* Color picker popup */}
             {isPickerOpen && (
                 <div
-                    className="absolute z-10 p-2 rounded-xl shadow-lg dark:bg-gray-900"
+                    className="absolute z-10 p-2 rounded-xl shadow-lg dark:bg-slate-900"
                     style={{
                         top: pickerPosition.top ? "100%" : "auto",
                         bottom: !pickerPosition.top ? "100%" : "auto",
@@ -91,7 +91,7 @@ const CustomColorPicker = ({ value, onChange }) => {
                     />
                     <input
                         type="text"
-                        className="mt-2 py-1 px-2 block w-full rounded-md bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-2 py-1 px-2 block w-full rounded-md bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         value={color}
                         onChange={(e) => handleColorChange(e.target.value)}
                         onMouseDown={(e) => e.stopPropagation()}

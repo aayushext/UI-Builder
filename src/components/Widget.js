@@ -121,7 +121,7 @@ const Widget = ({
                 isSelected
                     ? "border-2 border-blue-500"
                     : isHovered
-                      ? "border border-dashed border-gray-500"
+                      ? "border border-dashed border-slate-500"
                       : "border-none"
             }`}
             style={{
