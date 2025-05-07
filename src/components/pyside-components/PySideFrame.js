@@ -514,28 +514,17 @@ const PySideFrame = ({
     if (useCustomBorder) {
         return (
             <div
-                className="w-full h-full relative"
-                style={{ ...componentRootStyle, overflow: "visible" }}>
+                className="w-full h-full relative overflow-visible"
+                style={componentRootStyle}>
                 <div
+                    className="absolute inset-0 pointer-events-none z-0"
                     style={{
-                        position: "absolute",
-                        inset: 0,
                         border: `${borderWidth}px solid ${borderColor}`,
                         borderRadius: componentRootStyle.borderRadius,
-                        pointerEvents: "none",
-                        zIndex: 0,
                         boxSizing: "border-box",
                     }}
                 />
-                <div
-                    style={{
-                        position: "relative",
-                        zIndex: 1,
-                        width: "100%",
-                        height: "100%",
-                    }}>
-                    {children}
-                </div>
+                <div className="relative z-[1] w-full h-full">{children}</div>
             </div>
         );
     }
