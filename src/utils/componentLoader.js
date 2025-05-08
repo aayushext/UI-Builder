@@ -49,7 +49,7 @@ export const createComponent = (type, id, position = { x: 50, y: 50 }) => {
         console.warn(
             `Component type "${type}" definition is missing defaultProps.`
         );
-        definition.defaultProps = {};
+        const localDefaultProps = {};
     }
 
     const componentId = `${type.toLowerCase()}${id}`;
@@ -61,7 +61,7 @@ export const createComponent = (type, id, position = { x: 50, y: 50 }) => {
         y: position.y,
         parentId: null,
         componentId: componentId,
-        ...definition.defaultProps,
+        ...(definition.defaultProps || localDefaultProps),
     };
 };
 
