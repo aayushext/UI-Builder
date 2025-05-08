@@ -497,7 +497,6 @@ const PySideFrame = ({
 }) => {
     const lineW = lineWidth !== undefined ? Math.max(0, lineWidth) : 1;
     const midLineW = midLineWidth !== undefined ? Math.max(0, midLineWidth) : 0;
-    const totalWidth = lineW + midLineW;
 
     const componentRootStyle = {
         backgroundColor:
@@ -537,11 +536,6 @@ const PySideFrame = ({
         );
     }
 
-    const isContainerShape =
-        frameShape === "Box" ||
-        frameShape === "Panel" ||
-        frameShape === "WinPanel" ||
-        frameShape === "StyledPanel";
     return (
         <div
             className="w-full h-full relative motion-scale-in-[1.5] motion-opacity-in-[0%] motion-duration-[250ms] motion-ease-spring-bouncier"
