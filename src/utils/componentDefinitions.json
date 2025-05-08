@@ -183,6 +183,15 @@
                     "label": "Component ID"
                 },
                 {
+                    "name": "orientation",
+                    "type": "select",
+                    "label": "Orientation",
+                    "options": [
+                        { "value": "horizontal", "label": "Horizontal" },
+                        { "value": "vertical", "label": "Vertical" }
+                    ]
+                },
+                {
                     "name": "minimum",
                     "type": "number",
                     "label": "Minimum",
@@ -201,13 +210,11 @@
                     "step": 1
                 },
                 {
-                    "name": "orientation",
-                    "type": "select",
-                    "label": "Orientation",
-                    "options": [
-                        { "value": "horizontal", "label": "Horizontal" },
-                        { "value": "vertical", "label": "Vertical" }
-                    ]
+                    "name": "trackWidth",
+                    "type": "number",
+                    "label": "Track Width",
+                    "min": 1,
+                    "step": 1
                 },
                 {
                     "name": "sliderColor",
@@ -218,13 +225,6 @@
                     "name": "trackColor",
                     "type": "color",
                     "label": "Track Color"
-                },
-                {
-                    "name": "trackWidth",
-                    "type": "number",
-                    "label": "Track Width",
-                    "min": 1,
-                    "step": 1
                 },
                 {
                     "name": "backgroundColor",

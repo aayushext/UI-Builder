@@ -10,14 +10,21 @@ const PySideSlider = ({
     orientation = "horizontal",
     sliderColor = "#3b82f6",
     backgroundColor = "#000000ff",
+    trackWidth: trackThicknessProp = 8, // Use the trackWidth prop for thickness
 }) => {
     const isHorizontal = orientation === "horizontal";
-    const trackHeight = isHorizontal
-        ? Math.max(Math.min(height / 3, 12), 8)
-        : height - 20;
+
+    // Effective thickness for rendering, ensuring a minimum
+    const trackThickness = Math.max(trackThicknessProp, 2);
+
+    // Calculate dimensions for the track div element based on orientation and effective thickness
     const trackWidth = isHorizontal
-        ? Math.max(width - 20, 8)
-        : Math.min(width / 3, 8);
+        ? Math.max(width - 20, 8) // Length of horizontal track (component width - 20px padding)
+        : trackThickness; // Thickness of vertical track
+
+    const trackHeight = isHorizontal
+        ? trackThickness // Thickness of horizontal track
+        : Math.max(height - 20, 8); // Length of vertical track (component height - 20px padding)
 
     const range = maximum - minimum;
     const percentage = range > 0 ? (value - minimum) / range : 0;
@@ -26,9 +33,12 @@ const PySideSlider = ({
         32
     );
 
+    // Thumb position calculation needs the *length* of the track element
+    const trackLength = isHorizontal ? trackWidth : trackHeight;
+
     const thumbPosition = isHorizontal
-        ? percentage * (width - 20 - thumbSize) + 10
-        : (1 - percentage) * (height - 20 - thumbSize) + 10;
+        ? percentage * (trackLength - thumbSize) + 10
+        : (1 - percentage) * (trackLength - thumbSize) + 10;
 
     return (
         <div
@@ -58,7 +68,7 @@ const PySideSlider = ({
                         : `${width / 2 - trackWidth / 2}px`,
                     top: isHorizontal
                         ? `${height / 2 - trackHeight / 2}px`
-                        : `${height - 10 - percentage * trackHeight}px`,
+                        : `${10 + (1 - percentage) * trackHeight}px`, // Adjusted for vertical fill from bottom
                     width: isHorizontal
                         ? `${percentage * trackWidth}px`
                         : trackWidth,
@@ -76,7 +86,7 @@ const PySideSlider = ({
                     left: isHorizontal ? thumbPosition : `${width / 2}px`,
                     top: isHorizontal ? `${height / 2}px` : thumbPosition,
                     width: thumbSize,
-                    height: thumbSize,
+                    height: thumbSize + trackHeight,
                     backgroundColor: sliderColor,
                 }}
             />
