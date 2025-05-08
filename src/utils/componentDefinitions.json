@@ -64,16 +64,16 @@
                     "label": "Hover Color"
                 },
                 {
-                    "name": "borderColor",
-                    "type": "color",
-                    "label": "Border Color"
-                },
-                {
                     "name": "borderWidth",
                     "type": "number",
                     "label": "Border Width",
                     "min": 0,
                     "step": 1
+                },
+                {
+                    "name": "borderColor",
+                    "type": "color",
+                    "label": "Border Color"
                 },
                 {
                     "name": "hoverBorderColor",
@@ -247,6 +247,7 @@
                 "midLineWidth": 0,
                 "borderColor": "#808080",
                 "borderWidth": 1,
+                "radius": 0,
                 "useCustomBorder": false
             },
             "properties": [
@@ -314,6 +315,13 @@
                     "label": "Border Width",
                     "min": 0,
                     "step": 1
+                },
+                {
+                    "name": "radius",
+                    "type": "number",
+                    "label": "Radius",
+                    "min": 0,
+                    "hasMaxRadius": true
                 }
             ]
         }

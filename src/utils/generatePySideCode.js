@@ -286,6 +286,7 @@ ${indent}      <string>QFrame#${compName} {
 ${indent}          background-color: rgba(${hexToRgba(
             component.backgroundColor
         )});
+${indent}          border-radius: ${component.radius}px;        
 ${borderStyle ? borderStyle + "\n" : ""}${indent}      }</string>
 ${indent}  </property>\n`;
         xml += `${indent}  <property name="frameShape">

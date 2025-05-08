@@ -296,6 +296,12 @@ const parseComponentWidget = (
                 component.backgroundColor = parseRgba(
                     `rgba(${bgColorMatch[1]})`
                 );
+
+            const radiusMatch = componentStyle.textContent.match(
+                /border-radius:\s*(\d+)px/
+            );
+            if (radiusMatch) component.radius = parseInt(radiusMatch[1]);
+
             const borderMatch = componentStyle.textContent.match(
                 /border:\s*(\d+)px solid rgba\(([^)]+)\)/
             );
@@ -307,6 +313,7 @@ const parseComponentWidget = (
                 component.useCustomBorder = false;
             }
         }
+
         const shapeProp = componentWidget.querySelector(
             ":scope > property[name='frameShape'] > enum"
         );

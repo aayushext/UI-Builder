@@ -489,6 +489,7 @@ const PySideFrame = ({
     midLineWidth,
     borderColor,
     borderWidth,
+    radius,
     useCustomBorder,
     width,
     height,
@@ -508,6 +509,7 @@ const PySideFrame = ({
         width: "100%",
         position: "relative",
         overflow: "hidden",
+        borderRadius: radius ? `${radius}px` : "0px",
     };
 
     if (useCustomBorder) {

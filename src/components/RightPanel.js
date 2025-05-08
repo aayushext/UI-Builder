@@ -411,7 +411,8 @@ const RightPanel = () => {
                         if (
                             selectedComponent.type === "PySideFrame" &&
                             (property.name === "borderColor" ||
-                                property.name === "borderWidth") &&
+                                property.name === "borderWidth" ||
+                                property.name === "radius") &&
                             !selectedComponent.useCustomBorder
                         ) {
                             return null;

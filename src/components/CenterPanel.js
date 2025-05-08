@@ -110,6 +110,7 @@ const renderComponent = (
                     midLineWidth={component.midLineWidth}
                     borderColor={component.borderColor}
                     borderWidth={component.borderWidth}
+                    radius={component.radius}
                     useCustomBorder={component.useCustomBorder}
                     width={component.width}
                     height={component.height}
