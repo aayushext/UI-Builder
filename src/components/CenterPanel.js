@@ -6,7 +6,7 @@ import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
 import PySideFrame from "@/components/pyside-components/PySideFrame";
 import { FaPlus, FaMinus } from "react-icons/fa6";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const renderComponent = (
     component,

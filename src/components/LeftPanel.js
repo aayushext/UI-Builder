@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { getComponentDefinitions } from "../utils/componentLoader";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const LeftPanel = ({ centerPanelDimensions }) => {
     const fileInputRef = useRef(null);

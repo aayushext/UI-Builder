@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { getComponentDefinitionByType } from "../utils/componentLoader";
 import CustomColorPicker from "./CustomColorPicker";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const PropertyEditor = ({ property, value, onChange, component }) => {
     const maxRadius = property.hasMaxRadius

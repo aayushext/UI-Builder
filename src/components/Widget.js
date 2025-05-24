@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
     <div
