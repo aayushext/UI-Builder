@@ -5,6 +5,7 @@ import { IconContext } from "react-icons";
 import { FaCopy } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { useAppStore } from "../store/rootStore";
+import { getAbsolutePosition } from "../utils/positionUtils";
 
 const WidgetToolbar = ({ id, onDuplicate, onDelete }) => (
     <div
@@ -77,8 +78,7 @@ const Widget = ({
         const screen = screens[currentScreenIndex];
         if (!screen) return null;
         const allComponents = screen.components;
-        const _getAbsolutePosition =
-            useAppStore.getState()._getAbsolutePosition;
+        // const _getAbsolutePosition = useAppStore.getState()._getAbsolutePosition; // Removed
         const frames = allComponents.filter(
             (c) => c.type === "PySideFrame" && c.id !== id
         );
@@ -99,7 +99,7 @@ const Widget = ({
 
         let potentialParentFrameId = null;
         for (const frame of frames) {
-            const frameAbsPos = _getAbsolutePosition(frame.id, allComponents); // These are unscaled
+            const frameAbsPos = getAbsolutePosition(frame.id, allComponents); // These are unscaled
             if (
                 unscaledMouseX >= frameAbsPos.x &&
                 unscaledMouseX <= frameAbsPos.x + frame.width &&
@@ -237,21 +237,5 @@ Widget.propTypes = {
     zoomLevel: PropTypes.number,
     isDropTarget: PropTypes.bool,
 };
-
-if (
-    typeof window !== "undefined" &&
-    !document.getElementById("widget-blink-overlay-style")
-) {
-    const style = document.createElement("style");
-    style.id = "widget-blink-overlay-style";
-    style.innerHTML = `
-    @keyframes blink-overlay {
-        0% { opacity: 1; }
-        50% { opacity: 0.4; }
-        100% { opacity: 1; }
-    }
-    `;
-    document.head.appendChild(style);
-}
 
 export default Widget;

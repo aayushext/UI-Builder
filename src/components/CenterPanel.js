@@ -258,19 +258,3 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
 CenterPanel.displayName = "CenterPanel";
 
 export default CenterPanel;
-
-if (
-    typeof window !== "undefined" &&
-    !document.getElementById("widget-blink-overlay-style")
-) {
-    const style = document.createElement("style");
-    style.id = "widget-blink-overlay-style";
-    style.innerHTML = `
-    @keyframes blink-overlay {
-        0% { opacity: 1; }
-        50% { opacity: 0.4; }
-        100% { opacity: 1; }
-    }
-    `;
-    document.head.appendChild(style);
-}

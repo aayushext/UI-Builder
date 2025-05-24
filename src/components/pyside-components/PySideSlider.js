@@ -10,12 +10,12 @@ const PySideSlider = ({
     orientation = "horizontal",
     sliderColor = "#3b82f6",
     backgroundColor = "#000000ff",
-    trackWidth: trackThicknessProp = 8, // Use the trackWidth prop for thickness
+    trackWidth = 8,
 }) => {
     const isHorizontal = orientation === "horizontal";
 
     // Effective thickness for rendering, ensuring a minimum
-    const trackThickness = Math.max(trackThicknessProp, 2);
+    const trackThickness = Math.max(trackWidth, 2);
 
     // Calculate dimensions for the track div element based on orientation and effective thickness
     const trackWidth = isHorizontal
@@ -103,6 +103,7 @@ PySideSlider.propTypes = {
     orientation: PropTypes.oneOf(["horizontal", "vertical"]),
     sliderColor: PropTypes.string,
     backgroundColor: PropTypes.string,
+    trackWidth: PropTypes.number,
 };
 
 export default PySideSlider;
