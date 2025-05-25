@@ -1,6 +1,59 @@
 import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { hexToRgb, rgbToHex, adjustColor } from "../../utils/colorUtils";
+
+/**
+ * Converts a hex color string to an RGB object.
+ * @param {string} hex - The hex color string.
+ * @returns {{r: number, g: number, b: number}|null} The RGB object or null if invalid.
+ */
+const hexToRgb = (hex) => {
+    if (!hex) return null;
+    hex = hex.replace("#", "");
+    let r, g, b;
+    if (hex.length === 3) {
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+    } else if (hex.length === 6 || hex.length === 8) {
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+    } else {
+        return null;
+    }
+    return { r, g, b };
+};
+
+/**
+ * Converts an RGB object to a hex color string.
+ * @param {{r: number, g: number, b: number}} rgb - The RGB object.
+ * @returns {string} The hex color string.
+ */
+const rgbToHex = ({ r, g, b }) =>
+    "#" +
+    [r, g, b]
+        .map((c) => {
+            const hex = Math.round(c).toString(16);
+            return hex.length === 1 ? "0" + hex : hex;
+        })
+        .join("");
+
+/**
+ * Adjusts color brightness by a percentage.
+ * @param {string} hex - The hex color string.
+ * @param {number} percent - The percentage to adjust.
+ * @returns {string} The adjusted hex color string.
+ */
+const adjustColor = (hex, percent) => {
+    const rgb = hexToRgb(hex);
+    if (!rgb) return hex;
+    const factor = 1 + percent / 100;
+    return rgbToHex({
+        r: Math.max(0, Math.min(255, rgb.r * factor)),
+        g: Math.max(0, Math.min(255, rgb.g * factor)),
+        b: Math.max(0, Math.min(255, rgb.b * factor)),
+    });
+};
 
 /**
  * Lightens a color by a percentage.
