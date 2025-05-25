@@ -241,33 +241,30 @@ ${indent}    ${
                 : `height: ${component.trackWidth ?? 8}px; margin: 4px 0;`
         }
 ${indent}}
+${indent}/* Filled Track */
+${indent}QSlider::sub-page:${component.orientation ?? "horizontal"} {
+${indent}    background: rgba(${hexToRgba(component.filledTrackColor)});
+${indent}    border-radius: ${Math.round((component.trackWidth ?? 8) / 2)}px;
+${indent}}
 ${indent}/* Handle (Thumb) */
 ${indent}QSlider::handle:${component.orientation ?? "horizontal"} {
-${indent}    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(${hexToRgba(
-            component.sliderColor
-        )}), stop:1 rgba(${hexToRgba(component.sliderColor, 0.8)})); /* Gradient */
+${indent}    background: rgba(${hexToRgba(component.thumbColor)});
 ${indent}    border: 1px solid rgba(50, 50, 50, 1);
-${indent}    width: 18px;  /* Slightly larger handle */
-${indent}    height: 18px;
+${indent}    width: ${component.thumbSize ?? 18}px;
+${indent}    height: ${component.thumbSize ?? 18}px;
 ${indent}    ${
             component.orientation === "vertical"
                 ? "margin: 0 -5px;"
                 : "margin: -5px 0;"
         }
-${indent}    border-radius: 9px; /* Fully rounded */
+${indent}    border-radius: ${(component.thumbSize ?? 18) / 2}px;
 ${indent}}
 ${indent}/* Handle Hover/Pressed States (Optional) */
 ${indent}QSlider::handle:${component.orientation ?? "horizontal"}:hover {
-${indent}    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(${hexToRgba(
-            component.sliderColor,
-            1.1
-        )}), stop:1 rgba(${hexToRgba(component.sliderColor, 0.9)}));
+${indent}    background: rgba(${hexToRgba(component.thumbColor)});
 ${indent}}
 ${indent}QSlider::handle:${component.orientation ?? "horizontal"}:pressed {
-${indent}    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(${hexToRgba(
-            component.sliderColor,
-            0.8
-        )}), stop:1 rgba(${hexToRgba(component.sliderColor, 0.7)}));
+${indent}    background: rgba(${hexToRgba(component.thumbColor)});
 ${indent}}
 ${indent}    </string>
 ${indent}  </property>\n`;
@@ -388,7 +385,7 @@ export const generateQtUiFile = (screens, currentScreenIndex) => {
     });
 
     uiCode += `    <property name="currentIndex">
-     <number>${currentScreenIndex}</number>
+     <number>0</number>
     </property>
    </widget>
   </widget>

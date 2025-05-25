@@ -172,8 +172,10 @@
                 "maximum": 100,
                 "value": 50,
                 "backgroundColor": "#f0f0f0",
-                "sliderColor": "#3b82f6",
                 "trackColor": "#c8c8c8",
+                "filledTrackColor": "#3b82f6",
+                "thumbColor": "#3b82f6",
+                "thumbSize": 18,
                 "trackWidth": 8
             },
             "properties": [
@@ -217,14 +219,27 @@
                     "step": 1
                 },
                 {
-                    "name": "sliderColor",
-                    "type": "color",
-                    "label": "Slider Color"
-                },
-                {
                     "name": "trackColor",
                     "type": "color",
                     "label": "Track Color"
+                },
+                {
+                    "name": "filledTrackColor",
+                    "type": "color",
+                    "label": "Filled Track Color"
+                },
+                {
+                    "name": "thumbColor",
+                    "type": "color",
+                    "label": "Thumb Color"
+                },
+                {
+                    "name": "thumbSize",
+                    "type": "number",
+                    "label": "Thumb Size",
+                    "min": 8,
+                    "max": 64,
+                    "step": 1
                 },
                 {
                     "name": "backgroundColor",

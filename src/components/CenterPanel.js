@@ -94,9 +94,11 @@ const renderComponent = (
                     maximum={component.maximum}
                     value={component.value}
                     orientation={component.orientation}
-                    sliderColor={component.sliderColor}
                     backgroundColor={component.backgroundColor}
                     trackColor={component.trackColor}
+                    filledTrackColor={component.filledTrackColor}
+                    thumbColor={component.thumbColor}
+                    thumbSize={component.thumbSize}
                     trackWidth={component.trackWidth}
                 />
             )}

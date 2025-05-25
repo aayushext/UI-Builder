@@ -253,13 +253,6 @@ const parseComponentWidget = (
                 : "horizontal";
 
         if (componentStyle) {
-            const handleColorMatch = componentStyle.textContent.match(
-                /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/
-            );
-            if (handleColorMatch)
-                component.sliderColor = parseRgba(
-                    `rgba(${handleColorMatch[1]})`
-                );
             const bgColorMatch = componentStyle.textContent.match(
                 /QSlider\s*{[^}]*background-color:\s*rgba\(([^)]+)\)/
             );
@@ -272,6 +265,37 @@ const parseComponentWidget = (
             );
             if (trackColorMatch)
                 component.trackColor = parseRgba(`rgba(${trackColorMatch[1]})`);
+
+            // Filled track color
+            const filledTrackColorMatch = componentStyle.textContent.match(
+                /QSlider::sub-page[^}]*background:\s*rgba\(([^)]+)\)/
+            );
+            if (filledTrackColorMatch)
+                component.filledTrackColor = parseRgba(
+                    `rgba(${filledTrackColorMatch[1]})`
+                );
+
+            // Thumb color
+            const thumbColorMatch = componentStyle.textContent.match(
+                /QSlider::handle[^{]*{[^}]*background:\s*rgba\(([^)]+)\)/
+            );
+            if (thumbColorMatch)
+                component.thumbColor = parseRgba(`rgba(${thumbColorMatch[1]})`);
+
+            // Thumb size
+            const thumbSizeMatch = componentStyle.textContent.match(
+                /QSlider::handle:[^}]*\{\s*[^}]*width:\s*(\d+)px;[^}]*height:\s*(\d+)px;/
+            );
+            if (thumbSizeMatch) {
+                component.thumbSize = parseInt(thumbSizeMatch[1]);
+            } else {
+                const thumbWidthMatch = componentStyle.textContent.match(
+                    /QSlider::handle:[^}]*\{\s*[^}]*width:\s*(\d+)px;/
+                );
+                if (thumbWidthMatch) {
+                    component.thumbSize = parseInt(thumbWidthMatch[1]);
+                }
+            }
 
             const trackWidthMatch = componentStyle.textContent.match(
                 /QSlider::groove:horizontal\s*{[^}]*height:\s*(\d+)px/
@@ -478,9 +502,11 @@ const setDefaultProperties = (component) => {
         component.maximum = component.maximum ?? 100;
         component.value = component.value ?? 50;
         component.orientation = component.orientation ?? "horizontal";
-        component.sliderColor = component.sliderColor ?? "#3b82f6";
         component.backgroundColor = component.backgroundColor ?? "#f0f0f0";
         component.trackColor = component.trackColor ?? "#c8c8c8";
+        component.filledTrackColor = component.filledTrackColor ?? "#3b82f6";
+        component.thumbColor = component.thumbColor ?? "#3b82f6";
+        component.thumbSize = component.thumbSize ?? 18;
         component.trackWidth = component.trackWidth ?? 8;
     } else if (component.type === "PySideFrame") {
         component.backgroundColor = component.backgroundColor ?? "#e0e0e0";
