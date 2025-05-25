@@ -6,7 +6,7 @@ import PySideLabel from "@/components/pyside-components/PySideLabel";
 import PySideSlider from "@/components/pyside-components/PySideSlider";
 import PySideFrame from "@/components/pyside-components/PySideFrame";
 import { FaPlus, FaMinus } from "react-icons/fa6";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const renderComponent = (
     component,
@@ -260,19 +260,3 @@ const CenterPanel = React.forwardRef(({ centerPanelDimensions }, ref) => {
 CenterPanel.displayName = "CenterPanel";
 
 export default CenterPanel;
-
-if (
-    typeof window !== "undefined" &&
-    !document.getElementById("widget-blink-overlay-style")
-) {
-    const style = document.createElement("style");
-    style.id = "widget-blink-overlay-style";
-    style.innerHTML = `
-    @keyframes blink-overlay {
-        0% { opacity: 1; }
-        50% { opacity: 0.4; }
-        100% { opacity: 1; }
-    }
-    `;
-    document.head.appendChild(style);
-}

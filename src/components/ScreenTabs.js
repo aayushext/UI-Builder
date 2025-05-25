@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { IconContext } from "react-icons";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const ScreenTabs = () => {
     const screens = useAppStore((s) => s.screens);
