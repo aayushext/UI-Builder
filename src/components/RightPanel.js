@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { getComponentDefinitionByType } from "../utils/componentLoader";
 import CustomColorPicker from "./CustomColorPicker";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 const PropertyEditor = ({ property, value, onChange, component }) => {
     const maxRadius = property.hasMaxRadius
@@ -135,7 +135,9 @@ const RightPanel = () => {
         setScreenCustomId(currentScreen?.customId || "screen_0");
     }, [currentScreen]);
 
-    // --- Hide lineWidth for HLine/VLine + Plain, and force it to 0 ---
+    // Effect to ensure lineWidth is 0 for HLine/VLine frames with Plain shadow,
+    // as these specific configurations should not have a visible line width
+    // controlled by the lineWidth property directly in the property panel.
     useEffect(() => {
         if (
             selectedComponent &&
@@ -157,7 +159,9 @@ const RightPanel = () => {
         updateComponentProps,
     ]);
 
-    // Effect to adjust PySideFrame properties based on shape/shadow
+    // Effect to enforce specific lineWidth and midLineWidth for certain frameShapes
+    // (e.g., NoFrame, WinPanel) or specific combinations (HLine/VLine with Plain shadow).
+    // This ensures visual consistency and correct behavior based on Qt's rendering for these frame types.
     useEffect(() => {
         if (selectedComponent && selectedComponent.type === "PySideFrame") {
             const { id, frameShape, lineWidth, midLineWidth } =

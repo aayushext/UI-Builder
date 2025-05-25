@@ -4,7 +4,7 @@ import LeftPanel from "../components/LeftPanel";
 import CenterPanel from "../components/CenterPanel";
 import RightPanel from "../components/RightPanel";
 import ScreenTabs from "../components/ScreenTabs";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../store/rootStore";
 
 export default function Home() {
     const centerPanelRef = useRef(null);
