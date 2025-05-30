@@ -1,10 +1,13 @@
 {
+    "_readme": "This file defines the properties and XML export behavior for PySide components used in the application.\n\nEach component definition object in the 'components' array has the following main keys:\n\n- `type`: (String) A unique identifier for the component type (e.g., 'PySideButton', 'PySideCheckBox').\n- `displayName`: (String) The user-friendly name that appears in the component palette (e.g., 'Button', 'Checkbox').\n- `jsComponent`: (String) The name of the corresponding React component file (without .js extension) located in `src/components/pyside-components/`. This is used by `componentLoader.js` to dynamically render the preview.\n- `icon`: (String, Optional) An identifier for an icon to be displayed in the UI, often matching a key in an icon library.\n- `defaultProps`: (Object) Default values for the component's properties when a new instance is created. This includes visual properties (width, height, colors, text) and behavioral properties (checked, value, orientation).\n    - `componentId`: (String) A default unique ID for the component. It's good practice for this to be unique among default components.\n- `properties`: (Array) An array of objects defining the properties that will be editable in the right-hand property panel. Each object includes:\n    - `name`: (String) The internal property name (must match a key in `defaultProps`).\n    - `type`: (String) The input type for the editor (e.g., 'text', 'number', 'color', 'boolean', 'select').\n    - `label`: (String) The user-friendly label for the property editor.\n    - Additional fields based on `type`: `step` for numbers, `options` for select (array of {value, label}), `min`, `max`, `hasMaxRadius`.\n\n- `qtXml`: (Object) Defines how the component is translated into Qt Designer's .ui XML format. This is the core of the data-driven XML generation.\n    - `class`: (String) The Qt widget class name (e.g., 'QPushButton', 'QLabel', 'QCheckBox').\n    - `nameProperty`: (String) The component property from `defaultProps` that should be used for the widget's 'name' attribute in the XML (e.g., 'componentId').\n    - `geometry`: (Boolean) If true, standard geometry XML (`<property name=\"geometry\"><rect>...</rect></property>`) will be generated using the component's x, y, width, and height.\n    - `directProperties`: (Object, Optional) For Qt properties that are set directly on the widget element using specific Qt types, not via stylesheets or the generic propertiesMap. The key is the component property name, and the value is an object defining its Qt mapping:\n        - `type`: (String) 'enum' for Qt enumerations, 'number' for numerical values.\n        - `prefix`: (String, Optional, for type: 'enum') A prefix for the enum value (e.g., 'QFrame::' for shape and shadow, 'Qt::' for orientation).\n        - `map`: (Object, Optional, for type: 'enum') Maps component prop values to specific Qt enum strings if they differ (e.g., { 'horizontal': 'Qt::Horizontal' }). If not provided, the component's value is used directly (after prefixing, if any).\n    - `propertiesMap`: (Object, Optional) For Qt properties that are set via the `<property name=\"...\">...</property>` syntax. The key is the component property name from `defaultProps`, and the value is an object defining its Qt mapping:\n        - `type`: (String, always 'property' for this map, but kept for clarity/future use).\n        - `name`: (String) The 'name' attribute of the Qt `<property>` tag (e.g., 'text', 'checked', 'alignment').\n        - `isString`: (Boolean, Optional) If true, the value is wrapped in `<string>...</string>`. XML characters are escaped.\n        - `isBoolean`: (Boolean, Optional) If true, the value is treated as a boolean for Qt (e.g., for 'checked' property, results in `<bool>true</bool>` or `<bool>false</bool>`).\n        - `isSet`: (Boolean, Optional) If true, the value is wrapped in `<set>...</set>` (used for alignment flags).\n        - `valueMap`: (Object, Optional) Maps component prop values to specific Qt values if they differ (e.g., for `textAlign` mapping to `Qt::AlignLeft|Qt::AlignVCenter`).\n        - `defaultValue`: (String, Optional) A fallback Qt value if the component's value is not found in `valueMap`.\n        (Note: If none of `isString`, `isBoolean`, `isSet` are true, it often defaults to `<number>` or a direct value insertion, but ensure the generation script handles this.)\n    - `styleSheet`: (Object, Optional) Defines the Qt Stylesheet generation for the widget.\n        - `selector`: (String) The base CSS selector for the widget (e.g., 'QPushButton', 'QLabel', 'QFrame#${componentId}').\n            - `${componentId}`: Placeholder that will be replaced with the actual component's ID if present, useful for instance-specific styling (especially for QFrame).\n            - `${orientation}`: Placeholder for properties like slider orientation.\n        - `baseProperties`: (Object, Optional, typically for QSlider) Properties applied to the base selector without any specific ID. Key is component prop name, value is CSS rule template.\n        - `properties`: (Object) CSS rules applied to the main `selector`. Each key is a component property name (from `defaultProps`), and the value is either:\n            - A string template for the CSS rule: e.g., `'color: rgba(${hexToRgba(value)});'` where `${value}` is replaced by the component's property value (after `hexToRgba` if applicable).\n            - An object for more complex/static rules:\n                - `_value`: A static value to be used directly in the template (e.g., `_value: 'Arial'` for `font-family`).\n                - `_valueFrom`: (Array of Strings) An array of component property names. Values from these props are gathered and passed to the template. The template can then use `${propName}` for each.\n                - `template`: (String) The CSS rule template, using `${value}` (if `_value` is used) or specific prop names (if `_valueFrom` is used).\n                - Example: `\"borderStyle\": { \"_valueFrom\": [\"borderWidth\", \"borderColor\"], \"template\": \"border: ${borderWidth}px solid rgba(${hexToRgba(borderColor)});\"}`\n                - A key starting with `_static_` (e.g. `_static_border`) will have its string value directly inserted as a CSS rule.\n        - `conditionalProperties`: (Array of Objects, Optional) Allows applying styles only if a condition is met. Each object:\n            - `condition`: (String) A JavaScript-like condition string evaluated against component properties (e.g., `'useCustomBorder === true'`).\n            - `properties`: (Object) CSS rules to apply if the condition is true, structured like the main `styleSheet.properties`.\n        - `states`: (Object, Optional) Defines styles for different widget states (e.g., `:hover`, `:pressed`). Each key is the state name (e.g., 'hover'), and the value is an object:\n            - `selectorSuffix`: (String) The CSS suffix for the state (e.g., ':hover', ':pressed').\n            - `properties`: (Object) CSS rules for this state, structured like `styleSheet.properties`.\n        - `subControls`: (Array of Objects, Optional, typically for QSlider) Defines styles for widget sub-controls (e.g., `::groove`, `::handle`). Each object:\n            - `name`: (String) A descriptive name for the sub-control (e.g., 'groove').\n            - `selectorSuffix`: (String) The CSS suffix for the sub-control, which can include placeholders like `${orientation}` (e.g., '::groove:${orientation}').\n            - `properties`: (Object) CSS rules for this sub-control, structured like `styleSheet.properties`.\n- `canHaveChildren`: (Boolean, Optional) If true, allows this component type to have child components (used by `generateComponentXml` to recurse). Typically true for container types like QFrame.\n\nTo add a new component:\n1. Define its React component in `src/components/pyside-components/`.\n2. Add its definition object to the `components` array below, following the structure described here.\n3. Import and map the React component in `src/utils/componentLoader.js`.\n",
     "components": [
         {
             "type": "PySideButton",
             "displayName": "Button",
             "icon": "button-icon",
+            "jsComponent": "PySideButton",
             "defaultProps": {
+                "componentId": "button_1",
                 "width": 200,
                 "height": 100,
                 "text": "Button",
@@ -20,78 +23,62 @@
                 "pressedBorderColor": "#000000ff"
             },
             "properties": [
-                {
-                    "name": "componentId",
-                    "type": "text",
-                    "label": "Component ID"
+                { "name": "componentId", "type": "text", "label": "Component ID" },
+                { "name": "text", "type": "text", "label": "Text" },
+                { "name": "fontSize", "type": "number", "label": "Font Size", "step": 1 },
+                { "name": "textColor", "type": "color", "label": "Text Color" },
+                { "name": "radius", "type": "number", "label": "Radius", "min": 0, "hasMaxRadius": true },
+                { "name": "backgroundColor", "type": "color", "label": "Background Color" },
+                { "name": "pressedColor", "type": "color", "label": "Pressed Color" },
+                { "name": "hoverColor", "type": "color", "label": "Hover Color" },
+                { "name": "borderWidth", "type": "number", "label": "Border Width", "min": 0, "step": 1 },
+                { "name": "borderColor", "type": "color", "label": "Border Color" },
+                { "name": "hoverBorderColor", "type": "color", "label": "Hover Border Color" },
+                { "name": "pressedBorderColor", "type": "color", "label": "Pressed Border Color" }
+            ],
+            "qtXml": {
+                "class": "QPushButton",
+                "nameProperty": "componentId",
+                "geometry": true,
+                "propertiesMap": {
+                    "text": { "type": "property", "name": "text", "isString": true }
                 },
-                {
-                    "name": "text",
-                    "type": "text",
-                    "label": "Text"
-                },
-                {
-                    "name": "fontSize",
-                    "type": "number",
-                    "label": "Font Size",
-                    "step": 1
-                },
-                {
-                    "name": "textColor",
-                    "type": "color",
-                    "label": "Text Color"
-                },
-                {
-                    "name": "radius",
-                    "type": "number",
-                    "label": "Radius",
-                    "min": 0,
-                    "hasMaxRadius": true
-                },
-                {
-                    "name": "backgroundColor",
-                    "type": "color",
-                    "label": "Background Color"
-                },
-                {
-                    "name": "pressedColor",
-                    "type": "color",
-                    "label": "Pressed Color"
-                },
-                {
-                    "name": "hoverColor",
-                    "type": "color",
-                    "label": "Hover Color"
-                },
-                {
-                    "name": "borderWidth",
-                    "type": "number",
-                    "label": "Border Width",
-                    "min": 0,
-                    "step": 1
-                },
-                {
-                    "name": "borderColor",
-                    "type": "color",
-                    "label": "Border Color"
-                },
-                {
-                    "name": "hoverBorderColor",
-                    "type": "color",
-                    "label": "Hover Border Color"
-                },
-                {
-                    "name": "pressedBorderColor",
-                    "type": "color",
-                    "label": "Pressed Border Color"
+                "styleSheet": {
+                    "selector": "QPushButton",
+                    "properties": {
+                        "textColor": "color: rgba(${hexToRgba(value)});",
+                        "backgroundColor": "background-color: rgba(${hexToRgba(value)});",
+                        "fontSize": "font-size: ${value}px;",
+                        "fontFamily": { "_value": "Arial", "template": "font-family: ${_value};" },
+                        "borderStyle": { "_valueFrom": ["borderWidth", "borderColor"], "template": "border: ${borderWidth}px solid rgba(${hexToRgba(borderColor)});"},
+                        "radius": "border-radius: ${value}px;"
+                    },
+                    "states": {
+                        "hover": {
+                            "selectorSuffix": ":hover",
+                            "properties": {
+                                "hoverColor": "background-color: rgba(${hexToRgba(value)});",
+                                "hoverBorderColor": "border-color: rgba(${hexToRgba(value)});"
+                            }
+                        },
+                        "pressed": {
+                            "selectorSuffix": ":pressed",
+                            "properties": {
+                                "pressedColor": "background-color: rgba(${hexToRgba(value)});",
+                                "pressedBorderColor": "border-color: rgba(${hexToRgba(value)});"
+                            }
+                        }
+                    }
                 }
-            ]
+            }
         },
         {
             "type": "PySideLabel",
             "displayName": "Label",
             "icon": "label-icon",
+            "jsComponent": "PySideLabel",
             "defaultProps": {
+                "componentId": "label_1",
                 "width": 150,
                 "height": 50,
                 "text": "Label",
@@ -104,70 +91,59 @@
                 "textAlign": "center"
             },
             "properties": [
-                {
-                    "name": "componentId",
-                    "type": "text",
-                    "label": "Component ID"
+                { "name": "componentId", "type": "text", "label": "Component ID" },
+                { "name": "text", "type": "text", "label": "Text" },
+                { "name": "fontSize", "type": "number", "label": "Font Size", "step": 1 },
+                { "name": "textColor", "type": "color", "label": "Text Color" },
+                { "name": "backgroundColor", "type": "color", "label": "Background Color" },
+                { "name": "borderColor", "type": "color", "label": "Border Color" },
+                { "name": "borderWidth", "type": "number", "label": "Border Width", "min": 0, "step": 1 },
+                { "name": "textAlign", "type": "select", "label": "Text Align", "options": [
+                    { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" }
+                ]},
+                { "name": "radius", "type": "number", "label": "Radius", "min": 0, "hasMaxRadius": true }
+            ],
+            "qtXml": {
+                "class": "QLabel",
+                "nameProperty": "componentId",
+                "geometry": true,
+                "propertiesMap": {
+                    "text": { "type": "property", "name": "text", "isString": true },
+                    "textAlign": {
+                        "type": "property",
+                        "name": "alignment",
+                        "isSet": true,
+                        "valueMap": {
+                            "left": "Qt::AlignLeft|Qt::AlignVCenter",
+                            "center": "Qt::AlignCenter|Qt::AlignVCenter",
+                            "right": "Qt::AlignRight|Qt::AlignVCenter"
+                        },
+                        "defaultValue": "Qt::AlignCenter|Qt::AlignVCenter"
+                    }
                 },
-                {
-                    "name": "text",
-                    "type": "text",
-                    "label": "Text"
-                },
-                {
-                    "name": "fontSize",
-                    "type": "number",
-                    "label": "Font Size",
-                    "step": 1
-                },
-                {
-                    "name": "textColor",
-                    "type": "color",
-                    "label": "Text Color"
-                },
-                {
-                    "name": "backgroundColor",
-                    "type": "color",
-                    "label": "Background Color"
-                },
-                {
-                    "name": "borderColor",
-                    "type": "color",
-                    "label": "Border Color"
-                },
-                {
-                    "name": "borderWidth",
-                    "type": "number",
-                    "label": "Border Width",
-                    "min": 0,
-                    "step": 1
-                },
-                {
-                    "name": "textAlign",
-                    "type": "select",
-                    "label": "Text Align",
-                    "options": [
-                        { "value": "left", "label": "Left" },
-                        { "value": "center", "label": "Center" },
-                        { "value": "right", "label": "Right" }
-                    ]
-                },
-                {
-                    "name": "radius",
-                    "type": "number",
-                    "label": "Radius",
-                    "min": 0,
-                    "hasMaxRadius": true
+                "styleSheet": {
+                    "selector": "QLabel",
+                    "properties": {
+                        "textColor": "color: rgba(${hexToRgba(value)});",
+                        "backgroundColor": "background-color: rgba(${hexToRgba(value)});",
+                        "fontSize": "font-size: ${value}px;",
+                        "fontFamily": { "_value": "Arial", "template": "font-family: ${_value};" },
+                        "borderStyle": { "_valueFrom": ["borderWidth", "borderColor"], "template": "border: ${borderWidth}px solid rgba(${hexToRgba(borderColor)});"},
+                        "radius": "border-radius: ${value}px;"
+                    }
                 }
-            ]
+            }
         },
         {
             "type": "PySideSlider",
             "displayName": "Slider",
             "icon": "slider-icon",
+            "jsComponent": "PySideSlider",
             "defaultProps": {
+                "componentId": "slider_1",
                 "width": 200,
                 "height": 30,
+                "orientation": "horizontal",
                 "minimum": 0,
                 "maximum": 100,
                 "value": 50,
@@ -179,80 +155,73 @@
                 "trackWidth": 8
             },
             "properties": [
-                {
-                    "name": "componentId",
-                    "type": "text",
-                    "label": "Component ID"
+                { "name": "componentId", "type": "text", "label": "Component ID" },
+                { "name": "orientation", "type": "select", "label": "Orientation", "options": [
+                    { "value": "horizontal", "label": "Horizontal" }, { "value": "vertical", "label": "Vertical" }
+                ]},
+                { "name": "minimum", "type": "number", "label": "Minimum", "step": 1 },
+                { "name": "maximum", "type": "number", "label": "Maximum", "step": 1 },
+                { "name": "value", "type": "number", "label": "Current Value", "step": 1 },
+                { "name": "trackWidth", "type": "number", "label": "Track Width", "min": 1, "step": 1 },
+                { "name": "trackColor", "type": "color", "label": "Track Color" },
+                { "name": "filledTrackColor", "type": "color", "label": "Filled Track Color" },
+                { "name": "thumbColor", "type": "color", "label": "Thumb Color" },
+                { "name": "thumbSize", "type": "number", "label": "Thumb Size", "min": 8, "max": 64, "step": 1 },
+                { "name": "backgroundColor", "type": "color", "label": "Background Color" }
+            ],
+            "qtXml": {
+                "class": "QSlider",
+                "nameProperty": "componentId",
+                "geometry": true,
+                "directProperties": {
+                    "orientation": { "type": "enum", "map": { "horizontal": "Qt::Horizontal", "vertical": "Qt::Vertical" } },
+                    "minimum": { "type": "number" },
+                    "maximum": { "type": "number" },
+                    "value": { "type": "number" }
                 },
-                {
-                    "name": "orientation",
-                    "type": "select",
-                    "label": "Orientation",
-                    "options": [
-                        { "value": "horizontal", "label": "Horizontal" },
-                        { "value": "vertical", "label": "Vertical" }
+                "styleSheet": {
+                    "selector": "QSlider",
+                    "baseProperties": { 
+                        "backgroundColor": "background-color: rgba(${hexToRgba(value)});"
+                    },
+                    "subControls": [ 
+                        {
+                            "name": "groove",
+                            "selectorSuffix": "::groove:${orientation}", 
+                            "properties": {
+                                "trackColor": "background: rgba(${hexToRgba(value)});",
+                                "trackWidth": { "_valueFrom": ["trackWidth", "orientation"], "template": "border-radius: ${Math.round(trackWidth / 2)}px; ${orientation === 'vertical' ? 'width' : 'height'}: ${trackWidth}px;" },
+                                "_static_border": "border: 1px solid rgba(150, 150, 150, 1);" 
+                            }
+                        },
+                        {
+                            "name": "sub-page", 
+                            "selectorSuffix": "::sub-page:${orientation}",
+                            "properties": {
+                                "filledTrackColor": "background: rgba(${hexToRgba(value)});",
+                                "trackWidth": { "_valueFrom": ["trackWidth"], "template": "border-radius: ${Math.round(trackWidth / 2)}px;"}
+                            }
+                        },
+                        {
+                            "name": "handle",
+                            "selectorSuffix": "::handle:${orientation}",
+                            "properties": {
+                                "thumbColor": "background: rgba(${hexToRgba(value)});",
+                                "thumbSize": { "_valueFrom": ["thumbSize", "orientation"], "template": "width: ${thumbSize}px; height: ${thumbSize}px; border-radius: ${thumbSize / 2}px; ${orientation === 'vertical' ? `margin: 0 -${thumbSize / 2 - (trackWidth ?? 8) / 2 - (thumbSize / 2 - (trackWidth ?? 8) / 2) / 2}px;` : `margin: -${thumbSize / 2 - (trackWidth ?? 8) / 2 - (thumbSize / 2 - (trackWidth ?? 8) / 2) / 2}px 0;`}"},
+                                "_static_border": "border: 1px solid rgba(50, 50, 50, 1);"
+                            }
+                        }
                     ]
-                },
-                {
-                    "name": "minimum",
-                    "type": "number",
-                    "label": "Minimum",
-                    "step": 1
-                },
-                {
-                    "name": "maximum",
-                    "type": "number",
-                    "label": "Maximum",
-                    "step": 1
-                },
-                {
-                    "name": "value",
-                    "type": "number",
-                    "label": "Current Value",
-                    "step": 1
-                },
-                {
-                    "name": "trackWidth",
-                    "type": "number",
-                    "label": "Track Width",
-                    "min": 1,
-                    "step": 1
-                },
-                {
-                    "name": "trackColor",
-                    "type": "color",
-                    "label": "Track Color"
-                },
-                {
-                    "name": "filledTrackColor",
-                    "type": "color",
-                    "label": "Filled Track Color"
-                },
-                {
-                    "name": "thumbColor",
-                    "type": "color",
-                    "label": "Thumb Color"
-                },
-                {
-                    "name": "thumbSize",
-                    "type": "number",
-                    "label": "Thumb Size",
-                    "min": 8,
-                    "max": 64,
-                    "step": 1
-                },
-                {
-                    "name": "backgroundColor",
-                    "type": "color",
-                    "label": "Background Color"
                 }
-            ]
+            }
         },
         {
             "type": "PySideFrame",
             "displayName": "Frame",
             "icon": "frame-icon",
+            "jsComponent": "PySideFrame",
             "defaultProps": {
+                "componentId": "frame_1",
                 "width": 300,
                 "height": 200,
                 "backgroundColor": "#e0e0e0",
@@ -266,79 +235,88 @@
                 "useCustomBorder": false
             },
             "properties": [
-                {
-                    "name": "componentId",
-                    "type": "text",
-                    "label": "Component ID"
+                { "name": "componentId", "type": "text", "label": "Component ID" },
+                { "name": "backgroundColor", "type": "color", "label": "Background Color" },
+                { "name": "frameShape", "type": "select", "label": "Frame Shape", "options": [
+                    { "value": "NoFrame", "label": "No Frame" }, { "value": "Box", "label": "Box" },
+                    { "value": "Panel", "label": "Panel" }, { "value": "StyledPanel", "label": "Styled Panel" },
+                    { "value": "HLine", "label": "Horizontal Line" }, { "value": "VLine", "label": "Vertical Line" },
+                    { "value": "WinPanel", "label": "Win Panel" }
+                ]},
+                { "name": "frameShadow", "type": "select", "label": "Frame Shadow", "options": [
+                    { "value": "Plain", "label": "Plain" }, { "value": "Raised", "label": "Raised" }, { "value": "Sunken", "label": "Sunken" }
+                ]},
+                { "name": "lineWidth", "type": "number", "label": "Line Width", "min": 0, "step": 1 },
+                { "name": "midLineWidth", "type": "number", "label": "Mid-Line Width", "min": 0, "step": 1 },
+                { "name": "useCustomBorder", "type": "boolean", "label": "Use Custom Border" },
+                { "name": "borderColor", "type": "color", "label": "Border Color" },
+                { "name": "borderWidth", "type": "number", "label": "Border Width", "min": 0, "step": 1 },
+                { "name": "radius", "type": "number", "label": "Radius", "min": 0, "hasMaxRadius": true }
+            ],
+            "qtXml": {
+                "class": "QFrame",
+                "nameProperty": "componentId",
+                "geometry": true,
+                "directProperties": {
+                    "frameShape": { "type": "enum", "prefix": "QFrame::" },
+                    "frameShadow": { "type": "enum", "prefix": "QFrame::" },
+                    "lineWidth": { "type": "number" },
+                    "midLineWidth": { "type": "number" }
                 },
-                {
-                    "name": "backgroundColor",
-                    "type": "color",
-                    "label": "Background Color"
-                },
-                {
-                    "name": "frameShape",
-                    "type": "select",
-                    "label": "Frame Shape",
-                    "options": [
-                        { "value": "NoFrame", "label": "No Frame" },
-                        { "value": "Box", "label": "Box" },
-                        { "value": "Panel", "label": "Panel" },
-                        { "value": "StyledPanel", "label": "Styled Panel" },
-                        { "value": "HLine", "label": "Horizontal Line" },
-                        { "value": "VLine", "label": "Vertical Line" },
-                        { "value": "WinPanel", "label": "Win Panel" }
+                "styleSheet": {
+                    "selector": "QFrame#${componentId}", 
+                    "properties": {
+                        "backgroundColor": "background-color: rgba(${hexToRgba(value)});",
+                        "radius": "border-radius: ${value}px;"
+                    },
+                    "conditionalProperties": [
+                        {
+                            "condition": "useCustomBorder === true",
+                            "properties": {
+                                "borderStyle": { "_valueFrom": ["borderWidth", "borderColor"], "template": "border: ${borderWidth}px solid rgba(${hexToRgba(borderColor)});"}
+                            }
+                        }
                     ]
-                },
-                {
-                    "name": "frameShadow",
-                    "type": "select",
-                    "label": "Frame Shadow",
-                    "options": [
-                        { "value": "Plain", "label": "Plain" },
-                        { "value": "Raised", "label": "Raised" },
-                        { "value": "Sunken", "label": "Sunken" }
-                    ]
-                },
-                {
-                    "name": "lineWidth",
-                    "type": "number",
-                    "label": "Line Width",
-                    "min": 0,
-                    "step": 1
-                },
-                {
-                    "name": "midLineWidth",
-                    "type": "number",
-                    "label": "Mid-Line Width",
-                    "min": 0,
-                    "step": 1
-                },
-                {
-                    "name": "useCustomBorder",
-                    "type": "boolean",
-                    "label": "Use Custom Border"
-                },
-                {
-                    "name": "borderColor",
-                    "type": "color",
-                    "label": "Border Color"
-                },
-                {
-                    "name": "borderWidth",
-                    "type": "number",
-                    "label": "Border Width",
-                    "min": 0,
-                    "step": 1
-                },
-                {
-                    "name": "radius",
-                    "type": "number",
-                    "label": "Radius",
-                    "min": 0,
-                    "hasMaxRadius": true
                 }
-            ]
+            }
+        },
+        {
+            "type": "PySideCheckBox",
+            "displayName": "Checkbox",
+            "jsComponent": "PySideCheckBox",
+            "defaultProps": {
+                "componentId": "checkbox_1",
+                "width": 150,
+                "height": 30,
+                "text": "Checkbox",
+                "fontSize": 14,
+                "textColor": "#000000",
+                "checked": false
+            },
+            "properties": [
+                { "name": "componentId", "type": "text", "label": "Component ID" },
+                { "name": "text", "type": "text", "label": "Text" },
+                { "name": "checked", "type": "boolean", "label": "Checked" },
+                { "name": "fontSize", "type": "number", "label": "Font Size", "step": 1 },
+                { "name": "textColor", "type": "color", "label": "Text Color" }
+            ],
+            "qtXml": {
+                "class": "QCheckBox",
+                "nameProperty": "componentId",
+                "geometry": true,
+                "propertiesMap": {
+                    "text": { "type": "property", "name": "text", "isString": true },
+                    "checked": { "type": "property", "name": "checked", "isBoolean": true }
+                },
+                "styleSheet": {
+                    "selector": "QCheckBox",
+                    "properties": {
+                        "textColor": "color: rgba(${hexToRgba(value)});",
+                        "fontSize": "font-size: ${value}px;",
+                        "_spacing": { "_value": 5, "template": "spacing: ${value}px;"} 
+                    }
+                }
+            }
         }
     ]
 }

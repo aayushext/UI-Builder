@@ -1,5 +1,38 @@
+/**
+ * @file componentLoader.js
+ * This file is responsible for loading component definitions from componentDefinitions.json,
+ * creating new component instances, and mapping component types to their corresponding
+ * React components for rendering in the UI.
+ */
 import PropTypes from "prop-types";
 import componentDefinitions from "@/utils/componentDefinitions.json";
+
+// Import React components
+// These are the actual React components used for previewing widgets in the center panel.
+import PySideButton from '../components/pyside-components/PySideButton';
+import PySideLabel from '../components/pyside-components/PySideLabel';
+import PySideSlider from '../components/pyside-components/PySideSlider';
+import PySideFrame from '../components/pyside-components/PySideFrame';
+import PySideCheckBox from '../components/pyside-components/PySideCheckBox'; // Import the new component
+// Placeholder for other existing components if any:
+// import ExistingComponent1 from '../components/pyside-components/ExistingComponent1';
+
+/**
+ * @const componentMap
+ * This object maps the `jsComponent` string names (defined in `componentDefinitions.json`)
+ * to the actual imported React component modules.
+ * When adding a new React component for widget preview, it must be imported here
+ * and added to this map.
+ */
+const componentMap = {
+  "PySideButton": PySideButton,
+  "PySideLabel": PySideLabel,
+  "PySideSlider": PySideSlider,
+  "PySideFrame": PySideFrame,
+  "PySideCheckBox": PySideCheckBox, // Add to map
+  // "ExistingComponent1": ExistingComponent1,
+  // New components will be added here
+};
 
 /**
  * Gets all component definitions.
@@ -77,4 +110,26 @@ createComponent.propTypes = {
         x: PropTypes.number,
         y: PropTypes.number,
     }),
+};
+
+/**
+ * Gets the React component constructor for a specific component type.
+ * This function uses the `jsComponent` field from the component's definition
+ * (fetched from `componentDefinitions.json`) to look up the actual React component
+ * in the `componentMap`.
+ * @param {string} type - The component type (e.g., 'PySideButton').
+ * @returns {React.ComponentType | null} The React component or null if not found.
+ */
+export const getReactComponentByType = (type) => {
+    const definition = getComponentDefinitionByType(type); 
+    const componentName = definition?.jsComponent;
+    if (componentName && componentMap[componentName]) {
+        return componentMap[componentName];
+    }
+    console.warn(`React component for type "${type}" (mapped to name "${componentName}") not found.`);
+    return null; // Or return a default placeholder React component
+};
+
+getReactComponentByType.propTypes = {
+    type: PropTypes.string.isRequired,
 };

@@ -1,10 +1,12 @@
 import React, { useMemo } from "react";
 import { IconContext } from "react-icons";
 import Widget from "./Widget";
-import PySideButton from "@/components/pyside-components/PySideButton";
-import PySideLabel from "@/components/pyside-components/PySideLabel";
-import PySideSlider from "@/components/pyside-components/PySideSlider";
-import PySideFrame from "@/components/pyside-components/PySideFrame";
+// Specific component imports are no longer needed here after refactor
+// import PySideButton from "@/components/pyside-components/PySideButton";
+// import PySideLabel from "@/components/pyside-components/PySideLabel";
+// import PySideSlider from "@/components/pyside-components/PySideSlider";
+// import PySideFrame from "@/components/pyside-components/PySideFrame";
+import { getReactComponentByType } from "@/utils/componentLoader"; // Import the new loader function
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useAppStore } from "../store/rootStore";
 
@@ -59,67 +61,24 @@ const renderComponent = (
             isSelected={component.id === selectedComponentId}
             zoomLevel={zoomLevel}
             isDropTarget={component.id === dropTargetFrameId}>
-            {component.type === "PySideButton" && (
-                <PySideButton
-                    text={component.text}
-                    fontSize={component.fontSize}
-                    textColor={component.textColor}
-                    backgroundColor={component.backgroundColor}
-                    radius={component.radius}
-                    pressedColor={component.pressedColor}
-                    hoverColor={component.hoverColor}
-                    borderColor={component.borderColor}
-                    borderWidth={component.borderWidth}
-                    hoverBorderColor={component.hoverBorderColor}
-                    pressedBorderColor={component.pressedBorderColor}
-                />
-            )}
-            {component.type === "PySideLabel" && (
-                <PySideLabel
-                    text={component.text}
-                    fontSize={component.fontSize}
-                    textColor={component.textColor}
-                    backgroundColor={component.backgroundColor}
-                    borderColor={component.borderColor}
-                    radius={component.radius}
-                    borderWidth={component.borderWidth}
-                    textAlign={component.textAlign}
-                />
-            )}
-            {component.type === "PySideSlider" && (
-                <PySideSlider
-                    width={component.width}
-                    height={component.height}
-                    minimum={component.minimum}
-                    maximum={component.maximum}
-                    value={component.value}
-                    orientation={component.orientation}
-                    backgroundColor={component.backgroundColor}
-                    trackColor={component.trackColor}
-                    filledTrackColor={component.filledTrackColor}
-                    thumbColor={component.thumbColor}
-                    thumbSize={component.thumbSize}
-                    trackWidth={component.trackWidth}
-                />
-            )}
-            {component.type === "PySideFrame" && (
-                <PySideFrame
-                    key={component.id}
-                    backgroundColor={component.backgroundColor}
-                    frameShape={component.frameShape}
-                    frameShadow={component.frameShadow}
-                    lineWidth={component.lineWidth}
-                    midLineWidth={component.midLineWidth}
-                    borderColor={component.borderColor}
-                    borderWidth={component.borderWidth}
-                    radius={component.radius}
-                    useCustomBorder={component.useCustomBorder}
-                    width={component.width}
-                    height={component.height}
-                    mainBackgroundColor={mainBackgroundColor}>
-                    {renderedChildren}
-                </PySideFrame>
-            )}
+            {(() => {
+                const SpecificComponent = getReactComponentByType(component.type);
+                if (!SpecificComponent) {
+                    return <div style={{ padding: '10px', color: 'red' }}>Unsupported component type: {component.type}</div>;
+                }
+                // For PySideFrame, pass children specifically. Others get props directly.
+                if (component.type === "PySideFrame") {
+                    return (
+                        <SpecificComponent
+                            {...component} // Spread all component props
+                            mainBackgroundColor={mainBackgroundColor} // Pass specific prop for Frame
+                        >
+                            {renderedChildren}
+                        </SpecificComponent>
+                    );
+                }
+                return <SpecificComponent {...component} />; // Spread all component props
+            })()}
         </Widget>
     );
 };
