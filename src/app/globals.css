@@ -43,8 +43,20 @@ body {
   background: #6b7280;
 }
 
+aside {
+  scrollbar-width: none;
+}
+
 @keyframes blink-overlay {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }

@@ -237,8 +237,8 @@ ${indent}    border: 1px solid rgba(150, 150, 150, 1);
 ${indent}    border-radius: ${Math.round((component.trackWidth ?? 8) / 2)}px;
 ${indent}    ${
             component.orientation === "vertical"
-                ? `width: ${component.trackWidth ?? 8}px; margin: 0 4px;`
-                : `height: ${component.trackWidth ?? 8}px; margin: 4px 0;`
+                ? `width: ${component.trackWidth ?? 8}px;`
+                : `height: ${component.trackWidth ?? 8}px;`
         }
 ${indent}}
 ${indent}/* Filled Track */
@@ -254,17 +254,10 @@ ${indent}    width: ${component.thumbSize ?? 18}px;
 ${indent}    height: ${component.thumbSize ?? 18}px;
 ${indent}    ${
             component.orientation === "vertical"
-                ? "margin: 0 -5px;"
-                : "margin: -5px 0;"
+                ? `margin: 0 -${component.thumbSize / 2 - 10 ?? 8}px;`
+                : `margin: -${component.thumbSize / 2 - 10 ?? 8}px 0;`
         }
 ${indent}    border-radius: ${(component.thumbSize ?? 18) / 2}px;
-${indent}}
-${indent}/* Handle Hover/Pressed States (Optional) */
-${indent}QSlider::handle:${component.orientation ?? "horizontal"}:hover {
-${indent}    background: rgba(${hexToRgba(component.thumbColor)});
-${indent}}
-${indent}QSlider::handle:${component.orientation ?? "horizontal"}:pressed {
-${indent}    background: rgba(${hexToRgba(component.thumbColor)});
 ${indent}}
 ${indent}    </string>
 ${indent}  </property>\n`;

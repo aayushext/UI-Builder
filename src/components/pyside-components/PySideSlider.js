@@ -10,9 +10,9 @@ const PySideSlider = ({
     orientation = "horizontal",
     backgroundColor = "#000000ff",
     trackColor = "#c8c8c8",
-    filledTrackColor, // new prop
-    thumbColor, // new prop
-    thumbSize: thumbSizeProp, // new prop
+    filledTrackColor,
+    thumbColor,
+    thumbSize: thumbSizeProp,
     trackWidth: trackThicknessProp = 8,
 }) => {
     const isHorizontal = orientation === "horizontal";
